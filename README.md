@@ -1,1 +1,24 @@
 # DemoQA_Playwright
+
+
+Как запустить тесты с разными браузерами(Chromium, Firefox) через CLI:
+
+```shell
+   pytest --profile=full
+````
+или запустить в браузере Chromium:
+```shell
+   pytest --profile=demo
+```
+или запустить в Chromium в headless:
+```shell
+   pytest --profile=smoke
+```
+
+
+Автоматизированные тесты созданные с использованием pytest и playwright
+
+Реализованы проверки:
+
+1. Прогресс бар на странице (https://demoqa.com/progress-bar)
+
