@@ -21,4 +21,5 @@
 Реализованы проверки:
 
 1. Прогресс бар на странице (https://demoqa.com/progress-bar)
+2. Слайдер на странице (https://demoqa.com/slider)
 
