@@ -4,9 +4,15 @@ def test_accordion_initial_state(accordion_page):
     accordion_page.page.wait_for_timeout(2000)
 
     # Проверяем, что элементы существуют
-    assert accordion_page.first_section_header.is_visible(), "Первый заголовок должен быть видим"
-    assert accordion_page.second_section_header.is_visible(), "Второй заголовок должен быть видим"
-    assert accordion_page.third_section_header.is_visible(), "Третий заголовок должен быть видим"
+    assert (
+        accordion_page.first_section_header.is_visible()
+    ), "Первый заголовок должен быть видим"
+    assert (
+        accordion_page.second_section_header.is_visible()
+    ), "Второй заголовок должен быть видим"
+    assert (
+        accordion_page.third_section_header.is_visible()
+    ), "Третий заголовок должен быть видим"
 
 
 def test_accordion_toggle_first_section(accordion_page):
@@ -24,7 +30,9 @@ def test_accordion_toggle_first_section(accordion_page):
 
     # Проверяем, что состояние изменилось
     new_state = accordion_page.is_first_section_expanded()
-    assert new_state != initial_state, f"Состояние должно измениться: было {initial_state}, стало {new_state}"
+    assert (
+        new_state != initial_state
+    ), f"Состояние должно измениться: было {initial_state}, стало {new_state}"
 
 
 def test_accordion_multiple_sections_independence(accordion_page):
@@ -81,9 +89,15 @@ def test_accordion_header_texts(accordion_page):
     second_header = accordion_page.get_second_section_header_text()
     third_header = accordion_page.get_third_section_header_text()
 
-    assert "What is Lorem Ipsum?" in first_header, f"Заголовок должен содержать 'What is Lorem Ipsum?', получено: {first_header}"
-    assert "Where does it come from?" in second_header, f"Заголовок должен содержать 'Where does it come from?', получено: {second_header}"
-    assert "Why do we use it?" in third_header, f"Заголовок должен содержать 'Why do we use it?', получено: {third_header}"
+    assert (
+        "What is Lorem Ipsum?" in first_header
+    ), f"Заголовок должен содержать 'What is Lorem Ipsum?', получено: {first_header}"
+    assert (
+        "Where does it come from?" in second_header
+    ), f"Заголовок должен содержать 'Where does it come from?', получено: {second_header}"
+    assert (
+        "Why do we use it?" in third_header
+    ), f"Заголовок должен содержать 'Why do we use it?', получено: {third_header}"
 
 
 def test_accordion_content_exists(accordion_page):
@@ -94,7 +108,7 @@ def test_accordion_content_exists(accordion_page):
     sections_data = [
         (accordion_page.click_first_section, accordion_page.get_first_section_text),
         (accordion_page.click_second_section, accordion_page.get_second_section_text),
-        (accordion_page.click_third_section, accordion_page.get_third_section_text)
+        (accordion_page.click_third_section, accordion_page.get_third_section_text),
     ]
 
     for click_func, text_func in sections_data:

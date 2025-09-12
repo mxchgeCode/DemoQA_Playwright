@@ -5,3 +5,4 @@ class URLs:
     AUTO_COMPLETE_URL = "https://demoqa.com/auto-complete"
     DATE_PICKER_URL = "https://demoqa.com/date-picker"
     TABS_URL = "https://demoqa.com/tabs"
+    TOOL_TIPS_URL = "https://demoqa.com/tool-tips"

@@ -4,9 +4,10 @@ from pages.slider_page import SliderPage
 from pages.progress_bar_page import ProgressBarPage
 from data import URLs
 from locators.progress_bar_locators import ProgressBarLocators
-from locators.auto_complete_locators import (
-    AutoCompleteLocators,
-)  # Добавляем этот импорт
+from locators.auto_complete_locators import AutoCompleteLocators
+from locators.date_picker_locators import DatePickerLocators
+from locators.tabs_locators import TabsLocators
+from locators.tool_tips_locators import ToolTipsLocators
 
 
 # --- Фикстура для ProgressBarPage - отдельный браузер для прогресс-бара ---
@@ -39,20 +40,47 @@ def progress_page(progress_browser):
     page = context.new_page()
 
     progress_page = ProgressBarPage(page)
-    page.goto(URLs.PROGRESS_BAR, wait_until="domcontentloaded", timeout=30000)
-    page.wait_for_selector(
-        ProgressBarLocators.START_STOP_BUTTON, state="visible", timeout=10000
-    )
-    page.wait_for_selector(
-        ProgressBarLocators.PROGRESS_BAR, state="visible", timeout=10000
-    )
 
-    # Небольшая задержка для стабилизации страницы
-    page.wait_for_timeout(1000)
+    # Навигация с повторными попытками
+    for attempt in range(3):
+        try:
+            page.goto(URLs.PROGRESS_BAR, wait_until="domcontentloaded", timeout=30000)
+            break
+        except Exception as e:
+            if attempt == 2:  # Последняя попытка
+                raise e
+            page.wait_for_timeout(2000)  # Ждем перед повторной попыткой
+
+    # Ждем появления основного контейнера страницы
+    page.wait_for_selector("#app", state="visible", timeout=10000)
+
+    # Ждем появления кнопки Start/Stop с более гибкими условиями
+    try:
+        page.wait_for_selector(
+            ProgressBarLocators.START_STOP_BUTTON, state="visible", timeout=15000
+        )
+    except:
+        # Если не нашли по ID, пробуем найти кнопку по тексту
+        page.wait_for_selector("button", state="visible", timeout=10000)
+
+    # Ждем прогресс бар
+    try:
+        page.wait_for_selector(
+            ProgressBarLocators.PROGRESS_BAR, state="visible", timeout=10000
+        )
+    except:
+        pass  # Продолжаем, даже если прогресс бар не найден сразу
+
+    # Увеличенная стабилизация страницы
+    page.wait_for_timeout(4000)
+    try:
+        page.wait_for_load_state("networkidle")
+    except:
+        pass
 
     yield progress_page
 
-    # Очистка
+    # Очистка с обработкой исключений
     try:
         page.close()
         context.close()
@@ -237,9 +265,6 @@ def autocomplete_page(autocomplete_browser):
         pass
 
 
-# Добавляем в конец conftest.py
-
-
 # --- Фикстура для DatePickerPage - отдельный браузер для date picker ---
 @pytest.fixture(scope="module")
 def datepicker_browser():
@@ -267,7 +292,6 @@ def datepicker_browser():
 def datepicker_page(datepicker_browser):
     """Создаёт новую страницу для каждого теста date picker."""
     from pages.date_picker_page import DatePickerPage
-    from locators.date_picker_locators import DatePickerLocators
 
     context = datepicker_browser.new_context()
     page = context.new_page()
@@ -289,9 +313,6 @@ def datepicker_page(datepicker_browser):
         context.close()
     except:
         pass
-
-
-# Добавляем в конец conftest.py
 
 
 # --- Фикстура для TabsPage - отдельный браузер для tabs ---
@@ -321,7 +342,6 @@ def tabs_browser():
 def tabs_page(tabs_browser):
     """Создаёт новую страницу для каждого теста tabs."""
     from pages.tabs_page import TabsPage
-    from locators.tabs_locators import TabsLocators
 
     context = tabs_browser.new_context()
     page = context.new_page()
@@ -334,6 +354,58 @@ def tabs_page(tabs_browser):
     page.wait_for_timeout(2000)
 
     yield tabs_page
+
+    # Очистка
+    try:
+        page.close()
+        context.close()
+    except:
+        pass
+
+
+# --- Фикстура для ToolTipsPage - отдельный браузер для tool tips ---
+@pytest.fixture(scope="module")
+def tooltips_browser():
+    """Создаёт браузер для модуля tool tips."""
+    pw = None
+    browser = None
+    try:
+        pw = sync_playwright().start()
+        browser = pw.chromium.launch(headless=False)
+        yield browser
+    finally:
+        if browser:
+            try:
+                browser.close()
+            except:
+                pass
+        if pw:
+            try:
+                pw.stop()
+            except:
+                pass
+
+
+@pytest.fixture(scope="function")
+def tooltips_page(tooltips_browser):
+    """Создаёт новую страницу для каждого теста tool tips."""
+    from pages.tool_tips_page import ToolTipsPage
+
+    context = tooltips_browser.new_context()
+    page = context.new_page()
+
+    tooltips_page = ToolTipsPage(page)
+    page.goto(URLs.TOOL_TIPS_URL, wait_until="domcontentloaded", timeout=30000)
+
+    # Ждем загрузку основных элементов
+    page.wait_for_selector(
+        ToolTipsLocators.HOVER_BUTTON, state="visible", timeout=10000
+    )
+
+    # Небольшая задержка для стабилизации страницы
+    page.wait_for_timeout(3000)
+
+    yield tooltips_page
 
     # Очистка
     try:
