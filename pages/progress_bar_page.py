@@ -28,7 +28,7 @@ class ProgressBarPage(BasePage):
                     raise Exception(
                         f"Не удалось нажать Start после {retries} попыток"
                     ) from e
-                self.page.wait_for_timeout(500)
+                self.page.wait_for_timeout(1000)
 
     def stop_progress(self, retries=3):
         for attempt in range(retries):
@@ -43,7 +43,7 @@ class ProgressBarPage(BasePage):
                     raise Exception(
                         f"Не удалось нажать Stop после {retries} попыток"
                     ) from e
-                self.page.wait_for_timeout(500)
+                self.page.wait_for_timeout(1000)
 
     def reset_progress(self, retries=3):
         for attempt in range(retries):
@@ -58,7 +58,7 @@ class ProgressBarPage(BasePage):
                     raise Exception(
                         f"Не удалось нажать Reset после {retries} попыток"
                     ) from e
-                self.page.wait_for_timeout(500)
+                self.page.wait_for_timeout(1000)
 
     def get_progress_value(self) -> str:
         progress_bar = self.page.locator(ProgressBarLocators.PROGRESS_BAR)

@@ -28,10 +28,6 @@ class SliderPage:
                 f"Значение должно быть целым числом от 0 до 100, получено: {target_value}"
             )
 
-        print(
-            f"[DEBUG] Setting value {target_value} via JS (setting both input.value and --value)"
-        )
-
         self.page.evaluate(
             f"""
             const input = document.querySelector('{SLIDER_HANDLE}');
