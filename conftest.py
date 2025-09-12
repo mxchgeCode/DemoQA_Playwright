@@ -114,7 +114,6 @@ def slider_page(slider_page_instance):
     yield slider_page_instance
 
 
-
 # --- Настройка профилей ---
 def pytest_addoption(parser):
     parser.addoption(
@@ -135,3 +134,51 @@ def pytest_configure(config):
     elif profile == "demo":
         config.option.browser = ["chromium"]
         config.option.headed = True
+
+
+# --- Фикстура для AccordionPage - отдельный браузер для аккордеона ---
+@pytest.fixture(scope="module")
+def accordion_browser():
+    """Создаёт браузер для модуля аккордеона."""
+    pw = None
+    browser = None
+    try:
+        pw = sync_playwright().start()
+        browser = pw.chromium.launch(headless=False)
+        yield browser
+    finally:
+        if browser:
+            try:
+                browser.close()
+            except:
+                pass
+        if pw:
+            try:
+                pw.stop()
+            except:
+                pass
+
+
+@pytest.fixture(scope="function")
+def accordion_page(accordion_browser):
+    """Создаёт новую страницу для каждого теста accordion."""
+    from pages.accordion_page import AccordionPage
+
+    context = accordion_browser.new_context()
+    page = context.new_page()
+
+    accordion_page = AccordionPage(page)
+    page.goto(URLs.ACCORDION_URL, wait_until="domcontentloaded", timeout=30000)
+    page.wait_for_selector("div.accordion", state="visible", timeout=10000)
+
+    # Небольшая задержка для стабилизации страницы
+    page.wait_for_timeout(1000)
+
+    yield accordion_page
+
+    # Очистка
+    try:
+        page.close()
+        context.close()
+    except:
+        pass

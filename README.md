@@ -22,4 +22,5 @@
 
 1. Прогресс бар на странице (https://demoqa.com/progress-bar)
 2. Слайдер на странице (https://demoqa.com/slider)
+3. Тестовый аккордеон на странице (https://demoqa.com/accordian)
 
