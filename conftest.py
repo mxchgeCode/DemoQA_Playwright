@@ -235,3 +235,57 @@ def autocomplete_page(autocomplete_browser):
         context.close()
     except:
         pass
+
+
+# Добавляем в конец conftest.py
+
+
+# --- Фикстура для DatePickerPage - отдельный браузер для date picker ---
+@pytest.fixture(scope="module")
+def datepicker_browser():
+    """Создаёт браузер для модуля date picker."""
+    pw = None
+    browser = None
+    try:
+        pw = sync_playwright().start()
+        browser = pw.chromium.launch(headless=False)
+        yield browser
+    finally:
+        if browser:
+            try:
+                browser.close()
+            except:
+                pass
+        if pw:
+            try:
+                pw.stop()
+            except:
+                pass
+
+
+@pytest.fixture(scope="function")
+def datepicker_page(datepicker_browser):
+    """Создаёт новую страницу для каждого теста date picker."""
+    from pages.date_picker_page import DatePickerPage
+    from locators.date_picker_locators import DatePickerLocators
+
+    context = datepicker_browser.new_context()
+    page = context.new_page()
+
+    datepicker_page = DatePickerPage(page)
+    page.goto(URLs.DATE_PICKER_URL, wait_until="domcontentloaded", timeout=30000)
+    page.wait_for_selector(
+        DatePickerLocators.DATE_INPUT, state="visible", timeout=10000
+    )
+
+    # Небольшая задержка для стабилизации страницы
+    page.wait_for_timeout(2000)
+
+    yield datepicker_page
+
+    # Очистка
+    try:
+        page.close()
+        context.close()
+    except:
+        pass
