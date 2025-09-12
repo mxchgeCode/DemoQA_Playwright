@@ -25,4 +25,5 @@
 3. Текстовый аккордеон на странице (https://demoqa.com/accordian)
 4. Поля ввода с автозаполнением на странице (https://demoqa.com/auto-complete)
 5. Календарь на странице (https://demoqa.com/date-picker)
+6. Вкладки на странице (https://demoqa.com/tabs)
 

@@ -289,3 +289,55 @@ def datepicker_page(datepicker_browser):
         context.close()
     except:
         pass
+
+
+# Добавляем в конец conftest.py
+
+
+# --- Фикстура для TabsPage - отдельный браузер для tabs ---
+@pytest.fixture(scope="module")
+def tabs_browser():
+    """Создаёт браузер для модуля tabs."""
+    pw = None
+    browser = None
+    try:
+        pw = sync_playwright().start()
+        browser = pw.chromium.launch(headless=False)
+        yield browser
+    finally:
+        if browser:
+            try:
+                browser.close()
+            except:
+                pass
+        if pw:
+            try:
+                pw.stop()
+            except:
+                pass
+
+
+@pytest.fixture(scope="function")
+def tabs_page(tabs_browser):
+    """Создаёт новую страницу для каждого теста tabs."""
+    from pages.tabs_page import TabsPage
+    from locators.tabs_locators import TabsLocators
+
+    context = tabs_browser.new_context()
+    page = context.new_page()
+
+    tabs_page = TabsPage(page)
+    page.goto(URLs.TABS_URL, wait_until="domcontentloaded", timeout=30000)
+    page.wait_for_selector(TabsLocators.TAB_WHAT, state="visible", timeout=10000)
+
+    # Небольшая задержка для стабилизации страницы
+    page.wait_for_timeout(2000)
+
+    yield tabs_page
+
+    # Очистка
+    try:
+        page.close()
+        context.close()
+    except:
+        pass
