@@ -27,4 +27,5 @@
 5. Календарь на странице (https://demoqa.com/date-picker)
 6. Вкладки на странице (https://demoqa.com/tabs)
 7. Всплывающие подсказки на странице (https://demoqa.com/tool-tips)
+8. Меню на странице (http://demoqa.com/menu)
 
