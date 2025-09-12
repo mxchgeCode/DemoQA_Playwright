@@ -4,6 +4,9 @@ from pages.slider_page import SliderPage
 from pages.progress_bar_page import ProgressBarPage
 from data import URLs
 from locators.progress_bar_locators import ProgressBarLocators
+from locators.auto_complete_locators import (
+    AutoCompleteLocators,
+)  # Добавляем этот импорт
 
 
 # --- Фикстура для ProgressBarPage - отдельный браузер для прогресс-бара ---
@@ -175,6 +178,56 @@ def accordion_page(accordion_browser):
     page.wait_for_timeout(1000)
 
     yield accordion_page
+
+    # Очистка
+    try:
+        page.close()
+        context.close()
+    except:
+        pass
+
+
+# --- Фикстура для AutoCompletePage - отдельный браузер для auto complete ---
+@pytest.fixture(scope="module")
+def autocomplete_browser():
+    """Создаёт браузер для модуля auto complete."""
+    pw = None
+    browser = None
+    try:
+        pw = sync_playwright().start()
+        browser = pw.chromium.launch(headless=False)
+        yield browser
+    finally:
+        if browser:
+            try:
+                browser.close()
+            except:
+                pass
+        if pw:
+            try:
+                pw.stop()
+            except:
+                pass
+
+
+@pytest.fixture(scope="function")
+def autocomplete_page(autocomplete_browser):
+    """Создаёт новую страницу для каждого теста auto complete."""
+    from pages.auto_complete_page import AutoCompletePage
+
+    context = autocomplete_browser.new_context()
+    page = context.new_page()
+
+    autocomplete_page = AutoCompletePage(page)
+    page.goto(URLs.AUTO_COMPLETE_URL, wait_until="domcontentloaded", timeout=30000)
+    page.wait_for_selector(
+        AutoCompleteLocators.SINGLE_COLOR_INPUT, state="visible", timeout=10000
+    )
+
+    # Небольшая задержка для стабилизации страницы
+    page.wait_for_timeout(1000)
+
+    yield autocomplete_page
 
     # Очистка
     try:

@@ -22,5 +22,6 @@
 
 1. Прогресс бар на странице (https://demoqa.com/progress-bar)
 2. Слайдер на странице (https://demoqa.com/slider)
-3. Тестовый аккордеон на странице (https://demoqa.com/accordian)
+3. Текстовый аккордеон на странице (https://demoqa.com/accordian)
+4. Поля ввода с автозаполнением на странице (https://demoqa.com/auto-complete) 
 
