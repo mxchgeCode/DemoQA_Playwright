@@ -6,53 +6,36 @@ from locators.select_menu_locators import SelectMenuLocators
 class SelectMenuPage:
     def __init__(self, page: Page):
         self.page = page
+        # Основные элементы
         self.main_container = page.locator(SelectMenuLocators.MAIN_CONTAINER)
 
-        # Select Value
-        self.select_value_container = page.locator(
-            SelectMenuLocators.SELECT_VALUE_CONTAINER
-        )
-        self.select_value_input = page.locator(SelectMenuLocators.SELECT_VALUE_INPUT)
-        self.select_value_indicator = page.locator(
-            SelectMenuLocators.SELECT_VALUE_INDICATOR
-        )
+        # Select Value (Simple Select Menu)
+        self.simple_select = page.locator(SelectMenuLocators.SELECT_VALUE)
+        self.simple_select_options = page.locator(SelectMenuLocators.SELECT_VALUE_OPTIONS)
 
-        # Select One
-        self.select_one_container = page.locator(
-            SelectMenuLocators.SELECT_ONE_CONTAINER
-        )
+        # Select One (React select)
+        self.select_one_container = page.locator(SelectMenuLocators.SELECT_ONE_CONTAINER)
+        self.select_one_control = page.locator(SelectMenuLocators.SELECT_ONE_CONTROL)
         self.select_one_input = page.locator(SelectMenuLocators.SELECT_ONE_INPUT)
-        self.select_one_indicator = page.locator(
-            SelectMenuLocators.SELECT_ONE_INDICATOR
-        )
 
-        # Old Style Select
+        # Old Style Select Menu
         self.old_style_select = page.locator(SelectMenuLocators.OLD_STYLE_SELECT)
-        self.old_style_select_options = page.locator(
-            SelectMenuLocators.OLD_STYLE_SELECT_OPTIONS
-        )
+        self.old_style_select_options = page.locator(SelectMenuLocators.OLD_STYLE_SELECT_OPTIONS)
 
-        # Multiselect
-        self.multiselect_input = page.locator(SelectMenuLocators.MULTISELECT_INPUT)
-        self.multiselect_indicator = page.locator(
-            SelectMenuLocators.MULTISELECT_INDICATOR
-        )
+        # Multiselect drop down (React)
+        self.multiselect = page.locator(SelectMenuLocators.MULTISELECT)
+        self.multiselect_options = page.locator(SelectMenuLocators.MULTISELECT_OPTIONS)
 
-        # Standard Multi Select
-        self.standard_multi_select = page.locator(
-            SelectMenuLocators.STANDARD_MULTI_SELECT
-        )
-        self.standard_multi_select_options = page.locator(
-            SelectMenuLocators.STANDARD_MULTI_SELECT_OPTIONS
-        )
+        # Standard multi select (обычный select multiple)
+        self.standard_multi_select = page.locator(SelectMenuLocators.STANDARD_MULTI_SELECT)
+        self.standard_multi_select_options = page.locator(SelectMenuLocators.STANDARD_MULTI_SELECT_OPTIONS)
 
-        # Общие
+        # Общие элементы для dropdown (используются внутри контейнеров)
         self.dropdown_option = page.locator(SelectMenuLocators.DROPDOWN_OPTION)
         self.dropdown_menu = page.locator(SelectMenuLocators.DROPDOWN_MENU)
 
-    def _wait_for_element_visible(
-        self, locator, timeout=5000, description="Элемент"
-    ):  # Уменьшен таймаут
+    # --- Вспомогательный метод ожидания ---
+    def _wait_for_element_visible(self, locator, timeout=10000, description="Элемент"):
         """Универсальный метод ожидания видимости элемента."""
         try:
             locator.wait_for(state="visible", timeout=timeout)
@@ -62,159 +45,159 @@ class SelectMenuPage:
             print(f"Х {description} не стал видимым в течение {timeout}мс: {e}")
             return False
 
-    # --- Select Value ---
-    def open_select_value_dropdown(self):
-        print("Попытка открыть dropdown Select Value...")
-        if not self._wait_for_element_visible(
-            self.select_value_container, 5000, "Контейнер Select Value"
-        ):
-            raise Exception("Контейнер Select Value не видим")
-
-        # Прокрутка
-        try:
-            self.select_value_input.scroll_into_view_if_needed()
-        except:
-            pass
-
-        # Клик по индикатору (стрелке) - более надежный способ
-        try:
-            self.select_value_indicator.click(
-                force=True, timeout=2000
-            )  # force=True, малый таймаут
-            print("✓ Клик по индикатору Select Value")
-        except Exception as e1:
-            print(f"? Клик по индикатору не удался: {e1}")
-            # fallback на input
-            try:
-                self.select_value_input.click(force=True, timeout=2000)
-                print("✓ Клик по Input Select Value (force)")
-            except Exception as e2:
-                print(f"? Клик по Input тоже не удался: {e2}")
-                raise Exception(f"Не удалось открыть Select Value: {e1}, {e2}")
-
-        self.page.wait_for_timeout(500)  # Короткая пауза
-        print("✓ Dropdown Select Value, вероятно, открыт")
-
-    def select_option_in_select_value(self, option_text: str):
-        # Ищем опцию сразу, не вызывая open_dropdown
-        option_locator = self.page.locator(SelectMenuLocators.DROPDOWN_OPTION).filter(
-            has_text=option_text
-        )
-        if option_locator.count() == 0 or not option_locator.first.is_visible():
-            # Если не нашли, пробуем частичное совпадение
-            option_locator = self.page.locator(
-                SelectMenuLocators.DROPDOWN_OPTION
-            ).filter(
-                has_text=re.compile(f".*{re.escape(option_text)}.*", re.IGNORECASE)
-            )
-
-        if option_locator.count() > 0 and option_locator.first.is_visible():
-            option_to_click = option_locator.first
-            print(f"✓ Опция '{option_text}' найдена")
-        else:
-            any_option = self.page.locator(SelectMenuLocators.DROPDOWN_OPTION).first
-            if any_option.count() > 0 and any_option.is_visible():
-                option_to_click = any_option
-                print(
-                    f"~ Выбираем первую доступную опцию, так как '{option_text}' не найдена точно"
-                )
-            else:
-                raise Exception(
-                    f"Опция '{option_text}' и другие опции не найдены или не видимы"
-                )
-
-        try:
-            option_to_click.click(force=True, timeout=2000)  # force=True, малый таймаут
-            print(f"✓ Опция '{option_text}' кликнута")
-        except Exception as e:
-            print(f"? Клик по опции не удался: {e}")
-            raise
+    # --- Simple Select Menu (Select Value) ---
+    def select_simple_option_by_value(self, value: str):
+        self.simple_select.select_option(value)
         self.page.wait_for_timeout(500)
 
-    def get_select_value_selected_text(self) -> str:
-        try:
-            value_container = self.select_value_container.locator(
-                "div[class*='singleValue']"
-            )
-            if value_container.count() > 0 and value_container.is_visible():
-                return value_container.text_content().strip()
-        except:
-            pass
-        return ""
+    def select_simple_option_by_index(self, index: int):
+        self.simple_select.select_option(index=index)
+        self.page.wait_for_timeout(500)
 
-    # --- Select One ---
+    def select_simple_option_by_text(self, text: str):
+        self.simple_select.select_option(label=text)
+        self.page.wait_for_timeout(500)
+
+    def get_simple_select_selected_value(self) -> str:
+        return self.simple_select.input_value()
+
+    def get_simple_select_selected_text(self) -> str:
+        selected_option = self.simple_select.locator("option:checked")
+        return selected_option.text_content().strip() if selected_option.count() > 0 else ""
+
+    def get_simple_select_options_count(self) -> int:
+        return self.simple_select_options.count()
+
+    def get_simple_select_options_text(self) -> list:
+        options = []
+        count = self.simple_select_options.count()
+        for i in range(count):
+            option_text = self.simple_select_options.nth(i).text_content().strip()
+            if option_text:
+                options.append(option_text)
+        return options
+
+    # --- Select One (React select) ---
     def open_select_one_dropdown(self):
+        """Открывает dropdown для Select One."""
         print("Попытка открыть dropdown Select One...")
-        if not self._wait_for_element_visible(
-            self.select_one_container, 5000, "Контейнер Select One"
-        ):
-            raise Exception("Контейнер Select One не видим")
+        # 1. Убедиться, что контейнер видим
+        if not self._wait_for_element_visible(self.select_one_container, 10000, "Контейнер Select One"):
+            raise Exception("Контейнер Select One не стал видимым")
+        # 2. Найти элемент управления
+        control_locator = self.select_one_control
+        if not self._wait_for_element_visible(control_locator, 5000, "Элемент управления Select One"):
+            raise Exception("Элемент управления Select One не найден или не видим")
 
+        # 3. Прокрутить в область видимости
         try:
-            self.select_one_input.scroll_into_view_if_needed()
-        except:
-            pass
+            control_locator.scroll_into_view_if_needed()
+            print("✓ Элемент управления Select One прокручен в видимую область")
+        except Exception as e:
+            print(f"? Ошибка прокрутки элемента управления Select One: {e}")
 
+        # 4. Кликнуть
         try:
-            self.select_one_indicator.click(force=True, timeout=2000)
-            print("✓ Клик по индикатору Select One")
+            control_locator.click(force=False)
+            print("✓ Клик по элементу управления Select One (обычный)")
         except Exception as e1:
-            print(f"? Клик по индикатору не удался: {e1}")
+            print(f"? Обычный клик не удался: {e1}")
             try:
-                self.select_one_input.click(force=True, timeout=2000)
-                print("✓ Клик по Input Select One (force)")
+                control_locator.click(force=True)
+                print("✓ Клик по элементу управления Select One (force)")
             except Exception as e2:
-                print(f"? Клик по Input тоже не удался: {e2}")
-                raise Exception(f"Не удалось открыть Select One: {e1}, {e2}")
+                print(f"? Force-клик не удался: {e2}")
+                try:
+                    bbox = control_locator.bounding_box()
+                    if bbox:
+                        self.page.mouse.click(bbox['x'] + bbox['width'] / 2, bbox['y'] + bbox['height'] / 2)
+                        print("✓ Клик по элементу управления Select One (JS через mouse)")
+                    else:
+                        raise Exception("Не удалось получить координаты для JS клика")
+                except Exception as e3:
+                    print(f"? JS-клик не удался: {e3}")
+                    raise Exception(
+                        f"Не удалось кликнуть по элементу управления Select One всеми способами: {e1}, {e2}, {e3}")
 
-        self.page.wait_for_timeout(500)
-        print("✓ Dropdown Select One, вероятно, открыт")
+        # 5. Подождать, пока dropdown появится (проверим наличие меню внутри контейнера)
+        select_one_menu = self.select_one_container.locator("div[class*='menu']")
+        if self._wait_for_element_visible(select_one_menu, 5000, "Dropdown меню Select One"):
+            print("✓ Dropdown Select One открыт")
+        else:
+            print("? Dropdown Select One, возможно, открыт, но меню не обнаружено")
 
     def select_option_in_select_one(self, option_text: str):
-        # Ищем опцию сразу
-        option_locator = self.page.locator(SelectMenuLocators.DROPDOWN_OPTION).filter(
-            has_text=option_text
-        )
-        if option_locator.count() == 0 or not option_locator.first.is_visible():
-            option_locator = self.page.locator(
-                SelectMenuLocators.DROPDOWN_OPTION
-            ).filter(
-                has_text=re.compile(f".*{re.escape(option_text)}.*", re.IGNORECASE)
-            )
+        """Выбирает опцию в Select One по тексту."""
+        # Открываем dropdown
+        self.open_select_one_dropdown()
+        # Небольшая пауза, чтобы опции точно отрендерились
+        self.page.wait_for_timeout(1000)
 
+        # Ищем опцию строго внутри контейнера Select One
+        option_locator = self.select_one_container.locator(f"div[class*='option']:has-text('{option_text}')")
         if option_locator.count() > 0 and option_locator.first.is_visible():
             option_to_click = option_locator.first
-            print(f"✓ Опция '{option_text}' найдена")
+            print(f"✓ Опция '{option_text}' найдена по точному совпадению")
         else:
-            any_option = self.page.locator(SelectMenuLocators.DROPDOWN_OPTION).first
-            if any_option.count() > 0 and any_option.is_visible():
-                option_to_click = any_option
-                print(
-                    f"~ Выбираем первую доступную опцию, так как '{option_text}' не найдена точно"
-                )
+            # Пробуем частичное совпадение
+            option_locator_partial = self.select_one_container.locator(
+                f"div[class*='option']:text-matches('(?i).*{option_text}.*')")
+            if option_locator_partial.count() > 0 and option_locator_partial.first.is_visible():
+                option_to_click = option_locator_partial.first
+                print(f"✓ Опция '{option_text}' найдена по частичному совпадению")
             else:
-                raise Exception(
-                    f"Опция '{option_text}' и другие опции не найдены или не видимы"
-                )
+                # Если не нашли, ищем первую доступную опцию в этом меню
+                any_option = self.select_one_container.locator("div[class*='option']").first
+                if any_option.count() > 0 and any_option.is_visible():
+                    option_to_click = any_option
+                    print(f"~ Выбираем первую доступную опцию, так как '{option_text}' не найдена")
+                else:
+                    raise Exception(f"Опция '{option_text}' и другие опции не найдены или не видимы")
 
+        # Прокручиваем опцию в видимую область
         try:
-            option_to_click.click(force=True, timeout=2000)
+            option_to_click.scroll_into_view_if_needed()
+        except Exception as e:
+            print(f"? Ошибка прокрутки опции: {e}")
+
+        # Кликаем по опции
+        try:
+            option_to_click.click(force=False)
             print(f"✓ Опция '{option_text}' кликнута")
         except Exception as e:
-            print(f"? Клик по опции не удался: {e}")
-            raise
-        self.page.wait_for_timeout(500)
+            print(f"? Обычный клик по опции не удался: {e}")
+            try:
+                option_to_click.click(force=True)
+                print(f"✓ Опция '{option_text}' кликнута (force)")
+            except Exception as e2:
+                print(f"? Force-клик по опции не удался: {e2}")
+                raise Exception(f"Не удалось кликнуть по опции '{option_text}': {e}, {e2}")
+
+        # Пауза после выбора
+        self.page.wait_for_timeout(1000)
 
     def get_select_one_selected_text(self) -> str:
+        """Получает текст выбранной опции в Select One."""
         try:
-            value_container = self.select_one_container.locator(
-                "div[class*='singleValue']"
-            )
+            # Ищем элемент с выбранным значением внутри контейнера.
+            value_container = self.select_one_container.locator("div[class*='singleValue']")
             if value_container.count() > 0 and value_container.is_visible():
-                return value_container.text_content().strip()
-        except:
-            pass
-        return ""
+                text = value_container.text_content().strip()
+                print(f"✓ Получено значение Select One из singleValue: '{text}'")
+                return text
+            else:
+                # Альтернатива: попробовать получить текст из самого контрола, исключая стрелки и плейсхолдеры
+                control_text = self.select_one_control.text_content().strip()
+                # Простая эвристика: если текст не стандартный плейсхолдер и не пустой
+                if control_text and control_text not in ["Select Option", "Select Title", ""]:
+                    print(f"~ Получено значение Select One из контрола: '{control_text}'")
+                    return control_text
+                else:
+                    print("? Значение Select One не определено или стандартное")
+                    return ""
+        except Exception as e:
+            print(f"Х Ошибка получения значения Select One: {e}")
+            return ""
 
     # --- Old Style Select Menu ---
     def select_old_style_option_by_value(self, value: str):
@@ -232,86 +215,41 @@ class SelectMenuPage:
     def get_old_style_select_selected_value(self) -> str:
         return self.old_style_select.input_value()
 
-    def get_old_style_select_options_count(self) -> int:
-        return self.old_style_select_options.count()
+    # --- Multiselect drop down (React) ---
+    def select_multiselect_option_by_index(self, index: int):
+        # Используем стандартный метод select_option для multiselect
+        self.multiselect.select_option(index=index)
+        self.page.wait_for_timeout(500)
 
-    def get_old_style_select_options_text(self) -> list:
-        options = []
-        count = self.old_style_select_options.count()
+    def select_multiselect_option_by_value(self, value: str):
+        # Используем стандартный метод select_option для multiselect
+        self.multiselect.select_option(value)
+        self.page.wait_for_timeout(500)
+
+    def get_multiselect_selected_values(self) -> list:
+        # Получаем выбранные значения для стандартного multiselect
+        selected_options = self.multiselect.locator("option:checked")
+        values = []
+        count = selected_options.count()
         for i in range(count):
-            option_text = self.old_style_select_options.nth(i).text_content().strip()
-            if option_text:
-                options.append(option_text)
-        return options
+            value = selected_options.nth(i).get_attribute("value")
+            if value:
+                values.append(value)
+        return values
 
-    # --- Multiselect ---
-    def open_multiselect_dropdown(self):
-        print("Попытка открыть dropdown Multiselect...")
-        try:
-            self.multiselect_input.scroll_into_view_if_needed()
-        except:
-            pass
-
-        try:
-            self.multiselect_indicator.click(force=True, timeout=2000)
-            print("✓ Клик по индикатору Multiselect")
-        except Exception as e1:
-            print(f"? Клик по индикатору не удался: {e1}")
-            try:
-                self.multiselect_input.click(force=True, timeout=2000)
-                print("✓ Клик по Input Multiselect (force)")
-            except Exception as e2:
-                print(f"? Клик по Input тоже не удался: {e2}")
-                raise Exception(f"Не удалось открыть Multiselect: {e1}, {e2}")
-
-        self.page.wait_for_timeout(500)
-        print("✓ Dropdown Multiselect, вероятно, открыт")
-
-    def select_option_in_multiselect(self, option_text: str):
-        # Ищем опцию сразу
-        option_locator = self.page.locator(SelectMenuLocators.DROPDOWN_OPTION).filter(
-            has_text=option_text
-        )
-        if option_locator.count() == 0 or not option_locator.first.is_visible():
-            option_locator = self.page.locator(
-                SelectMenuLocators.DROPDOWN_OPTION
-            ).filter(
-                has_text=re.compile(f".*{re.escape(option_text)}.*", re.IGNORECASE)
-            )
-
-        if option_locator.count() > 0 and option_locator.first.is_visible():
-            option_to_click = option_locator.first
-            print(f"✓ Опция '{option_text}' найдена")
-        else:
-            any_option = self.page.locator(SelectMenuLocators.DROPDOWN_OPTION).first
-            if any_option.count() > 0 and any_option.is_visible():
-                option_to_click = any_option
-                print(
-                    f"~ Выбираем первую доступную опцию, так как '{option_text}' не найдена точно"
-                )
-            else:
-                raise Exception(
-                    f"Опция '{option_text}' и другие опции не найдены или не видимы"
-                )
-
-        try:
-            option_to_click.click(force=True, timeout=2000)
-            print(f"✓ Опция '{option_text}' кликнута")
-        except Exception as e:
-            print(f"? Клик по опции не удался: {e}")
-            raise
-        self.page.wait_for_timeout(500)
-
-    # --- Standard Multi Select ---
+    # --- Standard multi select (обычный select multiple) ---
     def select_standard_multi_select_option_by_index(self, index: int):
+        # Используем стандартный метод select_option для стандартного multiselect
         self.standard_multi_select.select_option(index=index)
         self.page.wait_for_timeout(500)
 
     def select_standard_multi_select_option_by_value(self, value: str):
+        # Используем стандартный метод select_option для стандартного multiselect
         self.standard_multi_select.select_option(value)
         self.page.wait_for_timeout(500)
 
     def get_standard_multi_select_selected_values(self) -> list:
+        # Получаем выбранные значения для стандартного multiselect
         selected_options = self.standard_multi_select.locator("option:checked")
         values = []
         count = selected_options.count()
@@ -321,7 +259,7 @@ class SelectMenuPage:
                 values.append(value)
         return values
 
-    # --- Вспомогательные ---
+    # --- Вспомогательные методы ---
     def is_page_loaded(self) -> bool:
         try:
             return self.main_container.is_visible()
@@ -329,27 +267,12 @@ class SelectMenuPage:
             return False
 
     def get_all_selects_count(self) -> int:
+        # Подсчитываем разные типы селектов
         try:
-            return (
-                (1 if self.old_style_select.count() > 0 else 0)
-                + (1 if self.standard_multi_select.count() > 0 else 0)
-                + (
-                    1
-                    if self.select_value_container.locator(
-                        "div[class*='control']"
-                    ).count()
-                    > 0
-                    else 0
-                )
-                + (
-                    1
-                    if self.select_one_container.locator(
-                        "div[class*='control']"
-                    ).count()
-                    > 0
-                    else 0
-                )
-                + (1 if self.multiselect_input.count() > 0 else 0)
-            )
+            simple_count = 1 if self.simple_select.count() > 0 else 0
+            select_one_count = 1 if self.select_one_control.count() > 0 else 0
+            multiselect_count = 1 if self.multiselect.count() > 0 else 0
+            standard_multi_count = 1 if self.standard_multi_select.count() > 0 else 0
+            return simple_count + select_one_count + multiselect_count + standard_multi_count
         except:
             return 0

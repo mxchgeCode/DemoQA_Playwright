@@ -39,41 +39,16 @@ def block_external(route):
     """Блокирует внешние и ненужные ресурсы."""
     url = route.request.url.lower()  # Приводим к нижнему регистру для сравнения
     resource_type = route.request.resource_type
-
     # Блокируем шрифты и изображения для ускорения
     if resource_type in ["font", "image"]:
         route.abort()
         return
-
     # Блокируем запросы к известным рекламным/аналитическим доменам
     if any(domain in url for domain in blocked_domains):
         route.abort()
         return
-
     # Разрешаем всё остальное
     route.continue_()
-
-
-# --- Настройка профилей ---
-def pytest_addoption(parser):
-    parser.addoption(
-        "--profile",
-        action="store",
-        default="default",
-        help="Test profile: smoke, full, demo",
-    )
-
-
-def pytest_configure(config):
-    profile = config.getoption("--profile")
-    if profile == "smoke":
-        config.option.browser = ["chromium"]
-    elif profile == "full":
-        config.option.browser = ["chromium", "firefox"]
-        config.option.headed = True
-    elif profile == "demo":
-        config.option.browser = ["chromium"]
-        config.option.headed = True
 
 
 # --- Фикстуры Playwright ---
@@ -109,12 +84,9 @@ def context(browser):
         bypass_csp=True,  # Обход CSP (Content Security Policy)
         viewport={"width": 1920, "height": 1080},  # Фиксированное разрешение
     )
-
     # Применяем блокировку ко всем запросам в этом контексте
     context.route("**/*", block_external)
-
     yield context
-
     # Закрываем контекст после теста
     context.close()
 
@@ -165,15 +137,17 @@ def create_page_with_wait(page, url, wait_selectors, stabilize_timeout=1000):
         print(f"Стабилизация: ожидание {stabilize_timeout}мс")
         page.wait_for_timeout(stabilize_timeout)
 
-    # УДАЛЕНО: Попытка дождаться networkidle, так как она часто фейлится из-за блокировки
-    # try:
-    #     print("Ожидание networkidle (макс. 5 секунд)...")
-    #     page.wait_for_load_state("networkidle", timeout=5000)
-    # except Exception as e:
-    #     print(f"Не удалось дождаться networkidle: {e}. Продолжаем.")
+    # Попытка дождаться networkidle, но с меньшим таймаутом, чтобы не блокировать
+    try:
+        print("Ожидание networkidle (макс. 5 секунд)...")
+        page.wait_for_load_state("networkidle", timeout=5000)
+    except Exception as e:
+        print(f"Не удалось дождаться networkidle: {e}. Продолжаем.")
 
 
-# --- Фикстуры для конкретных страниц ---
+# --- Фикстуры для конкретных страниц с измененным scope ---
+# Изменяем scope на "module" для страниц, где элементы не влияют друг на друга
+
 @pytest.fixture(scope="module")  # Изменено с "function"
 def progress_page(browser):  # Зависимость от browser, а не от context/page
     """Фикстура для страницы Progress Bar."""
@@ -385,14 +359,13 @@ def menu_page(browser):  # Зависимость от browser
     # Для Menu увеличиваем таймауты из-за его специфики
     wait_selectors = [
         ("#app", "visible", 15000),  # Увеличенный таймаут
+        # Добавь селекторы для конкретных элементов меню, если они стабильны
     ]
 
     # Используем 'load' вместо 'domcontentloaded' для Menu, если это помогает
     for attempt in range(3):
         try:
-            print(
-                f"[MenuPage Fixture] Попытка {attempt + 1} перехода на {URLs.MENU_URL}"
-            )
+            print(f"[MenuPage Fixture] Попытка {attempt + 1} перехода на {URLs.MENU_URL}")
             page.goto(URLs.MENU_URL, wait_until="load", timeout=40000)
             break
         except Exception as e:
@@ -417,9 +390,7 @@ def menu_page(browser):  # Зависимость от browser
             print(f"[MenuPage Fixture] Ожидание селектора '{selector}'")
             page.wait_for_selector(selector, state=state, timeout=timeout)
         except Exception as e:
-            print(
-                f"[MenuPage Fixture] Не удалось дождаться селектора '{selector}': {e}"
-            )
+            print(f"[MenuPage Fixture] Не удалось дождаться селектора '{selector}': {e}")
             page.close()
             context.close()
             raise e
@@ -454,11 +425,7 @@ def select_menu_page(browser):  # Зависимость от browser
 
     wait_selectors = [
         ("#app", "visible", 10000),
-        (
-            "select, .css-yk16ysz-control",
-            "visible",
-            10000,
-        ),  # Ждем любые select элементы
+        ("select, .css-yk16ysz-control", "visible", 10000),  # Ждем любые select элементы
     ]
     create_page_with_wait(
         page, URLs.SELECT_MENU_URL, wait_selectors, stabilize_timeout=2000
@@ -468,3 +435,25 @@ def select_menu_page(browser):  # Зависимость от browser
 
     page.close()
     context.close()
+
+
+# --- Настройка профилей ---
+def pytest_addoption(parser):
+    parser.addoption(
+        "--profile",
+        action="store",
+        default="default",
+        help="Test profile: smoke, full, demo",
+    )
+
+
+def pytest_configure(config):
+    profile = config.getoption("--profile")
+    if profile == "smoke":
+        config.option.browser = ["chromium"]
+    elif profile == "full":
+        config.option.browser = ["chromium", "firefox"]
+        config.option.headed = True
+    elif profile == "demo":
+        config.option.browser = ["chromium"]
+        config.option.headed = True

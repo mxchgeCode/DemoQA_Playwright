@@ -46,6 +46,14 @@ class DatePickerPage:
 
     def click_date_time_input(self):
         """Клик по полю выбора даты и времени."""
+        # Исправлено: Если календарь открыт, сначала кликаем вне его, чтобы закрыть
+        if self.is_calendar_visible():
+            print("~ Календарь уже открыт, закрываем перед кликом по полю ввода...")
+            # Кликаем в левый верхний угол страницы, чтобы закрыть календарь
+            self.page.mouse.click(10, 10)
+            self.page.wait_for_timeout(500)  # Короткая пауза
+
+        # Теперь кликаем по полю ввода
         self.date_time_input.click()
         self.page.wait_for_timeout(1000)
 

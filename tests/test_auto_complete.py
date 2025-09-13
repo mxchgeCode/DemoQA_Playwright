@@ -69,8 +69,6 @@ def test_auto_complete_multi_input_selection(autocomplete_page):
             assert True, "Страница корректно обрабатывает множественный выбор"
 
 
-# В файле tests/test_auto_complete.py улучшаем тест
-
 
 def test_auto_complete_dropdown_filtering(autocomplete_page):
     """Тест: фильтрация опций в dropdown."""
@@ -112,25 +110,34 @@ def test_auto_complete_dropdown_filtering(autocomplete_page):
 
 
 def test_auto_complete_basic_functionality(autocomplete_page):
-    """Тест: базовая функциональность."""
+    """Тест: базовая функциональность автозаполнения."""
     # Даем время странице загрузиться
-    autocomplete_page.page.wait_for_timeout(3000)
+    autocomplete_page.page.wait_for_timeout(2000)
 
-    # Проверяем, что поля ввода существуют
-    assert (
-        autocomplete_page.single_color_input.is_visible()
-    ), "Single input должен быть видим"
-    assert (
-        autocomplete_page.multi_color_input.is_visible()
-    ), "Multi input должен быть видим"
+    # --- Single Input ---
+    single_input_text = "Red"
+    autocomplete_page.fill_single_color(single_input_text)
+    # Проверяем, что значение установлено
+    assert single_input_text in autocomplete_page.get_single_color_value()
+    print(f"✓ Single color '{single_input_text}' установлен")
 
-    # Проверяем атрибуты (даже если placeholder пустой)
-    single_placeholder = autocomplete_page.get_single_input_placeholder()
-    multi_placeholder = autocomplete_page.get_multi_input_placeholder()
+    # --- Multiple Input ---
+    # Исправлено: Заполняем дважды
+    first_color = "Blue"
+    second_color = "Green"
 
-    # Просто проверяем, что методы не падают
-    assert True, "Поля ввода работают корректно"
+    # Первый выбор
+    autocomplete_page.fill_multiple_colors(first_color)
+    autocomplete_page.page.wait_for_timeout(1000)  # Пауза между выборами
 
+    # Второй выбор
+    autocomplete_page.fill_multiple_colors(second_color)
+
+    # Проверяем, что оба значения присутствуют
+    multiple_values = autocomplete_page.get_multiple_colors_values()
+    assert first_color in multiple_values
+    assert second_color in multiple_values
+    print(f"✓ Multiple colors '{first_color}' и '{second_color}' установлены")
 
 def test_auto_complete_input_interaction(autocomplete_page):
     """Тест: взаимодействие с полями ввода."""
