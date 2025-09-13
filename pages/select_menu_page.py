@@ -26,7 +26,7 @@ class SelectMenuPage:
         self.multiselect = page.locator(SelectMenuLocators.MULTISELECT)
         self.multiselect_options = page.locator(SelectMenuLocators.MULTISELECT_OPTIONS)
 
-        # Standard multi select (обычный select multiple) - Это обычный <select multiple>
+        # Standard multi select (обычный select multiple) - Это тот же самый <select>, что и multiselect
         # Он имеет тот же ID, что и multiselect! Это один и тот же элемент на странице.
         # Поэтому мы используем тот же локатор, что и для multiselect.
         self.standard_multi_select = page.locator(SelectMenuLocators.STANDARD_MULTI_SELECT)

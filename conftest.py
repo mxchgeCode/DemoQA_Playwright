@@ -468,21 +468,20 @@ def menu_page(browser):
         print("[MenuPage Fixture] Ресурсы Menu закрыты.")
 
 
-# --- Изменено: scope="module" для Select Menu ---
-@pytest.fixture(scope="module")
-def select_menu_page(browser):
+@pytest.fixture(scope="module") # Изменено с "function"
+def select_menu_page(browser): # Зависимость от browser
+    """Фикстура для страницы Select Menu."""
     context = None
     page = None
     try:
-        context = browser.new_context(ignore_https_errors=True, bypass_csp=True,
-                                      viewport={"width": 1920, "height": 1080})
+        context = browser.new_context(ignore_https_errors=True, bypass_csp=True, viewport={"width": 1920, "height": 1080})
         context.route("**/*", block_external)
         page = context.new_page()
         from pages.select_menu_page import SelectMenuPage
         from data import URLs
         wait_selectors = [
             ("#app", "visible", 10000),
-            ("select, .css-yk16ysz-control", "visible", 10000),  # Ждем любые select элементы
+            ("select, .css-yk16ysz-control", "visible", 10000), # Ждем любые select элементы
         ]
         create_page_with_wait(page, URLs.SELECT_MENU_URL, wait_selectors, stabilize_timeout=2000)
         select_menu_page = SelectMenuPage(page)
@@ -495,17 +494,12 @@ def select_menu_page(browser):
     finally:
         print("[SelectMenuPage Fixture] Закрытие ресурсов...")
         if page:
-            try:
-                page.close()
-            except:
-                pass
+            try: page.close()
+            except: pass
         if context:
-            try:
-                context.close()
-            except:
-                pass
+            try: context.close()
+            except: pass
         print("[SelectMenuPage Fixture] Ресурсы закрыты.")
-
 
 # --- Настройка профилей ---
 def pytest_addoption(parser):

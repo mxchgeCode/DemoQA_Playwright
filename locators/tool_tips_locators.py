@@ -1,17 +1,15 @@
 # locators/tool_tips_locators.py
 class ToolTipsLocators:
     # Основной контейнер
-    # Исправлено: добавлен недостающий локатор
     MAIN_CONTAINER = "#app"
 
     # Элементы, на которые наводим
+    # Исправлено: Реальные ID с сайта https://demoqa.com/tool-tips
     HOVER_BUTTON = "#toolTipButton"
     HOVER_FIELD = "#toolTipTextField"
-    HOVER_LINK = "#texToolLink"
-    TEXT_CONTAINER = "#textContent"
+    HOVER_LINK = "#texToolLink" # Исправлено: "texToolLink", а не "toolTipLink"
+    TEXT_CONTAINER = "#contraryText"
 
     # Тултипы (могут быть динамическими)
-    TOOLTIP_BUTTON = "#buttonToolTip"
-    TOOLTIP_FIELD = "#textFieldToolTip"
-    TOOLTIP_LINK = "div[role='tooltip']" # Примерный селектор, может потребоваться уточнение
-    TOOLTIP_TEXT = "div[role='tooltip']" # Примерный селектор, может потребоваться уточнение
+    # Исправлено: Тултипы рендерятся в портале, поэтому используем общий селектор
+    TOOLTIP_TEXT = "div[role='tooltip']" # Все тултипы имеют этот атрибут

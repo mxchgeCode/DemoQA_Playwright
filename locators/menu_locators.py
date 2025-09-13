@@ -1,17 +1,13 @@
 # locators/menu_locators.py
 class MenuLocators:
-    # Main container
+    # Основной контейнер
     MAIN_CONTAINER = "#app"
 
     # Menu tree structure
-    MENU_TREE = ".MuiTree-root"
-    TREE_ITEMS = ".MuiTreeItem-root"
+    MENU_TREE = ".menu-list" # Более надежный селектор
+    TREE_ITEMS = ".menu-item" # Более надежный селектор
 
-    # Text content of tree items
-    TREE_ITEM_CONTENT = ".MuiTreeItem-content"
-    TREE_ITEM_LABEL = ".MuiTreeItem-label"
-
-    # Specific items by text (более гибкий подход)
+    # Конкретные элементы по тексту (используем :has-text для гибкости)
     MAIN_ITEM_1 = ":has-text('Main Item 1')"
     MAIN_ITEM_2 = ":has-text('Main Item 2')"
     MAIN_ITEM_3 = ":has-text('Main Item 3')"
@@ -20,5 +16,5 @@ class MenuLocators:
     SUB_SUB_ITEM_1 = ":has-text('Sub Sub Item 1')"
     SUB_SUB_ITEM_2 = ":has-text('Sub Sub Item 2')"
 
-    # All clickable menu items
-    CLICKABLE_ITEMS = ".MuiTreeItem-content, .MuiTreeItem-label"
+    # Все кликабельные элементы
+    CLICKABLE_ITEMS = ".menu-item > a" # Кликабельные элементы меню
