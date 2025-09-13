@@ -6,9 +6,12 @@ from locators.auto_complete_locators import AutoCompleteLocators
 class AutoCompletePage:
     def __init__(self, page: Page):
         self.page = page
+        # Основной контейнер
         self.main_container = page.locator(AutoCompleteLocators.MAIN_CONTAINER)
+        # Поля ввода
         self.single_color_input = page.locator(AutoCompleteLocators.SINGLE_COLOR_INPUT)
         self.multi_color_input = page.locator(AutoCompleteLocators.MULTI_COLOR_INPUT)
+        # Dropdown
         self.dropdown_options = page.locator(AutoCompleteLocators.DROPDOWN_OPTIONS)
         self.dropdown_container = page.locator(AutoCompleteLocators.DROPDOWN_CONTAINER)
 
@@ -33,32 +36,25 @@ class AutoCompletePage:
         if option.is_visible():
             option.click()
         else:
-            # Если опция не видима, кликаем по тексту
+            # Если опция не видима, попробуем кликнуть по тексту
             option_text = option.text_content().strip()
+            # Ищем элемент с этим текстом в любом месте
             self.page.locator(f"//*[text()='{option_text}']").first.click()
         self.page.wait_for_timeout(500)
 
     def get_single_color_value_correctly(self) -> str:
-        """Получает значение из поля single color, учитывая разные способы отображения."""
+        """Получает значение из поля single color. Прямой доступ к input.value."""
+        # Этот метод должен возвращать значение, которое реально установлено в input
+        # Для этого мы просто читаем атрибут value
         try:
-            # Сначала пробуем получить значение напрямую из input
-            input_value = self.single_color_input.input_value()
-            if input_value and input_value.strip():
-                return input_value.strip()
+            value = self.single_color_input.get_attribute("value")
+            if value is not None:
+                return value.strip()
+            else:
+                return ""
         except Exception as e:
-            print(f"? Ошибка получения значения из input: {e}")
-
-        try:
-            # Если в input пусто, пробуем получить текст из самого input (если там текст)
-            input_text = self.single_color_input.text_content().strip()
-            placeholder = self.get_single_input_placeholder()
-            if input_text and input_text != placeholder and input_text.strip():
-                return input_text.strip()
-        except Exception as e:
-            print(f"? Ошибка получения текста из input: {e}")
-
-        # Если и это не помогло, возвращаем пустую строку
-        return ""
+            print(f"? Ошибка получения значения из атрибута value: {e}")
+            return ""
 
     def get_single_color_value(self) -> str:
         """Старый метод, возвращающий пустую строку для совместимости."""
@@ -67,9 +63,7 @@ class AutoCompletePage:
     # --- Multi Input ---
     def fill_multiple_colors(self, text: str):
         """Заполняет поле multiple colors."""
-        # Очищаем поле перед вводом (не всегда возможно для multi-input)
-        # self.multi_color_input.fill("")
-        # self.page.wait_for_timeout(200)
+        # Не очищаем, так как это multi-input
         self.multi_color_input.fill(text)
         self.page.wait_for_timeout(500)
 
@@ -79,8 +73,9 @@ class AutoCompletePage:
         if option.is_visible():
             option.click()
         else:
-            # Если опция не видима, кликаем по тексту
+            # Если опция не видима, попробуем кликнуть по тексту
             option_text = option.text_content().strip()
+            # Ищем элемент с этим текстом в любом месте
             self.page.locator(f"//*[text()='{option_text}']").first.click()
         self.page.wait_for_timeout(500)
 
@@ -89,10 +84,8 @@ class AutoCompletePage:
         values = []
         try:
             # Ищем элементы, представляющие выбранные значения (теги)
-            # Они могут быть дочерними элементами multi_color_input или рядом с ним
-            # Предположим, они находятся внутри контейнера multi_color_input или рядом
-            # Более общий подход: ищем теги рядом с input
-            selected_tags = self.multi_color_input.locator("xpath=following-sibling::div | ..//div[contains(@class, 'multi-value')]")
+            # Они находятся внутри контейнера мульти-инпута
+            selected_tags = self.multi_color_input.locator("xpath=../div[contains(@class, 'multi-value')]")
             count = selected_tags.count()
             for i in range(count):
                 try:
@@ -101,17 +94,17 @@ class AutoCompletePage:
                     cleaned_text = tag_text.rstrip('×').strip()
                     if cleaned_text:
                         values.append(cleaned_text)
-                except:
+                except Exception:
                     continue # Игнорируем ошибки отдельных тегов
         except Exception as e:
-            print(f"? Ошибка при получении multi значений (основной метод): {e}")
-            # fallback: пробуем получить значение из input
+            print(f"? Ошибка при получении multi значений: {e}")
+            # Fallback: пробуем получить значение из input
             try:
                 input_value = self.multi_color_input.input_value()
                 if input_value and input_value.strip():
                     values.append(input_value.strip())
-            except Exception as e2:
-                print(f"? Ошибка при получении multi значений (fallback): {e2}")
+            except Exception:
+                pass
         return values
 
     def get_multi_color_values(self) -> list:

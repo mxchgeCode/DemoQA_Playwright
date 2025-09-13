@@ -137,28 +137,19 @@ def create_page_with_wait(page, url, wait_selectors, stabilize_timeout=1000):
         print(f"Стабилизация: ожидание {stabilize_timeout}мс")
         page.wait_for_timeout(stabilize_timeout)
 
-    # Попытка дождаться networkidle, но с меньшим таймаутом, чтобы не блокировать
-    try:
-        print("Ожидание networkidle (макс. 5 секунд)...")
-        page.wait_for_load_state("networkidle", timeout=5000)
-    except Exception as e:
-        print(f"Не удалось дождаться networkidle: {e}. Продолжаем.")
+    # УДАЛЕНО: Попытка дождаться networkidle, так как она часто фейлится из-за блокировки
+    # try:
+    #     print("Ожидание networkidle (макс. 5 секунд)...")
+    #     page.wait_for_load_state("networkidle", timeout=5000)
+    # except Exception as e:
+    #     print(f"Не удалось дождаться networkidle: {e}. Продолжаем.")
 
-
-# --- Фикстуры для конкретных страниц с измененным scope ---
-# Изменяем scope на "module" для страниц, где элементы не влияют друг на друга
-
-
-# conftest.py (фрагменты с изменениями)
-
-# ... (импорты, blocked_domains, block_external, browser, context, page, create_page_with_wait)
 
 # --- Фикстуры для конкретных страниц с измененным scope ---
 # Изменяем scope на "module" для страниц, где элементы не влияют друг на друга
 
 @pytest.fixture(scope="module")
 def progress_page(browser):
-    """Фикстура для страницы Progress Bar."""
     context = None
     page = None
     try:
@@ -186,28 +177,24 @@ def progress_page(browser):
         yield progress_page
     except Exception as e:
         print(f"[ProgressPage Fixture] Ошибка инициализации: {e}")
-        if page:
-            page.close()
-        if context:
-            context.close()
+        if page: page.close()
+        if context: context.close()
         raise
     finally:
-        # Этот блок выполнится в любом случае после yield
         print("[ProgressPage Fixture] Закрытие ресурсов Progress Bar...")
         if page:
             try:
                 page.close()
-            except Exception as e:
-                print(f"[ProgressPage Fixture] Ошибка закрытия page: {e}")
+            except:
+                pass
         if context:
             try:
                 context.close()
-            except Exception as e:
-                print(f"[ProgressPage Fixture] Ошибка закрытия context: {e}")
+            except:
+                pass
         print("[ProgressPage Fixture] Ресурсы Progress Bar закрыты.")
 
 
-# Аналогично для других module-фикстур
 @pytest.fixture(scope="module")
 def slider_page(browser):
     context = None
@@ -422,6 +409,7 @@ def tooltips_page(browser):
         print("[ToolTipsPage Fixture] Ресурсы закрыты.")
 
 
+# --- Изменено: scope="module" для Menu ---
 @pytest.fixture(scope="module")
 def menu_page(browser):
     context = None
@@ -433,24 +421,29 @@ def menu_page(browser):
         page = context.new_page()
         from pages.menu_page import MenuPage
         from data import URLs
-        wait_selectors = [("#app", "visible", 15000)]
+        wait_selectors = [("#app", "visible", 15000)]  # Увеличенный таймаут
+
+        # Используем 'load' вместо 'domcontentloaded' для Menu, если это помогает
         for attempt in range(3):
             try:
                 print(f"[MenuPage Fixture] Попытка {attempt + 1} перехода на {URLs.MENU_URL}")
-                page.goto(URLs.MENU_URL, wait_until="load", timeout=40000)
+                page.goto(URLs.MENU_URL, wait_until="load", timeout=30000)  # Увеличен таймаут
                 break
             except Exception as e:
                 print(f"[MenuPage Fixture] Попытка {attempt + 1} перехода не удалась: {e}")
                 if attempt == 2:
                     raise e
                 page.wait_for_timeout(3000)
+
+        # Ожидание ключевых селекторов
         for selector, state, timeout in wait_selectors:
             try:
                 print(f"[MenuPage Fixture] Ожидание селектора '{selector}'")
-                page.wait_for_selector(selector, state=state, timeout=timeout)
+                page.wait_for_selector(selector, state=state, timeout=30000)  # Увеличен таймаут
             except Exception as e:
                 print(f"[MenuPage Fixture] Не удалось дождаться селектора '{selector}': {e}")
                 raise e
+
         print("[MenuPage Fixture] Стабилизация Menu: ожидание 5000мс")
         page.wait_for_timeout(5000)
         menu_page = MenuPage(page)
@@ -475,6 +468,7 @@ def menu_page(browser):
         print("[MenuPage Fixture] Ресурсы Menu закрыты.")
 
 
+# --- Изменено: scope="module" для Select Menu ---
 @pytest.fixture(scope="module")
 def select_menu_page(browser):
     context = None
@@ -486,7 +480,10 @@ def select_menu_page(browser):
         page = context.new_page()
         from pages.select_menu_page import SelectMenuPage
         from data import URLs
-        wait_selectors = [("#app", "visible", 10000), ("select, .css-yk16ysz-control", "visible", 10000)]
+        wait_selectors = [
+            ("#app", "visible", 10000),
+            ("select, .css-yk16ysz-control", "visible", 10000),  # Ждем любые select элементы
+        ]
         create_page_with_wait(page, URLs.SELECT_MENU_URL, wait_selectors, stabilize_timeout=2000)
         select_menu_page = SelectMenuPage(page)
         yield select_menu_page
@@ -508,9 +505,6 @@ def select_menu_page(browser):
             except:
                 pass
         print("[SelectMenuPage Fixture] Ресурсы закрыты.")
-
-
-# ... (pytest_addoption, pytest_configure остаются без изменений)
 
 
 # --- Настройка профилей ---

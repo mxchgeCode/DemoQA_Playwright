@@ -6,6 +6,7 @@ from locators.tool_tips_locators import ToolTipsLocators
 class ToolTipsPage:
     def __init__(self, page: Page):
         self.page = page
+        # Основной контейнер
         self.main_container = page.locator(ToolTipsLocators.MAIN_CONTAINER)
 
         # Элементы, на которые наводим
