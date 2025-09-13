@@ -18,27 +18,33 @@ def test_tool_tips_hover_and_disappear(tooltips_page):
     tooltips_page.page.wait_for_timeout(2000)
 
     # --- Наведение на кнопку ---
+    print("-> Наведение на кнопку")
     tooltips_page.hover_over_button()
-    tooltips_page.page.wait_for_timeout(1000) # Увеличено ожидание
+    tooltips_page.page.wait_for_timeout(1500) # Увеличено ожидание
     button_tooltip_text = tooltips_page.get_button_tooltip_text()
+    print(f"Текст тултипа кнопки: '{button_tooltip_text}'")
     assert "You hovered over the Button" in button_tooltip_text
-    print(f"✓ Текст тултипа кнопки: '{button_tooltip_text}'")
+    print("✓ Тултип кнопки появился")
 
     # Скрытие тултипа кнопки
+    print("-> Скрытие тултипа кнопки")
     tooltips_page.move_mouse_away()
-    tooltips_page.page.wait_for_timeout(1000) # Увеличено ожидание
-    # Проверка исчезновения может быть нестабильна, пропустим
+    tooltips_page.page.wait_for_timeout(1500) # Увеличено ожидание
+    # Проверка исчезновения может быть нестабильна, пропустим строгую проверку
 
     # --- Наведение на поле ввода ---
-    tooltips_page.hover_over_input()
-    tooltips_page.page.wait_for_timeout(1000)
-    input_tooltip_text = tooltips_page.get_input_tooltip_text()
-    assert "You hovered over the Input Field" in input_tooltip_text
-    print(f"✓ Текст тултипа поля ввода: '{input_tooltip_text}'")
+    print("-> Наведение на поле ввода")
+    tooltips_page.hover_over_field()
+    tooltips_page.page.wait_for_timeout(1500)
+    field_tooltip_text = tooltips_page.get_field_tooltip_text()
+    print(f"Текст тултипа поля: '{field_tooltip_text}'")
+    assert "You hovered over the Input Field" in field_tooltip_text
+    print("✓ Тултип поля появился")
 
     # Скрытие тултипа поля ввода
+    print("-> Скрытие тултипа поля")
     tooltips_page.move_mouse_away()
-    tooltips_page.page.wait_for_timeout(1000)
+    tooltips_page.page.wait_for_timeout(1500)
 
 
 def test_tool_tips_other_elements(tooltips_page):
@@ -47,24 +53,30 @@ def test_tool_tips_other_elements(tooltips_page):
     tooltips_page.page.wait_for_timeout(2000)
 
     # --- Наведение на ссылку ---
+    print("-> Наведение на ссылку")
     tooltips_page.hover_over_link()
-    tooltips_page.page.wait_for_timeout(1000)
+    tooltips_page.page.wait_for_timeout(1500)
     link_tooltip_text = tooltips_page.get_link_tooltip_text()
+    print(f"Текст тултипа ссылки: '{link_tooltip_text}'")
     assert "You hovered over the Link" in link_tooltip_text
-    print(f"✓ Текст тултипа ссылки: '{link_tooltip_text}'")
+    print("✓ Тултип ссылки появился")
 
     # Скрытие тултипа ссылки
+    print("-> Скрытие тултипа ссылки")
     tooltips_page.move_mouse_away()
-    tooltips_page.page.wait_for_timeout(1000)
+    tooltips_page.page.wait_for_timeout(1500)
 
     # --- Наведение на текстовый контейнер ---
+    print("-> Наведение на текстовый контейнер")
     tooltips_page.hover_over_text_container()
-    tooltips_page.page.wait_for_timeout(1000)
+    tooltips_page.page.wait_for_timeout(1500)
     text_tooltip_text = tooltips_page.get_text_container_tooltip_text()
+    print(f"Текст тултипа текста: '{text_tooltip_text}'")
     # Упрощаем проверку
     assert "hovered" in text_tooltip_text.lower() or "contrary" in text_tooltip_text.lower()
-    print(f"✓ Текст тултипа текстового контейнера: '{text_tooltip_text}'")
+    print("✓ Тултип текста появился")
 
     # Скрытие тултипа текстового контейнера
+    print("-> Скрытие тултипа текста")
     tooltips_page.move_mouse_away()
-    tooltips_page.page.wait_for_timeout(1000)
+    tooltips_page.page.wait_for_timeout(1500)
