@@ -1,13 +1,17 @@
+# locators/tool_tips_locators.py
 class ToolTipsLocators:
-    # Hover elements
+    # Основной контейнер
+    # Исправлено: добавлен недостающий локатор
+    MAIN_CONTAINER = "#app"
+
+    # Элементы, на которые наводим
     HOVER_BUTTON = "#toolTipButton"
     HOVER_FIELD = "#toolTipTextField"
-    HOVER_LINK = "a:has-text('Contrary')"
-    HOVER_SECTION_LINK = "a:has-text('1.10.32')"
+    HOVER_LINK = "#texToolLink"
+    TEXT_CONTAINER = "#textContent"
 
-    # Tooltip elements
-    TOOLTIP = ".tooltip-inner"
-    TOOLTIP_TEXT = ".tooltip-inner"
-
-    # Common elements
-    HOVER_WRAPPER = ".mt-4"
+    # Тултипы (могут быть динамическими)
+    TOOLTIP_BUTTON = "#buttonToolTip"
+    TOOLTIP_FIELD = "#textFieldToolTip"
+    TOOLTIP_LINK = "div[role='tooltip']" # Примерный селектор, может потребоваться уточнение
+    TOOLTIP_TEXT = "div[role='tooltip']" # Примерный селектор, может потребоваться уточнение
