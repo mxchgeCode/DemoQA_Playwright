@@ -108,13 +108,12 @@ def page(context):
 # --- Вспомогательная функция для создания страниц с ожиданиями ---
 def create_page_with_wait(page, url, wait_selectors, stabilize_timeout=1000):
     """Переходит на URL и ждет указанные селекторы.
-
-    Args:
-        page: Экземпляр страницы Playwright.
-        url: URL для перехода.
-        wait_selectors: Список кортежей (селектор, состояние, таймаут в мс).
-        stabilize_timeout: Дополнительная пауза для стабилизации в мс.
-    """
+       Args:
+           page: Экземпляр страницы Playwright.
+           url: URL для перехода.
+           wait_selectors: Список кортежей (селектор, состояние, таймаут в мс).
+           stabilize_timeout: Дополнительная пауза для стабилизации в мс.
+       """
     # Переход с повторными попытками
     for attempt in range(3):
         try:
@@ -144,12 +143,12 @@ def create_page_with_wait(page, url, wait_selectors, stabilize_timeout=1000):
         print(f"Стабилизация: ожидание {stabilize_timeout}мс")
         page.wait_for_timeout(stabilize_timeout)
 
-    # Попытка дождаться networkidle, но с меньшим таймаутом, чтобы не блокировать
-    try:
-        print("Ожидание networkidle (макс. 5 секунд)...")
-        page.wait_for_load_state("networkidle", timeout=5000)
-    except Exception as e:
-        print(f"Не удалось дождаться networkidle: {e}. Продолжаем.")
+    # УДАЛЕНО: Попытка дождаться networkidle, так как она часто фейлится из-за блокировки
+    # try:
+    #     print("Ожидание networkidle (макс. 5 секунд)...")
+    #     page.wait_for_load_state("networkidle", timeout=5000)
+    # except Exception as e:
+    #     print(f"Не удалось дождаться networkidle: {e}. Продолжаем.")
 
 
 # --- Фикстуры для конкретных страниц ---
@@ -355,3 +354,62 @@ def pytest_configure(config):
     elif profile == "demo":
         config.option.browser = ["chromium"]
         config.option.headed = True
+
+
+@pytest.fixture(scope="module") # Возвращаем scope="module"
+def select_menu_page(browser):
+    """Фикстура для страницы Select Menu. Создается один раз для модуля."""
+    context = browser.new_context(
+        ignore_https_errors=True,
+        bypass_csp=True,
+        viewport={"width": 1920, "height": 1080},
+    )
+    context.route("**/*", block_external)
+    page = context.new_page()
+
+    from pages.select_menu_page import SelectMenuPage
+    from data import URLs
+
+    wait_selectors = [
+        ("#app", "visible", 10000),
+        ("#oldSelectMenu, #cars", "visible", 10000), # Ждем основные элементы
+    ]
+
+    url = URLs.SELECT_MENU_URL
+    stabilize_timeout = 1000 # Уменьшена стабилизация
+
+    for attempt in range(3):
+        try:
+            print(f"[SelectMenuPage Fixture] Попытка {attempt + 1} перехода на {url}")
+            page.goto(url, wait_until="domcontentloaded", timeout=30000)
+            break
+        except Exception as e:
+            print(f"[SelectMenuPage Fixture] Попытка {attempt + 1} перехода не удалась: {e}")
+            if attempt == 2:
+                page.close()
+                context.close()
+                raise e
+            page.wait_for_timeout(1000)
+
+    for selector, state, timeout in wait_selectors:
+        try:
+            print(f"[SelectMenuPage Fixture] Ожидание селектора '{selector}' ({state}, {timeout}мс)")
+            page.wait_for_selector(selector, state=state, timeout=timeout)
+        except Exception as e:
+            print(f"[SelectMenuPage Fixture] Не удалось дождаться '{selector}': {e}")
+            page.close()
+            context.close()
+            raise e
+
+    if stabilize_timeout > 0:
+        print(f"[SelectMenuPage Fixture] Стабилизация: {stabilize_timeout}мс")
+        page.wait_for_timeout(stabilize_timeout)
+
+    select_menu_page = SelectMenuPage(page)
+
+    yield select_menu_page
+
+    print("[SelectMenuPage Fixture] Закрытие страницы и контекста Select Menu...")
+    page.close()
+    context.close()
+    print("[SelectMenuPage Fixture] Страница и контекст Select Menu закрыты.")
