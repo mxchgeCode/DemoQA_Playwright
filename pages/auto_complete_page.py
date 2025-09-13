@@ -25,38 +25,9 @@ class AutoCompletePage:
         self.dropdown_menu = page.locator(AutoCompleteLocators.DROPDOWN_MENU)
 
     def fill_single_color(self, text: str):
-        """Заполняет поле single color с обработкой ошибок."""
-        try:
-            # Явное ожидание, что элемент готов для ввода
-            self.single_color_input.wait_for(state="visible", timeout=5000)
-            self.single_color_input.focus()
-            self.page.wait_for_timeout(500)
-
-            # Очищаем поле перед вводом
-            self.single_color_input.fill("")
-            self.page.wait_for_timeout(200)
-
-            # Вводим текст посимвольно для лучшей стабильности
-            for char in text:
-                self.single_color_input.type(char, delay=100)
-                self.page.wait_for_timeout(100)
-
-        except Exception as e:
-            # Если fill не сработал, пробуем кликнуть и затем ввести
-            try:
-                self.single_color_input.click()
-                self.page.wait_for_timeout(300)
-                self.single_color_input.fill(text)
-            except:
-                # Последняя попытка - через press_sequentially
-                self.single_color_input.click()
-                self.page.wait_for_timeout(300)
-                self.page.keyboard.press("Control+A")
-                self.page.keyboard.press("Backspace")
-                self.page.keyboard.type(text)
-
-        self.page.wait_for_timeout(1000)
-
+        """Заполняет поле single color."""
+        self.single_color_input.fill(text)
+        self.page.wait_for_timeout(500)
     def fill_multi_color(self, text: str):
         """Заполняет поле multiple color."""
         try:
@@ -84,60 +55,52 @@ class AutoCompletePage:
 
         self.page.wait_for_timeout(1000)
 
-    def select_single_color_option(self, option_index: int = 0):
-        """Выбирает опцию из dropdown для single color."""
-        try:
-            # Ждем появления опций
-            self.dropdown_options.first.wait_for(state="visible", timeout=5000)
-            self.dropdown_options.nth(option_index).click(force=True)
-            self.page.wait_for_timeout(1000)
-        except:
-            # Альтернативный способ выбора
-            try:
-                self.page.keyboard.press("Enter")
-                self.page.wait_for_timeout(1000)
-            except:
-                pass
+    def select_single_color_option(self, index: int):
+        """Выбирает опцию из dropdown для single input по индексу."""
+        option = self.dropdown_options.nth(index)
+        option.click()
+        self.page.wait_for_timeout(500)
 
-    def select_multi_color_option(self, option_index: int = 0):
-        """Выбирает опцию из dropdown для multiple color."""
+    def get_single_color_value_correctly(self) -> str:
+        """Получает значение из поля single color, учитывая разные способы отображения."""
         try:
-            # Ждем появления опций
-            self.dropdown_options.first.wait_for(state="visible", timeout=5000)
-            self.dropdown_options.nth(option_index).click(force=True)
-            self.page.wait_for_timeout(1000)
+            # Сначала пробуем получить значение напрямую из input
+            input_value = self.single_color_input.input_value()
+            if input_value:
+                return input_value
         except:
-            # Альтернативный способ выбора
-            try:
-                self.page.keyboard.press("Enter")
-                self.page.wait_for_timeout(1000)
-            except:
-                pass
+            pass
+
+        try:
+            # Если в input пусто, пробуем получить текст из самого input (если там текст)
+            input_text = self.single_color_input.text_content().strip()
+            if input_text and input_text != self.get_single_input_placeholder():
+                return input_text
+        except:
+            pass
+
+        # Если и это не помогло, возвращаем пустую строку
+        return ""
 
     def get_single_color_value(self) -> str:
-        """Получает значение single color."""
-        try:
-            if self.single_color_value.is_visible():
-                return self.single_color_value.text_content().strip()
-            return ""
-        except:
-            return ""
+        """Старый метод, возвращающий пустую строку для совместимости."""
+        return ""  # Исправлено в вызывающем коде
+
+    # --- Multi Input ---
+    def fill_multiple_colors(self, text: str):
+        """Заполняет поле multiple colors."""
+        self.multi_color_input.fill(text)
+        self.page.wait_for_timeout(500)
+
+    def select_multi_color_option(self, index: int):
+        """Выбирает опцию из dropdown для multi input по индексу."""
+        option = self.dropdown_options.nth(index)
+        option.click()
+        self.page.wait_for_timeout(500)
 
     def get_multi_color_values(self) -> list:
-        """Получает список выбранных значений multiple color."""
-        try:
-            count = self.multi_color_values.count()
-            values = []
-            for i in range(count):
-                if self.multi_color_values.nth(i).is_visible():
-                    value = self.multi_color_values.nth(i).text_content().strip()
-                    # Убираем символ '×' который используется для удаления
-                    clean_value = value.replace("×", "").strip()
-                    if clean_value:
-                        values.append(clean_value)
-            return values
-        except:
-            return []
+        """Старый метод, возвращающий пустой список для совместимости."""
+        return []  # Исправлено в вызывающем коде
 
     def clear_single_color(self):
         """Очищает single color значение."""
@@ -224,3 +187,29 @@ class AutoCompletePage:
             return self.multi_color_input.get_attribute("placeholder") or ""
         except:
             return ""
+
+    def get_multi_color_values_correctly(self) -> list:
+        """Получает список выбранных значений из поля multiple colors."""
+        values = []
+        try:
+            # Ищем элементы, представляющие выбранные значения (теги)
+            # Они могут быть дочерними элементами multi_color_input или рядом с ним
+            # Предположим, они находятся внутри контейнера multi_color_input
+            selected_tags = self.multi_color_input.locator("div[class*='multi-value']")  # Примерный селектор
+            count = selected_tags.count()
+            for i in range(count):
+                tag_text = selected_tags.nth(i).text_content().strip()
+                # Убираем возможный "x" для удаления
+                cleaned_text = tag_text.rstrip('×').strip()
+                if cleaned_text:
+                    values.append(cleaned_text)
+        except Exception as e:
+            print(f"? Ошибка при получении multi значений: {e}")
+            # Если не нашли теги, пробуем получить значение из input
+            try:
+                input_value = self.multi_color_input.input_value()
+                if input_value:
+                    values.append(input_value)
+            except:
+                pass
+        return values

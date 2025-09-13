@@ -148,293 +148,369 @@ def create_page_with_wait(page, url, wait_selectors, stabilize_timeout=1000):
 # --- Фикстуры для конкретных страниц с измененным scope ---
 # Изменяем scope на "module" для страниц, где элементы не влияют друг на друга
 
-@pytest.fixture(scope="module")  # Изменено с "function"
-def progress_page(browser):  # Зависимость от browser, а не от context/page
+
+# conftest.py (фрагменты с изменениями)
+
+# ... (импорты, blocked_domains, block_external, browser, context, page, create_page_with_wait)
+
+# --- Фикстуры для конкретных страниц с измененным scope ---
+# Изменяем scope на "module" для страниц, где элементы не влияют друг на друга
+
+@pytest.fixture(scope="module")
+def progress_page(browser):
     """Фикстура для страницы Progress Bar."""
-    context = browser.new_context(
-        ignore_https_errors=True,
-        bypass_csp=True,
-        viewport={"width": 1920, "height": 1080},
-    )
-    context.route("**/*", block_external)
-    page = context.new_page()
+    context = None
+    page = None
+    try:
+        context = browser.new_context(
+            ignore_https_errors=True,
+            bypass_csp=True,
+            viewport={"width": 1920, "height": 1080},
+        )
+        context.route("**/*", block_external)
+        page = context.new_page()
 
-    from pages.progress_bar_page import ProgressBarPage
-    from data import URLs
-    from locators.progress_bar_locators import ProgressBarLocators
+        from pages.progress_bar_page import ProgressBarPage
+        from data import URLs
+        from locators.progress_bar_locators import ProgressBarLocators
 
-    wait_selectors = [
-        ("#app", "visible", 10000),
-        (ProgressBarLocators.START_STOP_BUTTON, "visible", 10000),
-        (ProgressBarLocators.PROGRESS_BAR, "visible", 10000),
-    ]
-    create_page_with_wait(
-        page, URLs.PROGRESS_BAR, wait_selectors, stabilize_timeout=2000
-    )
-    progress_page = ProgressBarPage(page)
-    yield progress_page
-
-    page.close()
-    context.close()
-
-
-@pytest.fixture(scope="module")  # Изменено с "function"
-def slider_page(browser):  # Зависимость от browser
-    """Фикстура для страницы Slider."""
-    context = browser.new_context(
-        ignore_https_errors=True,
-        bypass_csp=True,
-        viewport={"width": 1920, "height": 1080},
-    )
-    context.route("**/*", block_external)
-    page = context.new_page()
-
-    from pages.slider_page import SliderPage
-    from data import URLs
-
-    wait_selectors = [
-        (".range-slider", "visible", 10000),
-        ("#sliderValue", "visible", 10000),
-    ]
-    create_page_with_wait(page, URLs.SLIDER_URL, wait_selectors, stabilize_timeout=2000)
-    slider_page = SliderPage(page)
-    yield slider_page
-
-    page.close()
-    context.close()
-
-
-@pytest.fixture(scope="module")  # Изменено с "function"
-def accordion_page(browser):  # Зависимость от browser
-    """Фикстура для страницы Accordion."""
-    context = browser.new_context(
-        ignore_https_errors=True,
-        bypass_csp=True,
-        viewport={"width": 1920, "height": 1080},
-    )
-    context.route("**/*", block_external)
-    page = context.new_page()
-
-    from pages.accordion_page import AccordionPage
-    from data import URLs
-
-    wait_selectors = [
-        ("div.accordion", "visible", 10000),
-    ]
-    create_page_with_wait(
-        page, URLs.ACCORDION_URL, wait_selectors, stabilize_timeout=1000
-    )
-    accordion_page = AccordionPage(page)
-    yield accordion_page
-
-    page.close()
-    context.close()
-
-
-@pytest.fixture(scope="module")  # Изменено с "function"
-def autocomplete_page(browser):  # Зависимость от browser
-    """Фикстура для страницы Auto Complete."""
-    context = browser.new_context(
-        ignore_https_errors=True,
-        bypass_csp=True,
-        viewport={"width": 1920, "height": 1080},
-    )
-    context.route("**/*", block_external)
-    page = context.new_page()
-
-    from pages.auto_complete_page import AutoCompletePage
-    from data import URLs
-    from locators.auto_complete_locators import AutoCompleteLocators
-
-    wait_selectors = [
-        (AutoCompleteLocators.SINGLE_COLOR_INPUT, "visible", 10000),
-    ]
-    create_page_with_wait(
-        page, URLs.AUTO_COMPLETE_URL, wait_selectors, stabilize_timeout=1000
-    )
-    autocomplete_page = AutoCompletePage(page)
-    yield autocomplete_page
-
-    page.close()
-    context.close()
-
-
-@pytest.fixture(scope="module")  # Изменено с "function"
-def datepicker_page(browser):  # Зависимость от browser
-    """Фикстура для страницы Date Picker."""
-    context = browser.new_context(
-        ignore_https_errors=True,
-        bypass_csp=True,
-        viewport={"width": 1920, "height": 1080},
-    )
-    context.route("**/*", block_external)
-    page = context.new_page()
-
-    from pages.date_picker_page import DatePickerPage
-    from data import URLs
-    from locators.date_picker_locators import DatePickerLocators
-
-    wait_selectors = [
-        (DatePickerLocators.DATE_INPUT, "visible", 10000),
-    ]
-    create_page_with_wait(
-        page, URLs.DATE_PICKER_URL, wait_selectors, stabilize_timeout=2000
-    )
-    datepicker_page = DatePickerPage(page)
-    yield datepicker_page
-
-    page.close()
-    context.close()
-
-
-@pytest.fixture(scope="module")  # Изменено с "function"
-def tabs_page(browser):  # Зависимость от browser
-    """Фикстура для страницы Tabs."""
-    context = browser.new_context(
-        ignore_https_errors=True,
-        bypass_csp=True,
-        viewport={"width": 1920, "height": 1080},
-    )
-    context.route("**/*", block_external)
-    page = context.new_page()
-
-    from pages.tabs_page import TabsPage
-    from data import URLs
-    from locators.tabs_locators import TabsLocators
-
-    wait_selectors = [
-        (TabsLocators.TAB_WHAT, "visible", 10000),
-    ]
-    create_page_with_wait(page, URLs.TABS_URL, wait_selectors, stabilize_timeout=2000)
-    tabs_page = TabsPage(page)
-    yield tabs_page
-
-    page.close()
-    context.close()
-
-
-@pytest.fixture(scope="module")  # Изменено с "function"
-def tooltips_page(browser):  # Зависимость от browser
-    """Фикстура для страницы Tool Tips."""
-    context = browser.new_context(
-        ignore_https_errors=True,
-        bypass_csp=True,
-        viewport={"width": 1920, "height": 1080},
-    )
-    context.route("**/*", block_external)
-    page = context.new_page()
-
-    from pages.tool_tips_page import ToolTipsPage
-    from data import URLs
-    from locators.tool_tips_locators import ToolTipsLocators
-
-    wait_selectors = [
-        (ToolTipsLocators.HOVER_BUTTON, "visible", 10000),
-    ]
-    create_page_with_wait(
-        page, URLs.TOOL_TIPS_URL, wait_selectors, stabilize_timeout=3000
-    )
-    tooltips_page = ToolTipsPage(page)
-    yield tooltips_page
-
-    page.close()
-    context.close()
-
-
-# --- Изменено: scope="module" для Menu ---
-@pytest.fixture(scope="module")  # Изменено с "function"
-def menu_page(browser):  # Зависимость от browser
-    """Фикстура для страницы Menu."""
-    context = browser.new_context(
-        ignore_https_errors=True,
-        bypass_csp=True,
-        viewport={"width": 1920, "height": 1080},
-    )
-    context.route("**/*", block_external)
-    page = context.new_page()
-
-    from pages.menu_page import MenuPage
-    from data import URLs
-
-    # Для Menu увеличиваем таймауты из-за его специфики
-    wait_selectors = [
-        ("#app", "visible", 15000),  # Увеличенный таймаут
-        # Добавь селекторы для конкретных элементов меню, если они стабильны
-    ]
-
-    # Используем 'load' вместо 'domcontentloaded' для Menu, если это помогает
-    for attempt in range(3):
-        try:
-            print(f"[MenuPage Fixture] Попытка {attempt + 1} перехода на {URLs.MENU_URL}")
-            page.goto(URLs.MENU_URL, wait_until="load", timeout=40000)
-            break
-        except Exception as e:
-            print(f"[MenuPage Fixture] Попытка {attempt + 1} перехода не удалась: {e}")
-            if attempt == 2:
-                # Если все попытки неудачны, пробуем domcontentloaded
-                try:
-                    page.goto(
-                        URLs.MENU_URL, wait_until="domcontentloaded", timeout=30000
-                    )
-                    break
-                except Exception as e2:
-                    print(f"[MenuPage Fixture] Все попытки перехода неудачны: {e2}")
-                    page.close()
-                    context.close()
-                    raise e2  # Выбрасываем последнюю ошибку
-            page.wait_for_timeout(3000)
-
-    # Ожидание ключевых селекторов
-    for selector, state, timeout in wait_selectors:
-        try:
-            print(f"[MenuPage Fixture] Ожидание селектора '{selector}'")
-            page.wait_for_selector(selector, state=state, timeout=timeout)
-        except Exception as e:
-            print(f"[MenuPage Fixture] Не удалось дождаться селектора '{selector}': {e}")
+        wait_selectors = [
+            ("#app", "visible", 10000),
+            (ProgressBarLocators.START_STOP_BUTTON, "visible", 10000),
+            (ProgressBarLocators.PROGRESS_BAR, "visible", 10000),
+        ]
+        create_page_with_wait(
+            page, URLs.PROGRESS_BAR, wait_selectors, stabilize_timeout=2000
+        )
+        progress_page = ProgressBarPage(page)
+        yield progress_page
+    except Exception as e:
+        print(f"[ProgressPage Fixture] Ошибка инициализации: {e}")
+        if page:
             page.close()
+        if context:
             context.close()
-            raise e
+        raise
+    finally:
+        # Этот блок выполнится в любом случае после yield
+        print("[ProgressPage Fixture] Закрытие ресурсов Progress Bar...")
+        if page:
+            try:
+                page.close()
+            except Exception as e:
+                print(f"[ProgressPage Fixture] Ошибка закрытия page: {e}")
+        if context:
+            try:
+                context.close()
+            except Exception as e:
+                print(f"[ProgressPage Fixture] Ошибка закрытия context: {e}")
+        print("[ProgressPage Fixture] Ресурсы Progress Bar закрыты.")
 
-    # Увеличенная стабилизация для Menu
-    print("[MenuPage Fixture] Стабилизация Menu: ожидание 5000мс")
-    page.wait_for_timeout(5000)
 
-    menu_page = MenuPage(page)
-    yield menu_page
+# Аналогично для других module-фикстур
+@pytest.fixture(scope="module")
+def slider_page(browser):
+    context = None
+    page = None
+    try:
+        context = browser.new_context(ignore_https_errors=True, bypass_csp=True,
+                                      viewport={"width": 1920, "height": 1080})
+        context.route("**/*", block_external)
+        page = context.new_page()
+        from pages.slider_page import SliderPage
+        from data import URLs
+        wait_selectors = [(".range-slider", "visible", 10000), ("#sliderValue", "visible", 10000)]
+        create_page_with_wait(page, URLs.SLIDER_URL, wait_selectors, stabilize_timeout=2000)
+        slider_page = SliderPage(page)
+        yield slider_page
+    except Exception as e:
+        print(f"[SliderPage Fixture] Ошибка инициализации: {e}")
+        if page: page.close()
+        if context: context.close()
+        raise
+    finally:
+        print("[SliderPage Fixture] Закрытие ресурсов...")
+        if page:
+            try:
+                page.close()
+            except:
+                pass
+        if context:
+            try:
+                context.close()
+            except:
+                pass
+        print("[SliderPage Fixture] Ресурсы закрыты.")
 
-    print("[MenuPage Fixture] Закрытие страницы и контекста Menu...")
-    page.close()
-    context.close()
-    print("[MenuPage Fixture] Страница и контекст Menu закрыты.")
+
+@pytest.fixture(scope="module")
+def accordion_page(browser):
+    context = None
+    page = None
+    try:
+        context = browser.new_context(ignore_https_errors=True, bypass_csp=True,
+                                      viewport={"width": 1920, "height": 1080})
+        context.route("**/*", block_external)
+        page = context.new_page()
+        from pages.accordion_page import AccordionPage
+        from data import URLs
+        wait_selectors = [("div.accordion", "visible", 10000)]
+        create_page_with_wait(page, URLs.ACCORDION_URL, wait_selectors, stabilize_timeout=1000)
+        accordion_page = AccordionPage(page)
+        yield accordion_page
+    except Exception as e:
+        print(f"[AccordionPage Fixture] Ошибка инициализации: {e}")
+        if page: page.close()
+        if context: context.close()
+        raise
+    finally:
+        print("[AccordionPage Fixture] Закрытие ресурсов...")
+        if page:
+            try:
+                page.close()
+            except:
+                pass
+        if context:
+            try:
+                context.close()
+            except:
+                pass
+        print("[AccordionPage Fixture] Ресурсы закрыты.")
 
 
-# --- Изменено: scope="module" для Select Menu ---
-@pytest.fixture(scope="module")  # Изменено с "function"
-def select_menu_page(browser):  # Зависимость от browser
-    """Фикстура для страницы Select Menu."""
-    context = browser.new_context(
-        ignore_https_errors=True,
-        bypass_csp=True,
-        viewport={"width": 1920, "height": 1080},
-    )
-    context.route("**/*", block_external)
-    page = context.new_page()
+@pytest.fixture(scope="module")
+def autocomplete_page(browser):
+    context = None
+    page = None
+    try:
+        context = browser.new_context(ignore_https_errors=True, bypass_csp=True,
+                                      viewport={"width": 1920, "height": 1080})
+        context.route("**/*", block_external)
+        page = context.new_page()
+        from pages.auto_complete_page import AutoCompletePage
+        from data import URLs
+        from locators.auto_complete_locators import AutoCompleteLocators
+        wait_selectors = [(AutoCompleteLocators.SINGLE_COLOR_INPUT, "visible", 10000)]
+        create_page_with_wait(page, URLs.AUTO_COMPLETE_URL, wait_selectors, stabilize_timeout=1000)
+        autocomplete_page = AutoCompletePage(page)
+        yield autocomplete_page
+    except Exception as e:
+        print(f"[AutoCompletePage Fixture] Ошибка инициализации: {e}")
+        if page: page.close()
+        if context: context.close()
+        raise
+    finally:
+        print("[AutoCompletePage Fixture] Закрытие ресурсов...")
+        if page:
+            try:
+                page.close()
+            except:
+                pass
+        if context:
+            try:
+                context.close()
+            except:
+                pass
+        print("[AutoCompletePage Fixture] Ресурсы закрыты.")
 
-    from pages.select_menu_page import SelectMenuPage
-    from data import URLs
 
-    wait_selectors = [
-        ("#app", "visible", 10000),
-        ("select, .css-yk16ysz-control", "visible", 10000),  # Ждем любые select элементы
-    ]
-    create_page_with_wait(
-        page, URLs.SELECT_MENU_URL, wait_selectors, stabilize_timeout=2000
-    )
-    select_menu_page = SelectMenuPage(page)
-    yield select_menu_page
+@pytest.fixture(scope="module")
+def datepicker_page(browser):
+    context = None
+    page = None
+    try:
+        context = browser.new_context(ignore_https_errors=True, bypass_csp=True,
+                                      viewport={"width": 1920, "height": 1080})
+        context.route("**/*", block_external)
+        page = context.new_page()
+        from pages.date_picker_page import DatePickerPage
+        from data import URLs
+        from locators.date_picker_locators import DatePickerLocators
+        wait_selectors = [(DatePickerLocators.DATE_INPUT, "visible", 10000)]
+        create_page_with_wait(page, URLs.DATE_PICKER_URL, wait_selectors, stabilize_timeout=2000)
+        datepicker_page = DatePickerPage(page)
+        yield datepicker_page
+    except Exception as e:
+        print(f"[DatePickerPage Fixture] Ошибка инициализации: {e}")
+        if page: page.close()
+        if context: context.close()
+        raise
+    finally:
+        print("[DatePickerPage Fixture] Закрытие ресурсов...")
+        if page:
+            try:
+                page.close()
+            except:
+                pass
+        if context:
+            try:
+                context.close()
+            except:
+                pass
+        print("[DatePickerPage Fixture] Ресурсы закрыты.")
 
-    page.close()
-    context.close()
+
+@pytest.fixture(scope="module")
+def tabs_page(browser):
+    context = None
+    page = None
+    try:
+        context = browser.new_context(ignore_https_errors=True, bypass_csp=True,
+                                      viewport={"width": 1920, "height": 1080})
+        context.route("**/*", block_external)
+        page = context.new_page()
+        from pages.tabs_page import TabsPage
+        from data import URLs
+        from locators.tabs_locators import TabsLocators
+        wait_selectors = [(TabsLocators.TAB_WHAT, "visible", 10000)]
+        create_page_with_wait(page, URLs.TABS_URL, wait_selectors, stabilize_timeout=2000)
+        tabs_page = TabsPage(page)
+        yield tabs_page
+    except Exception as e:
+        print(f"[TabsPage Fixture] Ошибка инициализации: {e}")
+        if page: page.close()
+        if context: context.close()
+        raise
+    finally:
+        print("[TabsPage Fixture] Закрытие ресурсов...")
+        if page:
+            try:
+                page.close()
+            except:
+                pass
+        if context:
+            try:
+                context.close()
+            except:
+                pass
+        print("[TabsPage Fixture] Ресурсы закрыты.")
+
+
+@pytest.fixture(scope="module")
+def tooltips_page(browser):
+    context = None
+    page = None
+    try:
+        context = browser.new_context(ignore_https_errors=True, bypass_csp=True,
+                                      viewport={"width": 1920, "height": 1080})
+        context.route("**/*", block_external)
+        page = context.new_page()
+        from pages.tool_tips_page import ToolTipsPage
+        from data import URLs
+        from locators.tool_tips_locators import ToolTipsLocators
+        wait_selectors = [(ToolTipsLocators.HOVER_BUTTON, "visible", 10000)]
+        create_page_with_wait(page, URLs.TOOL_TIPS_URL, wait_selectors, stabilize_timeout=3000)
+        tooltips_page = ToolTipsPage(page)
+        yield tooltips_page
+    except Exception as e:
+        print(f"[ToolTipsPage Fixture] Ошибка инициализации: {e}")
+        if page: page.close()
+        if context: context.close()
+        raise
+    finally:
+        print("[ToolTipsPage Fixture] Закрытие ресурсов...")
+        if page:
+            try:
+                page.close()
+            except:
+                pass
+        if context:
+            try:
+                context.close()
+            except:
+                pass
+        print("[ToolTipsPage Fixture] Ресурсы закрыты.")
+
+
+@pytest.fixture(scope="module")
+def menu_page(browser):
+    context = None
+    page = None
+    try:
+        context = browser.new_context(ignore_https_errors=True, bypass_csp=True,
+                                      viewport={"width": 1920, "height": 1080})
+        context.route("**/*", block_external)
+        page = context.new_page()
+        from pages.menu_page import MenuPage
+        from data import URLs
+        wait_selectors = [("#app", "visible", 15000)]
+        for attempt in range(3):
+            try:
+                print(f"[MenuPage Fixture] Попытка {attempt + 1} перехода на {URLs.MENU_URL}")
+                page.goto(URLs.MENU_URL, wait_until="load", timeout=40000)
+                break
+            except Exception as e:
+                print(f"[MenuPage Fixture] Попытка {attempt + 1} перехода не удалась: {e}")
+                if attempt == 2:
+                    raise e
+                page.wait_for_timeout(3000)
+        for selector, state, timeout in wait_selectors:
+            try:
+                print(f"[MenuPage Fixture] Ожидание селектора '{selector}'")
+                page.wait_for_selector(selector, state=state, timeout=timeout)
+            except Exception as e:
+                print(f"[MenuPage Fixture] Не удалось дождаться селектора '{selector}': {e}")
+                raise e
+        print("[MenuPage Fixture] Стабилизация Menu: ожидание 5000мс")
+        page.wait_for_timeout(5000)
+        menu_page = MenuPage(page)
+        yield menu_page
+    except Exception as e:
+        print(f"[MenuPage Fixture] Ошибка инициализации: {e}")
+        if page: page.close()
+        if context: context.close()
+        raise
+    finally:
+        print("[MenuPage Fixture] Закрытие ресурсов Menu...")
+        if page:
+            try:
+                page.close()
+            except:
+                pass
+        if context:
+            try:
+                context.close()
+            except:
+                pass
+        print("[MenuPage Fixture] Ресурсы Menu закрыты.")
+
+
+@pytest.fixture(scope="module")
+def select_menu_page(browser):
+    context = None
+    page = None
+    try:
+        context = browser.new_context(ignore_https_errors=True, bypass_csp=True,
+                                      viewport={"width": 1920, "height": 1080})
+        context.route("**/*", block_external)
+        page = context.new_page()
+        from pages.select_menu_page import SelectMenuPage
+        from data import URLs
+        wait_selectors = [("#app", "visible", 10000), ("select, .css-yk16ysz-control", "visible", 10000)]
+        create_page_with_wait(page, URLs.SELECT_MENU_URL, wait_selectors, stabilize_timeout=2000)
+        select_menu_page = SelectMenuPage(page)
+        yield select_menu_page
+    except Exception as e:
+        print(f"[SelectMenuPage Fixture] Ошибка инициализации: {e}")
+        if page: page.close()
+        if context: context.close()
+        raise
+    finally:
+        print("[SelectMenuPage Fixture] Закрытие ресурсов...")
+        if page:
+            try:
+                page.close()
+            except:
+                pass
+        if context:
+            try:
+                context.close()
+            except:
+                pass
+        print("[SelectMenuPage Fixture] Ресурсы закрыты.")
+
+
+# ... (pytest_addoption, pytest_configure остаются без изменений)
 
 
 # --- Настройка профилей ---

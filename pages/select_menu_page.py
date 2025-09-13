@@ -11,24 +11,34 @@ class SelectMenuPage:
 
         # Select Value (Simple Select Menu)
         self.simple_select = page.locator(SelectMenuLocators.SELECT_VALUE)
-        self.simple_select_options = page.locator(SelectMenuLocators.SELECT_VALUE_OPTIONS)
+        self.simple_select_options = page.locator(
+            SelectMenuLocators.SELECT_VALUE_OPTIONS
+        )
 
         # Select One (React select)
-        self.select_one_container = page.locator(SelectMenuLocators.SELECT_ONE_CONTAINER)
+        self.select_one_container = page.locator(
+            SelectMenuLocators.SELECT_ONE_CONTAINER
+        )
         self.select_one_control = page.locator(SelectMenuLocators.SELECT_ONE_CONTROL)
         self.select_one_input = page.locator(SelectMenuLocators.SELECT_ONE_INPUT)
 
         # Old Style Select Menu
         self.old_style_select = page.locator(SelectMenuLocators.OLD_STYLE_SELECT)
-        self.old_style_select_options = page.locator(SelectMenuLocators.OLD_STYLE_SELECT_OPTIONS)
+        self.old_style_select_options = page.locator(
+            SelectMenuLocators.OLD_STYLE_SELECT_OPTIONS
+        )
 
         # Multiselect drop down (React)
         self.multiselect = page.locator(SelectMenuLocators.MULTISELECT)
         self.multiselect_options = page.locator(SelectMenuLocators.MULTISELECT_OPTIONS)
 
         # Standard multi select (обычный select multiple)
-        self.standard_multi_select = page.locator(SelectMenuLocators.STANDARD_MULTI_SELECT)
-        self.standard_multi_select_options = page.locator(SelectMenuLocators.STANDARD_MULTI_SELECT_OPTIONS)
+        self.standard_multi_select = page.locator(
+            SelectMenuLocators.STANDARD_MULTI_SELECT
+        )
+        self.standard_multi_select_options = page.locator(
+            SelectMenuLocators.STANDARD_MULTI_SELECT_OPTIONS
+        )
 
         # Общие элементы для dropdown (используются внутри контейнеров)
         self.dropdown_option = page.locator(SelectMenuLocators.DROPDOWN_OPTION)
@@ -63,7 +73,11 @@ class SelectMenuPage:
 
     def get_simple_select_selected_text(self) -> str:
         selected_option = self.simple_select.locator("option:checked")
-        return selected_option.text_content().strip() if selected_option.count() > 0 else ""
+        return (
+            selected_option.text_content().strip()
+            if selected_option.count() > 0
+            else ""
+        )
 
     def get_simple_select_options_count(self) -> int:
         return self.simple_select_options.count()
@@ -82,11 +96,15 @@ class SelectMenuPage:
         """Открывает dropdown для Select One."""
         print("Попытка открыть dropdown Select One...")
         # 1. Убедиться, что контейнер видим
-        if not self._wait_for_element_visible(self.select_one_container, 10000, "Контейнер Select One"):
+        if not self._wait_for_element_visible(
+            self.select_one_container, 10000, "Контейнер Select One"
+        ):
             raise Exception("Контейнер Select One не стал видимым")
         # 2. Найти элемент управления
         control_locator = self.select_one_control
-        if not self._wait_for_element_visible(control_locator, 5000, "Элемент управления Select One"):
+        if not self._wait_for_element_visible(
+            control_locator, 5000, "Элемент управления Select One"
+        ):
             raise Exception("Элемент управления Select One не найден или не видим")
 
         # 3. Прокрутить в область видимости
@@ -110,18 +128,26 @@ class SelectMenuPage:
                 try:
                     bbox = control_locator.bounding_box()
                     if bbox:
-                        self.page.mouse.click(bbox['x'] + bbox['width'] / 2, bbox['y'] + bbox['height'] / 2)
-                        print("✓ Клик по элементу управления Select One (JS через mouse)")
+                        self.page.mouse.click(
+                            bbox["x"] + bbox["width"] / 2,
+                            bbox["y"] + bbox["height"] / 2,
+                        )
+                        print(
+                            "✓ Клик по элементу управления Select One (JS через mouse)"
+                        )
                     else:
                         raise Exception("Не удалось получить координаты для JS клика")
                 except Exception as e3:
                     print(f"? JS-клик не удался: {e3}")
                     raise Exception(
-                        f"Не удалось кликнуть по элементу управления Select One всеми способами: {e1}, {e2}, {e3}")
+                        f"Не удалось кликнуть по элементу управления Select One всеми способами: {e1}, {e2}, {e3}"
+                    )
 
         # 5. Подождать, пока dropdown появится (проверим наличие меню внутри контейнера)
         select_one_menu = self.select_one_container.locator("div[class*='menu']")
-        if self._wait_for_element_visible(select_one_menu, 5000, "Dropdown меню Select One"):
+        if self._wait_for_element_visible(
+            select_one_menu, 5000, "Dropdown меню Select One"
+        ):
             print("✓ Dropdown Select One открыт")
         else:
             print("? Dropdown Select One, возможно, открыт, но меню не обнаружено")
@@ -134,25 +160,37 @@ class SelectMenuPage:
         self.page.wait_for_timeout(1000)
 
         # Ищем опцию строго внутри контейнера Select One
-        option_locator = self.select_one_container.locator(f"div[class*='option']:has-text('{option_text}')")
+        option_locator = self.select_one_container.locator(
+            f"div[class*='option']:has-text('{option_text}')"
+        )
         if option_locator.count() > 0 and option_locator.first.is_visible():
             option_to_click = option_locator.first
             print(f"✓ Опция '{option_text}' найдена по точному совпадению")
         else:
             # Пробуем частичное совпадение
             option_locator_partial = self.select_one_container.locator(
-                f"div[class*='option']:text-matches('(?i).*{option_text}.*')")
-            if option_locator_partial.count() > 0 and option_locator_partial.first.is_visible():
+                f"div[class*='option']:text-matches('(?i).*{option_text}.*')"
+            )
+            if (
+                option_locator_partial.count() > 0
+                and option_locator_partial.first.is_visible()
+            ):
                 option_to_click = option_locator_partial.first
                 print(f"✓ Опция '{option_text}' найдена по частичному совпадению")
             else:
                 # Если не нашли, ищем первую доступную опцию в этом меню
-                any_option = self.select_one_container.locator("div[class*='option']").first
+                any_option = self.select_one_container.locator(
+                    "div[class*='option']"
+                ).first
                 if any_option.count() > 0 and any_option.is_visible():
                     option_to_click = any_option
-                    print(f"~ Выбираем первую доступную опцию, так как '{option_text}' не найдена")
+                    print(
+                        f"~ Выбираем первую доступную опцию, так как '{option_text}' не найдена"
+                    )
                 else:
-                    raise Exception(f"Опция '{option_text}' и другие опции не найдены или не видимы")
+                    raise Exception(
+                        f"Опция '{option_text}' и другие опции не найдены или не видимы"
+                    )
 
         # Прокручиваем опцию в видимую область
         try:
@@ -171,7 +209,9 @@ class SelectMenuPage:
                 print(f"✓ Опция '{option_text}' кликнута (force)")
             except Exception as e2:
                 print(f"? Force-клик по опции не удался: {e2}")
-                raise Exception(f"Не удалось кликнуть по опции '{option_text}': {e}, {e2}")
+                raise Exception(
+                    f"Не удалось кликнуть по опции '{option_text}': {e}, {e2}"
+                )
 
         # Пауза после выбора
         self.page.wait_for_timeout(1000)
@@ -180,7 +220,9 @@ class SelectMenuPage:
         """Получает текст выбранной опции в Select One."""
         try:
             # Ищем элемент с выбранным значением внутри контейнера.
-            value_container = self.select_one_container.locator("div[class*='singleValue']")
+            value_container = self.select_one_container.locator(
+                "div[class*='singleValue']"
+            )
             if value_container.count() > 0 and value_container.is_visible():
                 text = value_container.text_content().strip()
                 print(f"✓ Получено значение Select One из singleValue: '{text}'")
@@ -189,8 +231,14 @@ class SelectMenuPage:
                 # Альтернатива: попробовать получить текст из самого контрола, исключая стрелки и плейсхолдеры
                 control_text = self.select_one_control.text_content().strip()
                 # Простая эвристика: если текст не стандартный плейсхолдер и не пустой
-                if control_text and control_text not in ["Select Option", "Select Title", ""]:
-                    print(f"~ Получено значение Select One из контрола: '{control_text}'")
+                if control_text and control_text not in [
+                    "Select Option",
+                    "Select Title",
+                    "",
+                ]:
+                    print(
+                        f"~ Получено значение Select One из контрола: '{control_text}'"
+                    )
                     return control_text
                 else:
                     print("? Значение Select One не определено или стандартное")
@@ -273,6 +321,11 @@ class SelectMenuPage:
             select_one_count = 1 if self.select_one_control.count() > 0 else 0
             multiselect_count = 1 if self.multiselect.count() > 0 else 0
             standard_multi_count = 1 if self.standard_multi_select.count() > 0 else 0
-            return simple_count + select_one_count + multiselect_count + standard_multi_count
+            return (
+                simple_count
+                + select_one_count
+                + multiselect_count
+                + standard_multi_count
+            )
         except:
             return 0
