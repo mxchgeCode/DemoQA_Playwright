@@ -71,6 +71,7 @@ def test_auto_complete_multi_input_selection(autocomplete_page):
 
 # В файле tests/test_auto_complete.py улучшаем тест
 
+
 def test_auto_complete_dropdown_filtering(autocomplete_page):
     """Тест: фильтрация опций в dropdown."""
     # Даем время странице загрузиться
@@ -108,6 +109,7 @@ def test_auto_complete_dropdown_filtering(autocomplete_page):
 
     # Проверяем результат
     assert True, "Фильтрация работает корректно"
+
 
 def test_auto_complete_basic_functionality(autocomplete_page):
     """Тест: базовая функциональность."""

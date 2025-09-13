@@ -36,7 +36,11 @@ class MenuPage:
             if item_locator.count() > 0:
                 # Пробуем разные способы получения текста
                 try:
-                    return item_locator.first.locator(".MuiTreeItem-label").text_content().strip()
+                    return (
+                        item_locator.first.locator(".MuiTreeItem-label")
+                        .text_content()
+                        .strip()
+                    )
                 except:
                     pass
                 try:

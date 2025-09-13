@@ -22,7 +22,9 @@ class SelectMenuLocators:
     # --- Multiselect drop down (React select) ---
     MULTISELECT_INPUT = "#react-select-4-input"
     # Индикатор (стрелка)
-    MULTISELECT_INDICATOR = "div:has(> #react-select-4-input) .css-tlfecz-indicatorContainer"
+    MULTISELECT_INDICATOR = (
+        "div:has(> #react-select-4-input) .css-tlfecz-indicatorContainer"
+    )
 
     # --- Standard multi select (обычный select multiple) ---
     STANDARD_MULTI_SELECT = "#cars"

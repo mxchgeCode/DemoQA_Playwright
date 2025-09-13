@@ -11,7 +11,9 @@ def test_menu_functionality(menu_page):
 
     # 2. Проверяем URL
     current_url = menu_page.page.url
-    assert "menu" in current_url.lower(), f"URL должен содержать 'menu', текущий: {current_url}"
+    assert (
+        "menu" in current_url.lower()
+    ), f"URL должен содержать 'menu', текущий: {current_url}"
     print(f"✓ URL корректный: {current_url}")
 
     # 3. Проверяем заголовок
@@ -84,7 +86,9 @@ def test_menu_functionality(menu_page):
 
     # 8. Проверяем, что страница не сломалась после взаимодействия
     menu_page.page.wait_for_timeout(1000)
-    assert menu_page.is_page_loaded(), "Страница должна оставаться загруженной после взаимодействия"
+    assert (
+        menu_page.is_page_loaded()
+    ), "Страница должна оставаться загруженной после взаимодействия"
     print("✓ Страница стабильна после взаимодействия")
 
     # 9. Финальная проверка

@@ -9,12 +9,16 @@ class AutoCompletePage:
         # Single color elements
         self.single_color_input = page.locator(AutoCompleteLocators.SINGLE_COLOR_INPUT)
         self.single_color_value = page.locator(AutoCompleteLocators.SINGLE_COLOR_VALUE)
-        self.clear_single_button = page.locator(AutoCompleteLocators.CLEAR_SINGLE_BUTTON)
+        self.clear_single_button = page.locator(
+            AutoCompleteLocators.CLEAR_SINGLE_BUTTON
+        )
 
         # Multiple color elements
         self.multi_color_input = page.locator(AutoCompleteLocators.MULTI_COLOR_INPUT)
         self.multi_color_values = page.locator(AutoCompleteLocators.MULTI_COLOR_VALUES)
-        self.multi_color_remove_buttons = page.locator(AutoCompleteLocators.MULTI_COLOR_REMOVE_BUTTON)
+        self.multi_color_remove_buttons = page.locator(
+            AutoCompleteLocators.MULTI_COLOR_REMOVE_BUTTON
+        )
 
         # Dropdown elements
         self.dropdown_options = page.locator(AutoCompleteLocators.DROPDOWN_OPTIONS)
@@ -128,7 +132,7 @@ class AutoCompletePage:
                 if self.multi_color_values.nth(i).is_visible():
                     value = self.multi_color_values.nth(i).text_content().strip()
                     # Убираем символ '×' который используется для удаления
-                    clean_value = value.replace('×', '').strip()
+                    clean_value = value.replace("×", "").strip()
                     if clean_value:
                         values.append(clean_value)
             return values
@@ -147,8 +151,13 @@ class AutoCompletePage:
     def remove_multi_color_item(self, index: int = 0):
         """Удаляет элемент из multiple color по индексу."""
         try:
-            remove_buttons = self.page.locator(AutoCompleteLocators.MULTI_COLOR_REMOVE_BUTTON)
-            if remove_buttons.count() > index and remove_buttons.nth(index).is_visible():
+            remove_buttons = self.page.locator(
+                AutoCompleteLocators.MULTI_COLOR_REMOVE_BUTTON
+            )
+            if (
+                remove_buttons.count() > index
+                and remove_buttons.nth(index).is_visible()
+            ):
                 remove_buttons.nth(index).click(force=True)
                 self.page.wait_for_timeout(1000)
         except:
