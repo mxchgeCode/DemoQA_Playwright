@@ -74,8 +74,9 @@ def test_accordion_button_functionality(accordion_page):
     # Проверяем, что состояние изменилось (раскрыт/свернут)
     new_expanded = accordion_page.is_first_section_expanded()
 
-    assert new_expanded != initial_expanded, "Состояние первого раздела должно измениться после клика по кнопке"
-
+    assert (
+        new_expanded != initial_expanded
+    ), "Состояние первого раздела должно измениться после клика по кнопке"
 
 
 def test_accordion_header_texts(accordion_page):

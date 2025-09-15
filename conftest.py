@@ -364,3 +364,32 @@ def pytest_configure(config):
     elif profile == "demo":
         config.option.browser = ["chromium"]
         config.option.headed = True
+
+
+@pytest.fixture(scope="session")
+def select_menu_page(browser):
+    context = browser.new_context(
+        ignore_https_errors=True,
+        bypass_csp=True,
+        viewport={"width": 1920, "height": 1080},
+    )
+    context.route("**/*", block_external)
+    page = context.new_page()
+    from pages.select_menu_page import SelectMenuPage
+    from data import URLs
+
+    create_page_with_wait(
+        page,
+        URLs.SELECT_MENU_URL,
+        wait_selectors=[
+            ("#app", "visible", 10000),
+            ("select, .css-yk16ysz-control", "visible", 10000),
+        ],
+        stabilize_timeout=2000,
+    )
+
+    select_menu_page = SelectMenuPage(page)
+    yield select_menu_page
+
+    page.close()
+    context.close()

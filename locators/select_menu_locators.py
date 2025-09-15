@@ -1,0 +1,10 @@
+class SelectMenuLocators:
+    MAIN_CONTAINER = "#app"
+    SELECT_VALUE = "#oldSelectMenu"
+    MULTISELECT = "#cars"  # Этот же элемент используется для "Standard multi select"
+    SELECT_ONE_CONTAINER = "#selectOne"
+    SELECT_ONE_DISPLAY_TEXT = ".css-1hwfws3"
+    DROPDOWN_MENU = ".css-26l3qy-menu"
+    DROPDOWN_OPTIONS = ".css-yt9ioa-option"
+    DROPDOWN_CONTROL = ".css-yk16xz-control"
+    DROPDOWN_VALUE = ".css-1hwfws3"

@@ -1,7 +1,6 @@
 from playwright.sync_api import expect
 
 
-
 def test_menu1_visible(menu_page):
     count = menu_page.menu1_count()
     assert count > 0, "Menu level 1 is empty"
@@ -12,9 +11,14 @@ def test_menu1_visible(menu_page):
 
         # Проверяем, что подменю (если есть) появилось, считается активным
         # Пример: у пункта с подменю проверяем наличие дочернего ul.menu-list с видимостью
-        submenu_locator = menu_page.page.locator(f"ul#nav > li:nth-child({i+1}) ul.menu-list")
+        submenu_locator = menu_page.page.locator(
+            f"ul#nav > li:nth-child({i+1}) ul.menu-list"
+        )
         if submenu_locator.count() > 0:
-            assert submenu_locator.first.is_visible(), f"Submenu для Menu1 item {i} должен быть видим после hover"
+            assert (
+                submenu_locator.first.is_visible()
+            ), f"Submenu для Menu1 item {i} должен быть видим после hover"
+
 
 def test_menu2_and_3_visible(menu_page):
     menu_page.hover_menu1(1)  # "Main Item 2"
@@ -33,7 +37,9 @@ def test_menu2_and_3_visible(menu_page):
             f"ul#nav > li:nth-child(2) ul > li:nth-child({i+1}) ul.menu-list"
         )
         if submenu3_locator.count() > 0:
-            assert submenu3_locator.first.is_visible(), f"Submenu 3 для Menu2 item {i} должен быть видим после hover"
+            assert (
+                submenu3_locator.first.is_visible()
+            ), f"Submenu 3 для Menu2 item {i} должен быть видим после hover"
 
     menu_page.hover_sub_sub_list()
 
