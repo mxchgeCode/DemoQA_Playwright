@@ -15,3 +15,8 @@ class SelectMenuLocators:
     SELECTED_TAG_REMOVE_BTN = "button[aria-label='Remove']"
 
     MULTISELECT_CONTROL_SELECTOR = "div.css-1hwfws3"  # Уточните!
+    PLACEHOLDER = "div.css-1wa3eu0-placeholder"
+    CLOSEBUTTON = "div.css-xb97g8"
+    MENU = ".css-26l3qy-menu"
+
+    STANDARD_MULTISELECT = "#cars"
