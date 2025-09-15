@@ -4,8 +4,8 @@ class MenuLocators:
     MAIN_CONTAINER = "#app"
 
     # Menu tree structure
-    MENU_TREE = ".menu-list" # Более надежный селектор
-    TREE_ITEMS = ".menu-item" # Более надежный селектор
+    MENU_TREE = ".menu-list"  # Более надежный селектор
+    TREE_ITEMS = ".menu-item"  # Более надежный селектор
 
     # Конкретные элементы по тексту (используем :has-text для гибкости)
     MAIN_ITEM_1 = ":has-text('Main Item 1')"
@@ -17,4 +17,4 @@ class MenuLocators:
     SUB_SUB_ITEM_2 = ":has-text('Sub Sub Item 2')"
 
     # Все кликабельные элементы
-    CLICKABLE_ITEMS = ".menu-item > a" # Кликабельные элементы меню
+    CLICKABLE_ITEMS = ".menu-item > a"  # Кликабельные элементы меню

@@ -1,101 +1,49 @@
-# pages/menu_page.py
-from playwright.sync_api import Page
-from locators.menu_locators import MenuLocators
+from playwright.sync_api import Page, expect
+import time
 
 
 class MenuPage:
     def __init__(self, page: Page):
         self.page = page
+        self.menu1_items = page.locator("ul#nav > li")
+        self.menu2_items = page.locator("ul#nav > li:nth-child(2) ul > li")
+        self.menu3_items = page.locator("ul#nav > li:nth-child(2) ul > li ul > li")
 
-        # Основные элементы
-        self.main_container = page.locator(MenuLocators.MAIN_CONTAINER)
-        self.menu_tree = page.locator(MenuLocators.MENU_TREE)
-        self.tree_items = page.locator(MenuLocators.TREE_ITEMS)
-        self.tree_item_contents = page.locator(MenuLocators.TREE_ITEM_CONTENT)
+    def goto(self):
+        self.page.goto("https://demoqa.com/menu#")
 
-        # Конкретные элементы по тексту
-        self.main_item_1 = page.locator(MenuLocators.MAIN_ITEM_1)
-        self.main_item_2 = page.locator(MenuLocators.MAIN_ITEM_2)
-        self.main_item_3 = page.locator(MenuLocators.MAIN_ITEM_3)
-        self.sub_item = page.locator(MenuLocators.SUB_ITEM)
-        self.sub_sub_list = page.locator(MenuLocators.SUB_SUB_LIST)
-        self.sub_sub_item_1 = page.locator(MenuLocators.SUB_SUB_ITEM_1)
-        self.sub_sub_item_2 = page.locator(MenuLocators.SUB_SUB_ITEM_2)
+    def menu1_count(self):
+        return self.menu1_items.count()
 
-    def get_tree_items_count(self) -> int:
-        """Получает количество элементов дерева."""
-        try:
-            count = self.tree_items.count()
-            return count
-        except:
-            return 0
+    def is_menu1_visible(self, index: int):
+        return self.menu1_items.nth(index).is_visible()
 
-    def get_item_text(self, item_locator) -> str:
-        """Получает текст элемента."""
-        try:
-            if item_locator.count() > 0:
-                # Пробуем разные способы получения текста
-                try:
-                    return (
-                        item_locator.first.locator(".MuiTreeItem-label")
-                        .text_content()
-                        .strip()
-                    )
-                except:
-                    pass
-                try:
-                    return item_locator.first.text_content().strip()
-                except:
-                    pass
-            return ""
-        except:
-            return ""
-
-    def click_item(self, item_locator) -> bool:
-        """Кликает по элементу меню."""
-        try:
-            if item_locator.count() > 0:
-                # Пробуем кликнуть по разным частям элемента
-                try:
-                    item_locator.first.locator(".MuiTreeItem-content").click()
-                    self.page.wait_for_timeout(500)
-                    return True
-                except:
-                    pass
-                try:
-                    item_locator.first.click()
-                    self.page.wait_for_timeout(500)
-                    return True
-                except:
-                    pass
+    def is_menu2_visible(self, index: int):
+        locator = self.menu2_items.nth(index)
+        if locator.count() == 0:
             return False
-        except:
-            return False
+        expect(locator).to_be_visible(timeout=2000)
+        return True
 
-    def hover_item(self, item_locator) -> bool:
-        """Наводит курсор на элемент меню."""
-        try:
-            if item_locator.count() > 0:
-                try:
-                    item_locator.first.hover()
-                    self.page.wait_for_timeout(500)
-                    return True
-                except:
-                    pass
+    def is_menu3_visible(self, index: int):
+        locator = self.menu3_items.nth(index)
+        if locator.count() == 0:
             return False
-        except:
-            return False
+        expect(locator).to_be_visible(timeout=2000)
+        return True
 
-    def is_page_loaded(self) -> bool:
-        """Проверяет, загрузилась ли страница."""
-        try:
-            return self.main_container.is_visible()
-        except:
-            return False
+    def hover_menu1(self, index: int):
+        self.menu1_items.nth(index).hover()
+        time.sleep(2)
 
-    def find_items_by_text(self, text: str):
-        """Находит элементы по тексту."""
-        try:
-            return self.page.locator(f":has-text('{text}')")
-        except:
-            return None
+    def hover_menu2(self, index: int):
+        self.menu2_items.nth(index).hover()
+        time.sleep(2)
+
+    def hover_sub_sub_list(self):
+        # Находим пункт второго уровня с текстом "SUB SUB LIST »"
+        sub_sub_list_item = self.page.locator(
+            "ul#nav > li:nth-child(2) ul > li", has_text="SUB SUB LIST »"
+        )
+        sub_sub_list_item.hover()
+        time.sleep(2)  # пауза для визуального контроля

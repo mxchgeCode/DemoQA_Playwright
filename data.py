@@ -7,4 +7,3 @@ class URLs:
     TABS_URL = "https://demoqa.com/tabs"
     TOOL_TIPS_URL = "https://demoqa.com/tool-tips"
     MENU_URL = "https://demoqa.com/menu"
-    SELECT_MENU_URL = "https://demoqa.com/select-menu"

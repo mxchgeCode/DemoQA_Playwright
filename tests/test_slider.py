@@ -49,4 +49,3 @@ def test_slider_keyboard_navigation(slider_page):
     slider_page.page.wait_for_timeout(2000)
     final_value = int(slider_page.get_current_value())
     assert final_value == initial_value or final_value == initial_value - 1
-

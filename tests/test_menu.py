@@ -1,133 +1,46 @@
-# tests/test_menu.py
-import pytest
+from pages.menu_page import MenuPage
+from playwright.sync_api import expect
 
 
-def test_menu_functionality(menu_page):
-    """Тест: функциональность меню."""
-    print("=== ТЕСТ ФУНКЦИОНАЛЬНОСТИ МЕНЮ ===")
-    # Даем время странице загрузиться
-    menu_page.page.wait_for_timeout(5000)
+# @pytest.fixture(scope="module")
+def menu_page(page):
+    menu = MenuPage(page)
+    menu.goto()
+    return menu
 
-    # 1. Проверяем загрузку страницы
-    assert menu_page.is_page_loaded(), "Страница должна загрузиться"
-    print("✓ Страница загрузилась")
 
-    # 2. Проверяем URL
-    current_url = menu_page.page.url
-    assert "menu" in current_url.lower(), f"URL должен содержать 'menu', текущий: {current_url}"
-    print(f"✓ URL корректный: {current_url}")
+def test_menu1_visible(menu_page):
+    count = menu_page.menu1_count()
+    assert count > 0, "Menu level 1 is empty"
+    for i in range(count):
+        print(i)
+        assert menu_page.is_menu1_visible(i), f"Menu1 item {i} is not visible"
 
-    # 3. Проверяем заголовок
-    page_title = menu_page.page.title()
-    assert "DEMOQA" in page_title, f"Заголовок должен содержать 'DEMOQA', текущий: {page_title}"
-    print(f"✓ Заголовок: {page_title}")
 
-    # 4. Проверяем количество элементов (опционально)
-    tree_items_count = menu_page.get_tree_items_count()
-    print(f"Количество элементов дерева: {tree_items_count}")
+def test_hover_all_menu(menu_page):
+    count = menu_page.menu1_count()
 
-    # 5. Проверяем наличие основных пунктов меню по тексту
-    main_items = ["Main Item 1", "Main Item 2", "Main Item 3"]
-    found_items = []
-    for item_text in main_items:
-        try:
-            items = menu_page.find_items_by_text(item_text)
-            if items and items.count() > 0:
-                found_items.append(item_text)
-                print(f"✓ Найден пункт меню: '{item_text}'")
-            else:
-                print(f"⚠ Пункт меню не найден: '{item_text}'")
-        except Exception as e:
-            print(f"⚠ Ошибка поиска '{item_text}': {e}")
-    assert len(found_items) > 0, "Должны быть найдены пункты меню"
-    print(f"✓ Найдено пунктов меню: {len(found_items)}")
+    for i in range(count):
+        menu_page.hover_menu1(i)
 
-    # 6. Проверяем наличие подпунктов (Sub Item, SUB SUB LIST)
-    submenu_items = ["Sub Item", "SUB SUB LIST"]
-    found_submenu = []
-    for item_text in submenu_items:
-        try:
-            items = menu_page.find_items_by_text(item_text)
-            if items and items.count() > 0:
-                found_submenu.append(item_text)
-                print(f"✓ Найден подпункт меню: '{item_text}'")
-            else:
-                print(f"⚠ Подпункт меню не найден: '{item_text}'")
-        except Exception as e:
-            print(f"⚠ Ошибка поиска подпункта '{item_text}': {e}")
-    assert len(found_submenu) > 0, "Должны быть найдены подпункты меню"
-    print(f"✓ Найдено подпунктов меню: {len(found_submenu)}")
 
-    # 7. Проверяем наличие под-подпунктов (Sub Sub Item 1, Sub Sub Item 2)
-    sub_sub_items = ["Sub Sub Item 1", "Sub Sub Item 2"]
-    found_sub_sub = []
-    for item_text in sub_sub_items:
-        try:
-            items = menu_page.find_items_by_text(item_text)
-            if items and items.count() > 0:
-                found_sub_sub.append(item_text)
-                print(f"✓ Найден под-подпункт меню: '{item_text}'")
-            else:
-                print(f"⚠ Под-подпункт меню не найден: '{item_text}'")
-        except Exception as e:
-            print(f"⚠ Ошибка поиска под-подпункта '{item_text}': {e}")
-    assert len(found_sub_sub) > 0, "Должны быть найдены под-подпункты меню"
-    print(f"✓ Найдено под-подпунктов меню: {len(found_sub_sub)}")
+def test_menu2_and_3_visible(menu_page):
+    menu_page.hover_menu1(1)  # "Main Item 2"
 
-    # 8. ТЕСТ ИНТЕРАКТИВНОСТИ - КЛИКИ И НАВЕДЕНИЕ
-    print("- ТЕСТ ИНТЕРАКТИВНОСТИ -")
-    # Наведение на Main Item 1
-    main_item_1 = menu_page.find_items_by_text("Main Item 1").first
-    main_item_1.hover()
-    menu_page.page.wait_for_timeout(1000)
-    print("✓ Наведение на 'Main Item 1' работает")
+    menu2_count = menu_page.menu2_items.count()
+    assert menu2_count > 0, "Menu level 2 is empty"
 
-    # Клик по Main Item 1
-    main_item_1.click()
-    menu_page.page.wait_for_timeout(1000)
-    print("✓ Клик на 'Main Item 1' работает")
+    for i in range(menu2_count):
+        locator = menu_page.menu2_items.nth(i)
+        expect(locator).to_be_visible(timeout=2000)
+        menu_page.hover_menu2(i)
 
-    # Наведение на SUB SUB LIST и клик по Sub Sub Item 1
-    sub_sub_list = menu_page.find_items_by_text("SUB SUB LIST").first
-    sub_sub_list.hover()
-    menu_page.page.wait_for_timeout(2000) # Пауза для открытия 3-го уровня
-    print("✓ Наведение на 'SUB SUB LIST' работает")
+    # Наводим на пункт с подменю третьего уровня
+    menu_page.hover_sub_sub_list()
 
-    # Клик по Sub Sub Item 1
-    sub_sub_item_1 = menu_page.find_items_by_text("Sub Sub Item 1").first
-    if sub_sub_item_1.is_visible():
-        sub_sub_item_1.click()
-        print(f"✓ Клик по элементу 3-го уровня 'Sub Sub Item 1' успешен")
-        # Пауза после клика
-        menu_page.page.wait_for_timeout(500)
-        # Возврат курсора, если нужно проверить исчезновение (необязательно)
-        menu_page.move_mouse_away()
-        menu_page.page.wait_for_timeout(500)
-    else:
-        print("? Элемент 'Sub Sub Item 1' не видим после наведения на SUB SUB LIST")
+    menu3_count = menu_page.menu3_items.count()
+    assert menu3_count > 0, "Menu level 3 is empty"
 
-    # Клик по Sub Sub Item 2
-    sub_sub_item_2 = menu_page.find_items_by_text("Sub Sub Item 2").first
-    if sub_sub_item_2.is_visible():
-        sub_sub_item_2.click()
-        print(f"✓ Клик по элементу 3-го уровня 'Sub Sub Item 2' успешен")
-        # Пауза после клика
-        menu_page.page.wait_for_timeout(500)
-        # Возврат курсора, если нужно проверить исчезновение (необязательно)
-        menu_page.move_mouse_away()
-        menu_page.page.wait_for_timeout(500)
-    else:
-        print("? Элемент 'Sub Sub Item 2' не видим после наведения на SUB SUB LIST")
-
-    # Проверка стабильности страницы после взаимодействия
-    print("✓ Страница стабильна после взаимодействия")
-
-    # 9. Финальная проверка
-    total_found = len(found_items) + len(found_submenu) + len(found_sub_sub)
-    assert total_found > 0, "Должны быть найдены элементы меню"
-    print(f"🎉 ТЕСТ МЕНЮ ПРОЙДЕН УСПЕШНО!")
-    print(f" Найдено основных пунктов: {len(found_items)}")
-    print(f" Найдено подпунктов: {len(found_submenu)}")
-    print(f" Найдено под-подпунктов: {len(found_sub_sub)}")
-    print(f" Общее количество найденных элементов: {total_found}")
-    assert True, "Функциональность меню работает корректно"
+    for j in range(menu3_count):
+        locator3 = menu_page.menu3_items.nth(j)
+        expect(locator3).to_be_visible(timeout=2000)
