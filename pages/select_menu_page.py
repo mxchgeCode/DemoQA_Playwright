@@ -5,14 +5,8 @@ from locators.select_menu_locators import SelectMenuLocators
 class SelectMenuPage:
     def __init__(self, page: Page):
         self.page = page
-        # Основные элементы
         self.main_container = page.locator(SelectMenuLocators.MAIN_CONTAINER)
-
-        # У нас есть только 3 уникальных элемента
-        # 1. Simple Select (который называется "Select Value" и "Old Style Select")
         self.simple_select = page.locator(SelectMenuLocators.SELECT_VALUE)
-
-        # 2. React Select One
         self.select_one_container = page.locator(
             SelectMenuLocators.SELECT_ONE_CONTAINER
         )
@@ -22,7 +16,6 @@ class SelectMenuPage:
         self.select_one_input = page.locator(
             f"{SelectMenuLocators.SELECT_ONE_CONTAINER} input"
         )
-
         self.multiselect_control = (
             page.locator(SelectMenuLocators.MULTISELECT_CONTROL)
             .filter(has_text="Select...")
@@ -30,13 +23,18 @@ class SelectMenuPage:
         )
 
     def get_multiselect_control(self):
-        return self.page.locator(SelectMenuLocators.MULTISELECT_CONTROL_SELECTOR).nth(2)
+        # return (
+        #     self.page.locator(SelectMenuLocators.MULTISELECT_CONTROL)
+        #     .filter(has_text="Select...")
+        #     .first
+        # )
+        return self.page.locator(SelectMenuLocators.DROPDOWN_VALUE).nth(2)
 
     def multiselect_open(self):
         control = self.get_multiselect_control()
         control.wait_for(state="visible", timeout=5000)
         control.click()
-        self.page.locator(SelectMenuLocators.MENU).wait_for(
+        self.page.locator(SelectMenuLocators.DROPDOWN_MENU).wait_for(
             state="visible", timeout=5000
         )
 
@@ -46,10 +44,6 @@ class SelectMenuPage:
         input_field.fill(option_text)
         self.page.keyboard.press("Enter")
         self.page.wait_for_timeout(300)
-        self.page.mouse.click(0, 0)  # клик вне для закрытия
-        self.page.wait_for_timeout(300)
-
-    def close_dropdown_by_click_outside(self):
         self.page.mouse.click(0, 0)
         self.page.wait_for_timeout(300)
 
@@ -63,9 +57,8 @@ class SelectMenuPage:
 
     def multiselect_get_selected_options(self):
         tags = self.page.locator(SelectMenuLocators.SELECTED_TAG)
-        count = tags.count()
         selected = []
-        for i in range(count):
+        for i in range(tags.count()):
             text = (
                 tags.nth(i).locator(SelectMenuLocators.SELECTED_TAG_TEXT).text_content()
             )
@@ -75,8 +68,7 @@ class SelectMenuPage:
 
     def multiselect_remove_selected_option(self, option_text: str):
         tags = self.page.locator(SelectMenuLocators.SELECTED_TAG)
-        count = tags.count()
-        for i in range(count):
+        for i in range(tags.count()):
             text = (
                 tags.nth(i).locator(SelectMenuLocators.SELECTED_TAG_TEXT).text_content()
             )
@@ -84,25 +76,12 @@ class SelectMenuPage:
                 close_btn = tags.nth(i).locator(SelectMenuLocators.CLOSEBUTTON)
                 close_btn.click()
                 self.page.wait_for_timeout(300)
-                # Клик вне для закрытия меню, если нужно
                 self.page.mouse.click(0, 0)
                 self.page.wait_for_timeout(300)
                 return
         raise Exception(f"Опция '{option_text}' для удаления не найдена")
 
-    def is_page_loaded(self) -> bool:
-        try:
-            return self.main_container.is_visible()
-        except:
-            return False
-
-    def is_page_loaded(self) -> bool:
-        try:
-            return self.main_container.is_visible()
-        except:
-            return False
-
-    # --- Simple Select Menu (Select Value / Old Style Select) ---
+    # --- Simple Select ---
     def select_simple_option_by_value(self, value: str):
         self.simple_select.select_option(value)
         self.page.wait_for_timeout(500)
@@ -121,54 +100,46 @@ class SelectMenuPage:
     def get_simple_select_options_count(self) -> int:
         return self.simple_select.locator("option").count()
 
-    def get_simple_select_options_text(self) -> list:
-        options = []
-        count = self.get_simple_select_options_count()
-        for i in range(count):
-            option_text = (
-                self.simple_select.locator("option").nth(i).text_content().strip()
-            )
-            if option_text:
-                options.append(option_text)
-        return options
+    # def get_simple_select_options_text(self) -> list[str]:
+    #     options = []
+    #     count = self.get_simple_select_options_count()
+    #     for i in range(count):
+    #         text = self.simple_select.locator("option").nth(i).text_content()
+    #         if text:
+    #             options.append(text.strip())
+    #     return options
 
+    # --- Select One ---
     def select_option_in_dropdown(self, option_text: str):
         dropdown_menu = self.page.locator(SelectMenuLocators.DROPDOWN_MENU)
         dropdown_menu.wait_for(state="visible", timeout=5000)
-
         options = dropdown_menu.locator(SelectMenuLocators.DROPDOWN_OPTIONS)
-        option_count = options.count()
-        target_index = None
-        for i in range(option_count):
+        for i in range(options.count()):
             text = options.nth(i).text_content()
             if text and option_text in text:
-                target_index = i
-                break
-
-        if target_index is None:
-            raise Exception(f"Опция '{option_text}' не найдена в dropdown")
-
-        options.nth(target_index).click()
+                options.nth(i).click()
+                return
+        raise Exception(f"Опция '{option_text}' не найдена в dropdown")
 
     def get_select_one_display_text(self) -> str:
         locator = self.select_one_container.locator(
             SelectMenuLocators.SELECT_ONE_DISPLAY_TEXT
         )
-        locator.wait_for(state="visible", timeout=10000)
+        locator.wait_for(state="visible", timeout=5000)
         text = locator.text_content()
         return text.strip() if text else ""
 
+    # --- Standard Multi Select ---
     def select_standard_multiselect_options(self, options: list[str]):
-        multi_select = self.page.locator(SelectMenuLocators.STANDARD_MULTISELECT)
+        multi_select = self.page.locator(SelectMenuLocators.MULTISELECT)
         multi_select.select_option(options)
 
     def get_selected_standard_multiselect_options(self) -> list[str]:
-        multi_select = self.page.locator(SelectMenuLocators.STANDARD_MULTISELECT)
-        selected = multi_select.evaluate(
+        multi_select = self.page.locator(SelectMenuLocators.MULTISELECT)
+        return multi_select.evaluate(
             "el => Array.from(el.selectedOptions).map(opt => opt.value)"
         )
-        return selected
 
     def clear_standard_multiselect_selection(self):
-        multi_select = self.page.locator(SelectMenuLocators.STANDARD_MULTISELECT)
+        multi_select = self.page.locator(SelectMenuLocators.MULTISELECT)
         multi_select.select_option([])
