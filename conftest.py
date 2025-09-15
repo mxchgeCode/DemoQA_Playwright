@@ -1,18 +1,18 @@
 # conftest.py
 import pytest
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, Browser, BrowserContext
 from datetime import datetime
 
-# --- Блокировка ресурсов ---
+# --- Список доменов для блокировки внешних и рекламных запросов ---
 blocked_domains = [
     "doubleclick.net",
     "googlesyndication.com",
-    "pagead2.googlesyndication.com",  # Добавлено из HAR
+    "pagead2.googlesyndication.com",
     "adservice.google.com",
     "google-analytics.com",
     "analytics.google.com",
     "googletagmanager.com",
-    "www.googletagmanager.com",  # Добавлено из HAR
+    "www.googletagmanager.com",
     "connect.facebook.net",
     "facebook.com",
     "twitter.com",
@@ -28,573 +28,323 @@ blocked_domains = [
     "cdn.jsdelivr.net",
     "cdnjs.cloudflare.com",
     "unpkg.com",
-    "serving.stat-rock.com",  # Добавлено из HAR
-    "stat-rock.com",  # Добавлено из HAR
-    "ad.plus",  # Добавлено из HAR
-    "g.doubleclick.net",  # Добавлено из HAR
-    "googletagservices.com",  # Добавлено из HAR
+    "serving.stat-rock.com",
+    "stat-rock.com",
+    "ad.plus",
+    "g.doubleclick.net",
+    "googletagservices.com",
 ]
 
 
 def block_external(route):
-    """Блокирует внешние и ненужные ресурсы."""
-    url = route.request.url.lower()  # Приводим к нижнему регистру для сравнения
+    """Блокирует загрузку внешних и ненужных ресурсов."""
+    url = route.request.url.lower()
     resource_type = route.request.resource_type
-    # Блокируем шрифты и изображения для ускорения
-    if resource_type in ["font", "image"]:
+    # Блокируем шрифты и изображения
+    if resource_type in {"font", "image"}:
         route.abort()
         return
-    # Блокируем запросы к известным рекламным/аналитическим доменам
+    # Блокируем известные рекламные/аналитические домены
     if any(domain in url for domain in blocked_domains):
         route.abort()
         return
-    # Разрешаем всё остальное
     route.continue_()
 
 
-# --- Фикстуры Playwright ---
-@pytest.fixture(scope="session")  # Браузер на всю сессию
-def browser():
-    """Запускает браузер на всю сессию тестов."""
-    pw = None
-    browser = None
-    try:
-        pw = sync_playwright().start()
-        # Запуск браузера с игнорированием HTTPS ошибок для тестовой среды
-        browser = pw.chromium.launch(
-            headless=False,  # Установи True для CI/headless режима
-            ignore_default_args=["--disable-extensions"],  # Иногда помогает с CSP
-        )
-        yield browser
-    finally:
-        if browser and browser.is_connected():
-            browser.close()
-        if pw:
-            try:
-                pw.stop()
-            except:
-                pass
+@pytest.fixture(scope="session")
+def browser() -> Browser:
+    """Запускает браузер Chromium на всю сессию тестов."""
+    pw = sync_playwright().start()
+    browser = pw.chromium.launch(
+        headless=False,  # Установите True для CI
+        ignore_default_args=["--disable-extensions"],  # Помогает с CSP
+    )
+    yield browser
+    browser.close()
+    pw.stop()
 
 
-@pytest.fixture(scope="function")  # Новый контекст для каждой функции/теста
-def context(browser):
-    """Создает новый контекст браузера для каждого теста."""
-    # Создаем контекст с полезными настройками
+@pytest.fixture(scope="function")
+def context(browser: Browser) -> BrowserContext:
+    """Создаёт новый контекст браузера для каждого теста с отключёнными внешними ресурсами."""
     context = browser.new_context(
-        ignore_https_errors=True,  # Игнорировать ошибки SSL/HTTPS
-        bypass_csp=True,  # Обход CSP (Content Security Policy)
+        ignore_https_errors=True,  # Игнорировать ошибки сертификатов
+        bypass_csp=True,  # Обход политики безопасности контента
         viewport={"width": 1920, "height": 1080},  # Фиксированное разрешение
     )
-    # Применяем блокировку ко всем запросам в этом контексте
     context.route("**/*", block_external)
     yield context
-    # Закрываем контекст после теста
     context.close()
 
 
-# @pytest.fixture(scope="function")  # Новая страница для каждого теста
-# def page(context):
-#     """Создает новую страницу в контексте для каждого теста."""
-#     page = context.new_page()
-#     yield page
-#     # Страница автоматически закрывается при закрытии контекста
-
-
-# --- Вспомогательная функция для создания страниц с ожиданиями ---
-def create_page_with_wait(page, url, wait_selectors, stabilize_timeout=1000):
-    """Переходит на URL и ждет указанные селекторы.
-    Args:
-        page: Экземпляр страницы Playwright.
-        url: URL для перехода.
-        wait_selectors: Список кортежей (селектор, состояние, таймаут в мс).
-        stabilize_timeout: Дополнительная пауза для стабилизации в мс.
+def create_page_with_wait(
+    page, url: str, wait_selectors: list, stabilize_timeout: int = 1000
+):
     """
-    # Переход с повторными попытками
+    Переходит по url с ожиданием появления указанных селекторов.
+    Повторяет попытку до 3 раз при неудаче.
+    Args:
+        page: экземпляр Playwright page
+        url: URL для перехода
+        wait_selectors: список кортежей (селектор, состояние, таймаут в мс)
+        stabilize_timeout: дополнительная задержка после загрузки
+    """
     for attempt in range(3):
         try:
             print(f"Попытка {attempt + 1} перехода на {url}")
-            # Используем domcontentloaded для скорости, networkidle может ждать заблокированные ресурсы
             page.goto(url, wait_until="domcontentloaded", timeout=30000)
             break
         except Exception as e:
-            print(f"Попытка {attempt + 1} перехода не удалась: {e}")
-            if attempt == 2:  # Последняя попытка
-                raise e
-            page.wait_for_timeout(2000)  # Пауза перед повторной попыткой
+            print(f"Попытка {attempt + 1} не удалась: {e}")
+            if attempt == 2:
+                raise
+            page.wait_for_timeout(2000)
 
-    # Ожидание ключевых селекторов
     for selector, state, timeout in wait_selectors:
         try:
             print(
-                f"Ожидание селектора '{selector}' со статусом '{state}' (таймаут {timeout}мс)"
+                f"Ожидание селектора '{selector}' в состоянии '{state}', таймаут {timeout}мс"
             )
             page.wait_for_selector(selector, state=state, timeout=timeout)
         except Exception as e:
-            print(f"Не удалось дождаться селектора '{selector}': {e}")
-            # Не прерываем выполнение, если селектор не критичен
-
-    # Дополнительная стабилизация
+            print(f"Не дождался селектора '{selector}': {e}")
     if stabilize_timeout > 0:
-        print(f"Стабилизация: ожидание {stabilize_timeout}мс")
+        print(f"Стабилизация: пауза {stabilize_timeout} мс")
         page.wait_for_timeout(stabilize_timeout)
 
 
-# --- Фикстуры для конкретных страниц с измененным scope ---
-# Изменяем scope на "module" для страниц, где элементы не влияют друг на друга
-
-
+# --- Фикстуры для страниц с более длительным scope, для повторного использования контекстов ---
 @pytest.fixture(scope="module")
 def progress_page(browser):
-    context = None
-    page = None
-    try:
-        context = browser.new_context(
-            ignore_https_errors=True,
-            bypass_csp=True,
-            viewport={"width": 1920, "height": 1080},
-        )
-        context.route("**/*", block_external)
-        page = context.new_page()
+    context = browser.new_context(
+        ignore_https_errors=True,
+        bypass_csp=True,
+        viewport={"width": 1920, "height": 1080},
+    )
+    context.route("**/*", block_external)
+    page = context.new_page()
 
-        from pages.progress_bar_page import ProgressBarPage
-        from data import URLs
-        from locators.progress_bar_locators import ProgressBarLocators
+    from pages.progress_bar_page import ProgressBarPage
+    from data import URLs
+    from locators.progress_bar_locators import ProgressBarLocators
 
-        wait_selectors = [
-            ("#app", "visible", 10000),
-            (ProgressBarLocators.START_STOP_BUTTON, "visible", 10000),
-            (ProgressBarLocators.PROGRESS_BAR, "visible", 10000),
-        ]
-        create_page_with_wait(
-            page, URLs.PROGRESS_BAR, wait_selectors, stabilize_timeout=2000
-        )
-        progress_page = ProgressBarPage(page)
-        yield progress_page
-    except Exception as e:
-        print(f"[ProgressPage Fixture] Ошибка инициализации: {e}")
-        if page:
-            page.close()
-        if context:
-            context.close()
-        raise
-    finally:
-        print("[ProgressPage Fixture] Закрытие ресурсов Progress Bar...")
-        if page:
-            try:
-                page.close()
-            except:
-                pass
-        if context:
-            try:
-                context.close()
-            except:
-                pass
-        print("[ProgressPage Fixture] Ресурсы Progress Bar закрыты.")
+    wait_selectors = [
+        ("#app", "visible", 10000),
+        (ProgressBarLocators.START_STOP_BUTTON, "visible", 10000),
+        (ProgressBarLocators.PROGRESS_BAR, "visible", 10000),
+    ]
+    create_page_with_wait(
+        page, URLs.PROGRESS_BAR, wait_selectors, stabilize_timeout=2000
+    )
+    progress_page = ProgressBarPage(page)
+
+    yield progress_page
+
+    page.close()
+    context.close()
 
 
 @pytest.fixture(scope="module")
 def slider_page(browser):
-    context = None
-    page = None
-    try:
-        context = browser.new_context(
-            ignore_https_errors=True,
-            bypass_csp=True,
-            viewport={"width": 1920, "height": 1080},
-        )
-        context.route("**/*", block_external)
-        page = context.new_page()
-        from pages.slider_page import SliderPage
-        from data import URLs
+    context = browser.new_context(
+        ignore_https_errors=True,
+        bypass_csp=True,
+        viewport={"width": 1920, "height": 1080},
+    )
+    context.route("**/*", block_external)
+    page = context.new_page()
 
-        wait_selectors = [
-            (".range-slider", "visible", 10000),
-            ("#sliderValue", "visible", 10000),
-        ]
-        create_page_with_wait(
-            page, URLs.SLIDER_URL, wait_selectors, stabilize_timeout=2000
-        )
-        slider_page = SliderPage(page)
-        yield slider_page
-    except Exception as e:
-        print(f"[SliderPage Fixture] Ошибка инициализации: {e}")
-        if page:
-            page.close()
-        if context:
-            context.close()
-        raise
-    finally:
-        print("[SliderPage Fixture] Закрытие ресурсов...")
-        if page:
-            try:
-                page.close()
-            except:
-                pass
-        if context:
-            try:
-                context.close()
-            except:
-                pass
-        print("[SliderPage Fixture] Ресурсы закрыты.")
+    from pages.slider_page import SliderPage
+    from data import URLs
+
+    wait_selectors = [
+        (".range-slider", "visible", 10000),
+        ("#sliderValue", "visible", 10000),
+    ]
+    create_page_with_wait(page, URLs.SLIDER_URL, wait_selectors, stabilize_timeout=2000)
+    slider_page = SliderPage(page)
+
+    yield slider_page
+
+    page.close()
+    context.close()
 
 
 @pytest.fixture(scope="module")
 def accordion_page(browser):
-    context = None
-    page = None
-    try:
-        context = browser.new_context(
-            ignore_https_errors=True,
-            bypass_csp=True,
-            viewport={"width": 1920, "height": 1080},
-        )
-        context.route("**/*", block_external)
-        page = context.new_page()
-        from pages.accordion_page import AccordionPage
-        from data import URLs
+    context = browser.new_context(
+        ignore_https_errors=True,
+        bypass_csp=True,
+        viewport={"width": 1920, "height": 1080},
+    )
+    context.route("**/*", block_external)
+    page = context.new_page()
 
-        wait_selectors = [("div.accordion", "visible", 10000)]
-        create_page_with_wait(
-            page, URLs.ACCORDION_URL, wait_selectors, stabilize_timeout=1000
-        )
-        accordion_page = AccordionPage(page)
-        yield accordion_page
-    except Exception as e:
-        print(f"[AccordionPage Fixture] Ошибка инициализации: {e}")
-        if page:
-            page.close()
-        if context:
-            context.close()
-        raise
-    finally:
-        print("[AccordionPage Fixture] Закрытие ресурсов...")
-        if page:
-            try:
-                page.close()
-            except:
-                pass
-        if context:
-            try:
-                context.close()
-            except:
-                pass
-        print("[AccordionPage Fixture] Ресурсы закрыты.")
+    from pages.accordion_page import AccordionPage
+    from data import URLs
+
+    wait_selectors = [("div.accordion", "visible", 10000)]
+    create_page_with_wait(
+        page, URLs.ACCORDION_URL, wait_selectors, stabilize_timeout=1000
+    )
+    accordion_page = AccordionPage(page)
+
+    yield accordion_page
+
+    page.close()
+    context.close()
 
 
 @pytest.fixture(scope="module")
 def autocomplete_page(browser):
-    context = None
-    page = None
-    try:
-        context = browser.new_context(
-            ignore_https_errors=True,
-            bypass_csp=True,
-            viewport={"width": 1920, "height": 1080},
-        )
-        context.route("**/*", block_external)
-        page = context.new_page()
-        from pages.auto_complete_page import AutoCompletePage
-        from data import URLs
-        from locators.auto_complete_locators import AutoCompleteLocators
+    context = browser.new_context(
+        ignore_https_errors=True,
+        bypass_csp=True,
+        viewport={"width": 1920, "height": 1080},
+    )
+    context.route("**/*", block_external)
+    page = context.new_page()
 
-        wait_selectors = [(AutoCompleteLocators.SINGLE_COLOR_INPUT, "visible", 10000)]
-        create_page_with_wait(
-            page, URLs.AUTO_COMPLETE_URL, wait_selectors, stabilize_timeout=1000
-        )
-        autocomplete_page = AutoCompletePage(page)
-        yield autocomplete_page
-    except Exception as e:
-        print(f"[AutoCompletePage Fixture] Ошибка инициализации: {e}")
-        if page:
-            page.close()
-        if context:
-            context.close()
-        raise
-    finally:
-        print("[AutoCompletePage Fixture] Закрытие ресурсов...")
-        if page:
-            try:
-                page.close()
-            except:
-                pass
-        if context:
-            try:
-                context.close()
-            except:
-                pass
-        print("[AutoCompletePage Fixture] Ресурсы закрыты.")
+    from pages.auto_complete_page import AutoCompletePage
+    from data import URLs
+    from locators.auto_complete_locators import AutoCompleteLocators
+
+    wait_selectors = [(AutoCompleteLocators.SINGLE_COLOR_INPUT, "visible", 10000)]
+    create_page_with_wait(
+        page, URLs.AUTO_COMPLETE_URL, wait_selectors, stabilize_timeout=1000
+    )
+    autocomplete_page = AutoCompletePage(page)
+
+    yield autocomplete_page
+
+    page.close()
+    context.close()
 
 
 @pytest.fixture(scope="module")
 def datepicker_page(browser):
-    context = None
-    page = None
-    try:
-        context = browser.new_context(
-            ignore_https_errors=True,
-            bypass_csp=True,
-            viewport={"width": 1920, "height": 1080},
-        )
-        context.route("**/*", block_external)
-        page = context.new_page()
-        from pages.date_picker_page import DatePickerPage
-        from data import URLs
-        from locators.date_picker_locators import DatePickerLocators
+    context = browser.new_context(
+        ignore_https_errors=True,
+        bypass_csp=True,
+        viewport={"width": 1920, "height": 1080},
+    )
+    context.route("**/*", block_external)
+    page = context.new_page()
 
-        wait_selectors = [(DatePickerLocators.DATE_INPUT, "visible", 10000)]
-        create_page_with_wait(
-            page, URLs.DATE_PICKER_URL, wait_selectors, stabilize_timeout=2000
-        )
-        datepicker_page = DatePickerPage(page)
-        yield datepicker_page
-    except Exception as e:
-        print(f"[DatePickerPage Fixture] Ошибка инициализации: {e}")
-        if page:
-            page.close()
-        if context:
-            context.close()
-        raise
-    finally:
-        print("[DatePickerPage Fixture] Закрытие ресурсов...")
-        if page:
-            try:
-                page.close()
-            except:
-                pass
-        if context:
-            try:
-                context.close()
-            except:
-                pass
-        print("[DatePickerPage Fixture] Ресурсы закрыты.")
+    from pages.date_picker_page import DatePickerPage
+    from data import URLs
+    from locators.date_picker_locators import DatePickerLocators
+
+    wait_selectors = [(DatePickerLocators.DATE_INPUT, "visible", 10000)]
+    create_page_with_wait(
+        page, URLs.DATE_PICKER_URL, wait_selectors, stabilize_timeout=2000
+    )
+    datepicker_page = DatePickerPage(page)
+
+    yield datepicker_page
+
+    page.close()
+    context.close()
 
 
 @pytest.fixture(scope="module")
 def tabs_page(browser):
-    context = None
-    page = None
-    try:
-        context = browser.new_context(
-            ignore_https_errors=True,
-            bypass_csp=True,
-            viewport={"width": 1920, "height": 1080},
-        )
-        context.route("**/*", block_external)
-        page = context.new_page()
-        from pages.tabs_page import TabsPage
-        from data import URLs
-        from locators.tabs_locators import TabsLocators
+    context = browser.new_context(
+        ignore_https_errors=True,
+        bypass_csp=True,
+        viewport={"width": 1920, "height": 1080},
+    )
+    context.route("**/*", block_external)
+    page = context.new_page()
 
-        wait_selectors = [(TabsLocators.TAB_WHAT, "visible", 10000)]
-        create_page_with_wait(
-            page, URLs.TABS_URL, wait_selectors, stabilize_timeout=2000
-        )
-        tabs_page = TabsPage(page)
-        yield tabs_page
-    except Exception as e:
-        print(f"[TabsPage Fixture] Ошибка инициализации: {e}")
-        if page:
-            page.close()
-        if context:
-            context.close()
-        raise
-    finally:
-        print("[TabsPage Fixture] Закрытие ресурсов...")
-        if page:
-            try:
-                page.close()
-            except:
-                pass
-        if context:
-            try:
-                context.close()
-            except:
-                pass
-        print("[TabsPage Fixture] Ресурсы закрыты.")
+    from pages.tabs_page import TabsPage
+    from data import URLs
+    from locators.tabs_locators import TabsLocators
+
+    wait_selectors = [(TabsLocators.TAB_WHAT, "visible", 10000)]
+    create_page_with_wait(page, URLs.TABS_URL, wait_selectors, stabilize_timeout=2000)
+    tabs_page = TabsPage(page)
+
+    yield tabs_page
+
+    page.close()
+    context.close()
 
 
 @pytest.fixture(scope="module")
 def tooltips_page(browser):
-    context = None
-    page = None
-    try:
-        context = browser.new_context(
-            ignore_https_errors=True,
-            bypass_csp=True,
-            viewport={"width": 1920, "height": 1080},
-        )
-        context.route("**/*", block_external)
-        page = context.new_page()
-        from pages.tool_tips_page import ToolTipsPage
-        from data import URLs
-        from locators.tool_tips_locators import ToolTipsLocators
+    context = browser.new_context(
+        ignore_https_errors=True,
+        bypass_csp=True,
+        viewport={"width": 1920, "height": 1080},
+    )
+    context.route("**/*", block_external)
+    page = context.new_page()
 
-        wait_selectors = [(ToolTipsLocators.HOVER_BUTTON, "visible", 10000)]
-        create_page_with_wait(
-            page, URLs.TOOL_TIPS_URL, wait_selectors, stabilize_timeout=3000
-        )
-        tooltips_page = ToolTipsPage(page)
-        yield tooltips_page
-    except Exception as e:
-        print(f"[ToolTipsPage Fixture] Ошибка инициализации: {e}")
-        if page:
-            page.close()
-        if context:
-            context.close()
-        raise
-    finally:
-        print("[ToolTipsPage Fixture] Закрытие ресурсов...")
-        if page:
-            try:
-                page.close()
-            except:
-                pass
-        if context:
-            try:
-                context.close()
-            except:
-                pass
-        print("[ToolTipsPage Fixture] Ресурсы закрыты.")
+    from pages.tool_tips_page import ToolTipsPage
+    from data import URLs
+    from locators.tool_tips_locators import ToolTipsLocators
+
+    wait_selectors = [(ToolTipsLocators.HOVER_BUTTON, "visible", 10000)]
+    create_page_with_wait(
+        page, URLs.TOOL_TIPS_URL, wait_selectors, stabilize_timeout=3000
+    )
+    tooltips_page = ToolTipsPage(page)
+
+    yield tooltips_page
+
+    page.close()
+    context.close()
 
 
-# --- Изменено: scope="module" для Menu ---
 @pytest.fixture(scope="module")
 def menu_page(browser):
-    context = None
-    page = None
-    try:
-        context = browser.new_context(
-            ignore_https_errors=True,
-            bypass_csp=True,
-            viewport={"width": 1920, "height": 1080},
-        )
-        context.route("**/*", block_external)
-        page = context.new_page()
-        from pages.menu_page import MenuPage
-        from data import URLs
+    context = browser.new_context(
+        ignore_https_errors=True,
+        bypass_csp=True,
+        viewport={"width": 1920, "height": 1080},
+    )
+    context.route("**/*", block_external)
+    page = context.new_page()
 
-        wait_selectors = [("#app", "visible", 1000)]  # Увеличенный таймаут
+    from pages.menu_page import MenuPage
+    from data import URLs
 
-        # Используем 'load' вместо 'domcontentloaded' для Menu, если это помогает
-        for attempt in range(3):
-            try:
-                print()
-                now = datetime.now()
-                current_time_str = now.strftime("%H:%M:%S")
-                print(
-                    f"[MenuPage Fixture] Попытка {attempt + 1} перехода на {URLs.MENU_URL}",
-                    {current_time_str},
-                )
-                page.goto(
-                    URLs.MENU_URL, wait_until="load", timeout=3000
-                )  # Увеличен таймаут
-                break
-            except Exception as e:
-                print(
-                    f"[MenuPage Fixture] Попытка {attempt + 1} перехода не удалась: {e}"
-                )
-                if attempt == 2:
-                    raise e
-                page.wait_for_timeout(1000)
+    wait_selectors = [("#app", "visible", 3000)]
 
-        # Ожидание ключевых селекторов
-        for selector, state, timeout in wait_selectors:
-            try:
-                now = datetime.now()
-                current_time_str = now.strftime("%H:%M:%S")
-                print(
-                    f"[MenuPage Fixture] Ожидание селектора '{selector}'",
-                    {current_time_str},
-                )
-                page.wait_for_selector(
-                    selector, state=state, timeout=3000
-                )  # Увеличен таймаут
-            except Exception as e:
-                print(
-                    f"[MenuPage Fixture] Не удалось дождаться селектора '{selector}': {e}"
-                )
-                raise e
+    for attempt in range(3):
+        try:
+            now = datetime.now().strftime("%H:%M:%S")
+            print(
+                f"[MenuPage Fixture] Попытка {attempt + 1} перехода на {URLs.MENU_URL} в {now}"
+            )
+            page.goto(URLs.MENU_URL, wait_until="load", timeout=5000)
+            break
+        except Exception as e:
+            print(f"[MenuPage Fixture] Попытка {attempt + 1} не удалась: {e}")
+            if attempt == 2:
+                raise
+            page.wait_for_timeout(1000)
 
-        now = datetime.now()
-        current_time_str = now.strftime("%H:%M:%S")
-        print("[MenuPage Fixture] Стабилизация Menu: ожидание 3000мс", current_time_str)
-        page.wait_for_timeout(3000)
-        menu_page = MenuPage(page)
-        yield menu_page
-    except Exception as e:
-        print(f"[MenuPage Fixture] Ошибка инициализации: {e}")
-        if page:
-            page.close()
-        if context:
-            context.close()
-        raise
-    finally:
-        print("[MenuPage Fixture] Закрытие ресурсов Menu...")
-        if page:
-            try:
-                page.close()
-            except:
-                pass
-        if context:
-            try:
-                context.close()
-            except:
-                pass
-        print("[MenuPage Fixture] Ресурсы Menu закрыты.")
+    for selector, state, timeout in wait_selectors:
+        try:
+            now = datetime.now().strftime("%H:%M:%S")
+            print(f"[MenuPage Fixture] Ожидание селектора '{selector}' в {now}")
+            page.wait_for_selector(selector, state=state, timeout=timeout)
+        except Exception as e:
+            print(f"[MenuPage Fixture] Не дождался селектора '{selector}': {e}")
+            raise
+
+    page.wait_for_timeout(3000)
+    menu_page = MenuPage(page)
+
+    yield menu_page
+
+    page.close()
+    context.close()
 
 
-@pytest.fixture(scope="module")  # Изменено с "function"
-def select_menu_page(browser):  # Зависимость от browser
-    """Фикстура для страницы Select Menu."""
-    context = None
-    page = None
-    try:
-        context = browser.new_context(
-            ignore_https_errors=True,
-            bypass_csp=True,
-            viewport={"width": 1920, "height": 1080},
-        )
-        context.route("**/*", block_external)
-        page = context.new_page()
-        from pages.select_menu_page import SelectMenuPage
-        from data import URLs
-
-        wait_selectors = [
-            ("#app", "visible", 1000),
-            (
-                "select, .css-yk16ysz-control",
-                "visible",
-                1000,
-            ),  # Ждем любые select элементы
-        ]
-        create_page_with_wait(
-            page, URLs.SELECT_MENU_URL, wait_selectors, stabilize_timeout=2000
-        )
-        select_menu_page = SelectMenuPage(page)
-        yield select_menu_page
-    except Exception as e:
-        print(f"[SelectMenuPage Fixture] Ошибка инициализации: {e}")
-        if page:
-            page.close()
-        if context:
-            context.close()
-        raise
-    finally:
-        print("[SelectMenuPage Fixture] Закрытие ресурсов...")
-        if page:
-            try:
-                page.close()
-            except:
-                pass
-        if context:
-            try:
-                context.close()
-            except:
-                pass
-        print("[SelectMenuPage Fixture] Ресурсы закрыты.")
-
-
-# --- Настройка профилей ---
+# --- Настройка профилей тестов ---
 def pytest_addoption(parser):
     parser.addoption(
         "--profile",

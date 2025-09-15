@@ -6,19 +6,20 @@ class SliderPage:
     def __init__(self, page: Page):
         self.page = page
         self.slider_handle = page.locator(SLIDER_HANDLE)
-        self.page.wait_for_timeout(1000)  # Даем странице загрузиться
+        self.page.wait_for_timeout(1000)
 
     def get_current_value(self) -> str:
-        """Возвращает значение из input.value — это источник истины"""
         value = self.page.evaluate(
             """
-            const input = document.querySelector('.range-slider');
-            if (input && input.value !== null && input.value !== undefined) {
-                input.value;
-            } else {
-                "0";
+            () => {
+                const input = document.querySelector('.range-slider');
+                if (input && input.value !== null && input.value !== undefined) {
+                    return input.value;
+                } else {
+                    return "0";
+                }
             }
-        """
+            """
         )
         return str(value).strip() if value is not None else "0"
 
@@ -39,17 +40,15 @@ class SliderPage:
                 input.dispatchEvent(new Event('mouseup', {{ bubbles: true }}));
                 input.dispatchEvent(new Event('blur', {{ bubbles: true }}));
             }}
-        """
+            """
         )
-
-        # Ждём, пока input.value действительно установится — это наша цель
         self.page.wait_for_function(
             f"""
             () => {{
                 const input = document.querySelector('{SLIDER_HANDLE}');
                 return input && input.value === '{target_value}';
             }}
-        """,
+            """,
             timeout=5000,
         )
 

@@ -1,4 +1,3 @@
-# locators/accordion_locators.py
 class AccordionLocators:
     # Основные элементы аккордеона
     ACCORDION_CONTAINER = "div.accordion"

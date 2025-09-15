@@ -1,4 +1,3 @@
-# locators/auto_complete_locators.py
 class AutoCompleteLocators:
     # Основной контейнер
     MAIN_CONTAINER = "#app"

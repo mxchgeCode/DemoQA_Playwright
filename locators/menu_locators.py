@@ -1,4 +1,3 @@
-# locators/menu_locators.py
 class MenuLocators:
     # Основной контейнер
     MAIN_CONTAINER = "#app"

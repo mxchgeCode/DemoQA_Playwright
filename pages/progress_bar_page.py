@@ -4,15 +4,13 @@ from locators.progress_bar_locators import ProgressBarLocators
 
 
 class ProgressBarPage(BasePage):
-
     def _wait_for_enabled(self, locator, timeout=5000):
-        """Ждёт, пока элемент станет enabled"""
         start_time = time.time()
         while True:
             if locator.is_enabled():
                 return
             if time.time() - start_time > timeout / 1000:
-                raise TimeoutError(f"Элемент не стал enabled за {timeout} мс")
+                raise TimeoutError(f"Element did not become enabled in {timeout} ms")
             self.page.wait_for_timeout(100)
 
     def start_progress(self, retries=3):
@@ -25,9 +23,7 @@ class ProgressBarPage(BasePage):
                 return
             except Exception as e:
                 if attempt == retries - 1:
-                    raise Exception(
-                        f"Не удалось нажать Start после {retries} попыток"
-                    ) from e
+                    raise Exception(f"Failed to start after {retries} attempts") from e
                 self.page.wait_for_timeout(1000)
 
     def stop_progress(self, retries=3):
@@ -40,9 +36,7 @@ class ProgressBarPage(BasePage):
                 return
             except Exception as e:
                 if attempt == retries - 1:
-                    raise Exception(
-                        f"Не удалось нажать Stop после {retries} попыток"
-                    ) from e
+                    raise Exception(f"Failed to stop after {retries} attempts") from e
                 self.page.wait_for_timeout(1000)
 
     def reset_progress(self, retries=3):
@@ -55,9 +49,7 @@ class ProgressBarPage(BasePage):
                 return
             except Exception as e:
                 if attempt == retries - 1:
-                    raise Exception(
-                        f"Не удалось нажать Reset после {retries} попыток"
-                    ) from e
+                    raise Exception(f"Failed to reset after {retries} attempts") from e
                 self.page.wait_for_timeout(1000)
 
     def get_progress_value(self) -> str:

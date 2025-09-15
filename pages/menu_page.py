@@ -22,28 +22,27 @@ class MenuPage:
         locator = self.menu2_items.nth(index)
         if locator.count() == 0:
             return False
-        expect(locator).to_be_visible(timeout=2000)
+        expect(locator).to_be_visible(timeout=500)
         return True
 
     def is_menu3_visible(self, index: int):
         locator = self.menu3_items.nth(index)
         if locator.count() == 0:
             return False
-        expect(locator).to_be_visible(timeout=2000)
+        expect(locator).to_be_visible(timeout=500)
         return True
 
     def hover_menu1(self, index: int):
         self.menu1_items.nth(index).hover()
-        time.sleep(2)
+        time.sleep(2)  # пауза для стабильности
 
     def hover_menu2(self, index: int):
         self.menu2_items.nth(index).hover()
         time.sleep(2)
 
     def hover_sub_sub_list(self):
-        # Находим пункт второго уровня с текстом "SUB SUB LIST »"
         sub_sub_list_item = self.page.locator(
             "ul#nav > li:nth-child(2) ul > li", has_text="SUB SUB LIST »"
         )
         sub_sub_list_item.hover()
-        time.sleep(2)  # пауза для визуального контроля
+        time.sleep(2)
