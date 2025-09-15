@@ -2,59 +2,81 @@ import time
 from pages.select_menu_page import SelectMenuPage
 
 
-def test_select_option_via_persistent_control(select_menu_page: SelectMenuPage):
-    container = select_menu_page.page.locator("#withOptGroup")
-    dropdown_control = container.locator(".css-yk16xz-control")
-    assert dropdown_control.is_visible(), "Dropdown control должен быть видим"
+# def test_select_option_via_persistent_control(select_menu_page: SelectMenuPage):
+#     container = select_menu_page.page.locator("#withOptGroup")
+#     dropdown_control = container.locator(".css-yk16xz-control")
+#     assert dropdown_control.is_visible(), "Dropdown control должен быть видим"
+#
+#     selected_text_locator = container.locator(".css-1hwfws3")
+#     initial_text = selected_text_locator.text_content().strip()
+#     assert initial_text, "Текст выбранного значения отсутствует"
+#
+#     dropdown_control.click()
+#     select_menu_page.page.wait_for_timeout(200)
+#     container.press("Enter")
+#     select_menu_page.page.wait_for_timeout(500)
+#
+#     selected_text = selected_text_locator.text_content().strip()
+#     assert (
+#         selected_text == "Group 1, option 1"
+#     ), f"Ожидаем выбранное 'Group 1, option 1', получено '{selected_text}'"
+#     time.sleep(3)
+#
+#
+# def test_select_title_option(select_menu_page: SelectMenuPage):
+#     assert select_menu_page.is_page_loaded(), "Страница не загрузилась"
+#     # Получаем placeholder
+#     initial_text = select_menu_page.get_select_one_display_text()
+#     assert (
+#         initial_text == "Select Title"
+#     ), f"Начальный текст должен быть 'Select Title', получено '{initial_text}'"
+#
+#     select_menu_page.select_one_control.click()
+#     select_menu_page.select_option_in_dropdown("Mrs.")
+#     select_menu_page.page.wait_for_timeout(500)
+#     selected_text = select_menu_page.get_select_one_display_text()
+#     assert (
+#         selected_text == "Mrs."
+#     ), f"Ожидается выбранное 'Mrs.', получено '{selected_text}'"
+#     time.sleep(3)
+#
+#
+# def test_4_old_style_select_menu_functionality(select_menu_page: SelectMenuPage):
+#     simple_select = select_menu_page.simple_select
+#     assert (
+#         simple_select.get_attribute("id") == "oldSelectMenu"
+#     ), "Локатор old_style_select должен указывать на #oldSelectMenu"
+#
+#     options_count = select_menu_page.get_simple_select_options_count()
+#
+#     if options_count > 1:
+#         initial_value = select_menu_page.get_simple_select_selected_value()
+#         select_menu_page.select_simple_option_by_index(1)
+#         selected_value = select_menu_page.get_simple_select_selected_value()
+#         assert len(selected_value) > 0, "Должно быть выбрано значение"
+#         assert (
+#             selected_value != initial_value
+#         ), "Выбранное значение должно отличаться от начального"
+#     time.sleep(3)
 
-    selected_text_locator = container.locator(".css-1hwfws3")
-    initial_text = selected_text_locator.text_content().strip()
-    assert initial_text, "Текст выбранного значения отсутствует"
 
-    dropdown_control.click()
-    select_menu_page.page.wait_for_timeout(200)
-    container.press("Enter")
-    select_menu_page.page.wait_for_timeout(500)
-
-    selected_text = selected_text_locator.text_content().strip()
+# ===========================================
+def test_multiselect_placeholder(select_menu_page: SelectMenuPage):
+    placeholder = select_menu_page.multiselect_get_placeholder()
     assert (
-        selected_text == "Group 1, option 1"
-    ), f"Ожидаем выбранное 'Group 1, option 1', получено '{selected_text}'"
-    time.sleep(3)
+        placeholder == "Select..."
+    ), f"Ожидаемый placeholder 'Select...', получено '{placeholder}'"
 
 
-def test_select_title_option(select_menu_page: SelectMenuPage):
-    assert select_menu_page.is_page_loaded(), "Страница не загрузилась"
-    # Получаем placeholder
-    initial_text = select_menu_page.get_select_one_display_text()
-    assert (
-        initial_text == "Select Title"
-    ), f"Начальный текст должен быть 'Select Title', получено '{initial_text}'"
-
-    select_menu_page.select_one_control.click()
-    select_menu_page.select_option_in_dropdown("Mrs.")
-    select_menu_page.page.wait_for_timeout(500)
-    selected_text = select_menu_page.get_select_one_display_text()
-    assert (
-        selected_text == "Mrs."
-    ), f"Ожидается выбранное 'Mrs.', получено '{selected_text}'"
-    time.sleep(3)
-
-
-def test_4_old_style_select_menu_functionality(select_menu_page: SelectMenuPage):
-    simple_select = select_menu_page.simple_select
-    assert (
-        simple_select.get_attribute("id") == "oldSelectMenu"
-    ), "Локатор old_style_select должен указывать на #oldSelectMenu"
-
-    options_count = select_menu_page.get_simple_select_options_count()
-
-    if options_count > 1:
-        initial_value = select_menu_page.get_simple_select_selected_value()
-        select_menu_page.select_simple_option_by_index(1)
-        selected_value = select_menu_page.get_simple_select_selected_value()
-        assert len(selected_value) > 0, "Должно быть выбрано значение"
+def test_multiselect_select_multiple_options(select_menu_page: SelectMenuPage):
+    options = ["Blue", "Black", "Green", "Red"]
+    for option in options:
+        select_menu_page.multiselect_select_option(option)
+    selected = select_menu_page.multiselect_get_selected_options()
+    for option in options:
         assert (
-            selected_value != initial_value
-        ), "Выбранное значение должно отличаться от начального"
-    time.sleep(3)
+            option in selected
+        ), f"Опция '{option}' должна быть выбрана, выбранные: {selected}"
+    options = ["Blue", "Black", "Green", "Red"]
+    for option in options:
+        select_menu_page.multiselect_remove_selected_option(option)

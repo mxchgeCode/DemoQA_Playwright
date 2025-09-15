@@ -8,3 +8,10 @@ class SelectMenuLocators:
     DROPDOWN_OPTIONS = ".css-yt9ioa-option"
     DROPDOWN_CONTROL = ".css-yk16xz-control"
     DROPDOWN_VALUE = ".css-1hwfws3"
+
+    MULTISELECT_CONTROL = "div.css-yk16xz-control"  # общий класс контролла multiselect
+    SELECTED_TAG = ".css-1rhbuit-multiValue"
+    SELECTED_TAG_TEXT = ".css-12jo7m5"
+    SELECTED_TAG_REMOVE_BTN = "button[aria-label='Remove']"
+
+    MULTISELECT_CONTROL_SELECTOR = "div.css-1hwfws3"  # Уточните!

@@ -23,17 +23,91 @@ class SelectMenuPage:
             f"{SelectMenuLocators.SELECT_ONE_CONTAINER} input"
         )
 
-        # 3. React Multiselect (который называется "Multiselect drop down" и "Standard multi select")
-        self.multiselect = page.locator(SelectMenuLocators.MULTISELECT)
-        self.multiselect_control = page.locator(
-            f"{SelectMenuLocators.MULTISELECT} ~ div[class*='control']"
-        )  # Ищем контрол рядом с #cars
-        self.multiselect_input = page.locator(
-            f"{SelectMenuLocators.MULTISELECT} ~ div[class*='control'] input"
+        self.multiselect_control = (
+            page.locator(SelectMenuLocators.MULTISELECT_CONTROL)
+            .filter(has_text="Select...")
+            .first
         )
 
-        self.dropdown_control = page.locator(SelectMenuLocators.DROPDOWN_CONTROL)
-        self.dropdown_value = page.locator(SelectMenuLocators.DROPDOWN_VALUE)
+    def get_multiselect_control(self):
+        return self.page.locator("div.css-1hwfws3").nth(2)
+
+    def multiselect_open(self):
+        control = self.get_multiselect_control()
+        control.wait_for(state="visible", timeout=5000)
+        control.click()
+        self.page.locator(".css-26l3qy-menu").wait_for(state="visible", timeout=5000)
+
+    def multiselect_select_option(self, option_text: str):
+        self.multiselect_open()
+        input_field = self.get_multiselect_control().locator("input").first
+        input_field.fill(option_text)
+        self.page.keyboard.press("Enter")
+        self.page.wait_for_timeout(300)
+        self.page.mouse.click(0, 0)  # клик вне для закрытия
+        self.page.wait_for_timeout(300)
+
+    def close_dropdown_by_click_outside(self):
+
+        self.page.mouse.click(0, 0)
+
+        # Даём UI время закрыть меню
+        self.page.wait_for_timeout(300)
+
+    #
+
+    def multiselect_get_placeholder(self) -> str:
+        placeholder_loc = self.multiselect_control.locator(
+            "div.css-1wa3eu0-placeholder"
+        ).first
+        placeholder_loc.wait_for(state="visible", timeout=5000)
+        text = placeholder_loc.text_content()
+        return text.strip() if text else ""
+
+    def multiselect_get_selected_options(self):
+        tags = self.page.locator(SelectMenuLocators.SELECTED_TAG)
+        count = tags.count()
+        selected = []
+        for i in range(count):
+            text = (
+                tags.nth(i).locator(SelectMenuLocators.SELECTED_TAG_TEXT).text_content()
+            )
+            if text:
+                selected.append(text.strip())
+        return selected
+
+    def multiselect_remove_selected_option(self, option_text: str):
+        tags = self.page.locator(SelectMenuLocators.SELECTED_TAG)
+        count = tags.count()
+        for i in range(count):
+            text = (
+                tags.nth(i).locator(SelectMenuLocators.SELECTED_TAG_TEXT).text_content()
+            )
+            if text and option_text.strip().lower() == text.strip().lower():
+                close_btn = tags.nth(i).locator("div.css-xb97g8")
+                close_btn.click()
+                self.page.wait_for_timeout(300)
+                # Клик вне для закрытия меню, если нужно
+                self.page.mouse.click(0, 0)
+                self.page.wait_for_timeout(300)
+                return
+        raise Exception(f"Опция '{option_text}' для удаления не найдена")
+
+    def is_page_loaded(self) -> bool:
+        try:
+            return self.main_container.is_visible()
+        except:
+            return False
+
+    # Вложенный контрол внутри контейнера с id=#cars
+    # self.multiselect = page.locator(SelectMenuLocators.MULTISELECT)
+    # self.multiselect_control = self.multiselect.locator("xpath=..").locator("div.css-yk16xz-control").first
+    # Если .locator("xpath=..") не подходит, попробуйте просто:
+    # self.multiselect_control = page.locator("#cars + div.css-yk16xz-control").first
+    # или уточнить точный путь в DevTools
+
+    # self.multiselect_control = page.locator("div.css-yk16xz-control").filter(has=self.page.locator("#cars")).first
+    # self.multiselect_input = self.multiselect_control.locator("input")
 
     def is_page_loaded(self) -> bool:
         try:
