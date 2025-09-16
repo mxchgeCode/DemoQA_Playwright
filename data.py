@@ -8,6 +8,9 @@ class URLs:
     WEB_TABLES = "https://demoqa.com/webtables"
     PAGE_BTN = "https://demoqa.com/buttons"
     LINKS_PAGE = "https://demoqa.com/links"
+    BROKEN_LINKS = "https://demoqa.com/broken"
+    DOWNLOAD = "https://demoqa.com/upload-download"
+    DYNAMIC = "https://demoqa.com/dynamic-properties"
 
     # widgets
     PROGRESS_BAR = "https://demoqa.com/progress-bar"

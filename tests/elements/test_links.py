@@ -1,6 +1,3 @@
-import time
-
-from pages.elements.links_page import LinksPage
 import pytest
 from data import URLs
 

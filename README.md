@@ -27,6 +27,9 @@
    4. Таблица данных на странице (https://demoqa.com/webtables) 
    5. Кнопки на странице (https://demoqa.com/buttons)
    6. Ссылки на странице (https://demoqa.com/links)
+   7. Ссылки на странице (https://demoqa.com/broken)
+   8. Страница загрузки файлов (https://demoqa.com/upload-download)
+   9. Страница эффектов (https://demoqa.com/dynamic-properties)
 
 Раздел Forms:
    1. Заполнение формы регистрации (https://demoqa.com/automation-practice-form)  

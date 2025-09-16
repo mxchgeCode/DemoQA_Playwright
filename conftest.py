@@ -2,8 +2,33 @@
 import pytest
 from playwright.sync_api import sync_playwright, Browser, BrowserContext
 from datetime import datetime
-from pages.elements.links_page import LinksPage
 from data import URLs
+from locators.elements.dynamic_locators import DynamicPropertiesLocators
+from pages.elements import (
+    LinksPage,
+    BrokenLinksPage,
+    UploadDownloadPage,
+    DynamicPropertiesPage,
+)
+
+from pages.widgets import (
+    SliderPage,
+    ProgressBarPage,
+    AccordionPage,
+    AutoCompletePage,
+    DatePickerPage,
+    TabsPage,
+    ToolTipsPage,
+    SelectMenuPage,
+    MenuPage,
+)
+from locators.widgets import (
+    ProgressBarLocators,
+    ToolTipsLocators,
+    TabsLocators,
+    DatePickerLocators,
+    AutoCompleteLocators,
+)
 
 
 # --- Список доменов для блокировки внешних и рекламных запросов ---
@@ -45,6 +70,20 @@ def block_external(route):
     resource_type = route.request.resource_type
     # Блокируем шрифты и изображения
     if resource_type in {"font", "image"}:
+        route.abort()
+        return
+    # Блокируем известные рекламные/аналитические домены
+    if any(domain in url for domain in blocked_domains):
+        route.abort()
+        return
+    route.continue_()
+
+
+def no_pic_block_external(route):
+    url = route.request.url.lower()
+    resource_type = route.request.resource_type
+    # Блокируем шрифты и изображения
+    if resource_type in {"font"}:
         route.abort()
         return
     # Блокируем известные рекламные/аналитические домены
@@ -135,10 +174,6 @@ def progress_page(browser):
     context.route("**/*", block_external)
     page = context.new_page()
 
-    from pages.widgets.progress_bar_page import ProgressBarPage
-
-    from locators.widgets.progress_bar_locators import ProgressBarLocators
-
     wait_selectors = [
         ("#app", "visible", 10000),
         (ProgressBarLocators.START_STOP_BUTTON, "visible", 10000),
@@ -165,8 +200,6 @@ def slider_page(browser):
     context.route("**/*", block_external)
     page = context.new_page()
 
-    from pages.widgets.slider_page import SliderPage
-
     wait_selectors = [
         (".range-slider", "visible", 10000),
         ("#sliderValue", "visible", 10000),
@@ -190,8 +223,6 @@ def accordion_page(browser):
     context.route("**/*", block_external)
     page = context.new_page()
 
-    from pages.widgets.accordion_page import AccordionPage
-
     wait_selectors = [("div.accordion", "visible", 10000)]
     create_page_with_wait(
         page, URLs.ACCORDION_URL, wait_selectors, stabilize_timeout=1000
@@ -213,10 +244,6 @@ def autocomplete_page(browser):
     )
     context.route("**/*", block_external)
     page = context.new_page()
-
-    from pages.widgets.auto_complete_page import AutoCompletePage
-
-    from locators.widgets.auto_complete_locators import AutoCompleteLocators
 
     wait_selectors = [(AutoCompleteLocators.SINGLE_COLOR_INPUT, "visible", 10000)]
     create_page_with_wait(
@@ -240,10 +267,6 @@ def datepicker_page(browser):
     context.route("**/*", block_external)
     page = context.new_page()
 
-    from pages.widgets.date_picker_page import DatePickerPage
-
-    from locators.widgets.date_picker_locators import DatePickerLocators
-
     wait_selectors = [(DatePickerLocators.DATE_INPUT, "visible", 10000)]
     create_page_with_wait(
         page, URLs.DATE_PICKER_URL, wait_selectors, stabilize_timeout=2000
@@ -266,10 +289,6 @@ def tabs_page(browser):
     context.route("**/*", block_external)
     page = context.new_page()
 
-    from pages.widgets.tabs_page import TabsPage
-
-    from locators.widgets.tabs_locators import TabsLocators
-
     wait_selectors = [(TabsLocators.TAB_WHAT, "visible", 10000)]
     create_page_with_wait(page, URLs.TABS_URL, wait_selectors, stabilize_timeout=2000)
     tabs_page = TabsPage(page)
@@ -289,10 +308,6 @@ def tooltips_page(browser):
     )
     context.route("**/*", block_external)
     page = context.new_page()
-
-    from pages.widgets.tool_tips_page import ToolTipsPage
-
-    from locators.widgets.tool_tips_locators import ToolTipsLocators
 
     wait_selectors = [(ToolTipsLocators.HOVER_BUTTON, "visible", 10000)]
     create_page_with_wait(
@@ -315,8 +330,6 @@ def menu_page(browser):
     )
     context.route("**/*", block_external)
     page = context.new_page()
-
-    from pages.widgets.menu_page import MenuPage
 
     wait_selectors = [("#app", "visible", 3000)]
 
@@ -383,7 +396,6 @@ def select_menu_page(browser):
     )
     context.route("**/*", block_external)
     page = context.new_page()
-    from pages.widgets.select_menu_page import SelectMenuPage
 
     create_page_with_wait(
         page,
@@ -425,5 +437,84 @@ def links_page(browser):
     links_page = LinksPage(page)
     yield links_page
 
+    page.close()
+    context.close()
+
+
+@pytest.fixture(scope="session")
+def broken_links_page(browser):
+    context = browser.new_context(
+        ignore_https_errors=True,
+        bypass_csp=True,
+        viewport={"width": 1920, "height": 1080},
+    )
+    context.route("**/*", no_pic_block_external)
+    page = context.new_page()
+
+    create_page_with_wait(
+        page,
+        URLs.BROKEN_LINKS,
+        wait_selectors=[
+            ("#app", "visible", 10000),
+            ("select, .css-yk16ysz-control", "visible", 10000),
+        ],
+        stabilize_timeout=2000,
+    )
+
+    broken_links_page = BrokenLinksPage(page)
+    yield broken_links_page
+    page.close()
+    context.close()
+
+
+@pytest.fixture(scope="session")
+def upload_download_page(browser):
+    context = browser.new_context(
+        ignore_https_errors=True,
+        bypass_csp=True,
+        viewport={"width": 1920, "height": 1080},
+    )
+    context.route("**/*", block_external)
+    page = context.new_page()
+
+    create_page_with_wait(
+        page,
+        URLs.DOWNLOAD,
+        wait_selectors=[
+            ("#app", "visible", 10000),
+            ("select, .css-yk16ysz-control", "visible", 10000),
+        ],
+        stabilize_timeout=2000,
+    )
+
+    upload_download_page = UploadDownloadPage(page)
+    yield upload_download_page
+    page.close()
+    context.close()
+
+
+@pytest.fixture(scope="session")
+def dynamic_properties_page(browser):
+
+    context = browser.new_context(
+        ignore_https_errors=True,
+        bypass_csp=True,
+        viewport={"width": 1920, "height": 1080},
+    )
+    context.route("**/*", block_external)
+    page = context.new_page()
+
+    create_page_with_wait(
+        page,
+        URLs.DYNAMIC,
+        wait_selectors=[
+            ("#app", "visible", 10000),
+            ("select, .css-yk16ysz-control", "visible", 10000),
+        ],
+        stabilize_timeout=2000,
+    )
+
+    dynamic_properties_page = DynamicPropertiesPage(page)
+    yield dynamic_properties_page
     page.close()
     context.close()
