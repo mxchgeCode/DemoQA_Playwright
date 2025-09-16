@@ -1,6 +1,6 @@
 import time
-from pages.base_page import BasePage
-from locators.progress_bar_locators import ProgressBarLocators
+from pages.widgets.base_page import BasePage
+from locators.widgets.progress_bar_locators import ProgressBarLocators
 
 
 class ProgressBarPage(BasePage):

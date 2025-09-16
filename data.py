@@ -1,4 +1,13 @@
 class URLs:
+    #PRACTICE_FORM
+    PRACTICE_FORM = "https://demoqa.com/automation-practice-form"
+    PICTURE_PATH = "utils/test_picture.png"
+
+
+
+
+
+    #widgets
     PROGRESS_BAR = "https://demoqa.com/progress-bar"
     SLIDER_URL = "https://demoqa.com/slider"
     ACCORDION_URL = "https://demoqa.com/accordian"
@@ -8,3 +17,4 @@ class URLs:
     TOOL_TIPS_URL = "https://demoqa.com/tool-tips"
     MENU_URL = "https://demoqa.com/menu"
     SELECT_MENU_URL = "https://demoqa.com/select-menu"
+

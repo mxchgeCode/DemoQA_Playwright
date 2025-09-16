@@ -1,5 +1,5 @@
 from playwright.sync_api import Page
-from locators.slider_locators import SLIDER_HANDLE
+from locators.widgets.slider_locators import SLIDER_HANDLE
 
 
 class SliderPage:

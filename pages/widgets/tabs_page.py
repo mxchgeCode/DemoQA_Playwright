@@ -1,5 +1,5 @@
 from playwright.sync_api import Page
-from locators.tabs_locators import TabsLocators
+from locators.widgets.tabs_locators import TabsLocators
 
 
 class TabsPage:

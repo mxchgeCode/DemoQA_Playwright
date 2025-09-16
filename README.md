@@ -20,13 +20,18 @@
 
 Реализованы проверки:
 
-1. Прогресс бар на странице (https://demoqa.com/progress-bar)
-2. Слайдер на странице (https://demoqa.com/slider)
-3. Текстовый аккордеон на странице (https://demoqa.com/accordian)
-4. Поля ввода с автозаполнением на странице (https://demoqa.com/auto-complete)
-5. Календарь на странице (https://demoqa.com/date-picker)
-6. Вкладки на странице (https://demoqa.com/tabs)
-7. Всплывающие подсказки на странице (https://demoqa.com/tool-tips)
-8. Меню на странице (http://demoqa.com/menu)
-9. Меню на странице (https://demoqa.com/select-menu)
+Раздел Forms:
+   1. Заполнение формы регистрации (https://demoqa.com/automation-practice-form)  
+
+
+Раздел Widgets:
+   1. Прогресс бар на странице (https://demoqa.com/progress-bar)
+   2. Слайдер на странице (https://demoqa.com/slider)
+   3. Текстовый аккордеон на странице (https://demoqa.com/accordian)
+   4. Поля ввода с автозаполнением на странице (https://demoqa.com/auto-complete)
+   5. Календарь на странице (https://demoqa.com/date-picker)
+   6. Вкладки на странице (https://demoqa.com/tabs)
+   7. Всплывающие подсказки на странице (https://demoqa.com/tool-tips)
+   8. Меню на странице (http://demoqa.com/menu)
+   9. Dropdown меню на странице (https://demoqa.com/select-menu)
 

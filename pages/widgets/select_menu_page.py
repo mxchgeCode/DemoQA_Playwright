@@ -1,5 +1,5 @@
 from playwright.sync_api import Page
-from locators.select_menu_locators import SelectMenuLocators
+from locators.widgets.select_menu_locators import SelectMenuLocators
 
 
 class SelectMenuPage:

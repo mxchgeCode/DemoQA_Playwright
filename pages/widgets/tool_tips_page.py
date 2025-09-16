@@ -1,5 +1,5 @@
 from playwright.sync_api import Page
-from locators.tool_tips_locators import ToolTipsLocators
+from locators.widgets.tool_tips_locators import ToolTipsLocators
 
 
 class ToolTipsPage:

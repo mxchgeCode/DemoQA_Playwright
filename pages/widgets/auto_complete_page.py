@@ -1,5 +1,5 @@
 from playwright.sync_api import Page
-from locators.auto_complete_locators import AutoCompleteLocators
+from locators.widgets.auto_complete_locators import AutoCompleteLocators
 
 
 class AutoCompletePage:

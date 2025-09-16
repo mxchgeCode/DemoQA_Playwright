@@ -1,6 +1,6 @@
 import time
-from pages.select_menu_page import SelectMenuPage
-from locators.select_menu_locators import SelectMenuLocators
+from pages.widgets.select_menu_page import SelectMenuPage
+from locators.widgets.select_menu_locators import SelectMenuLocators
 
 
 def test_select_option_via_persistent_control(select_menu_page: SelectMenuPage):

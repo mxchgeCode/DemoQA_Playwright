@@ -1,5 +1,5 @@
 from playwright.sync_api import Page
-from locators.date_picker_locators import DatePickerLocators
+from locators.widgets.date_picker_locators import DatePickerLocators
 from datetime import datetime
 
 

@@ -124,9 +124,9 @@ def progress_page(browser):
     context.route("**/*", block_external)
     page = context.new_page()
 
-    from pages.progress_bar_page import ProgressBarPage
+    from pages.widgets.progress_bar_page import ProgressBarPage
     from data import URLs
-    from locators.progress_bar_locators import ProgressBarLocators
+    from locators.widgets.progress_bar_locators import ProgressBarLocators
 
     wait_selectors = [
         ("#app", "visible", 10000),
@@ -154,7 +154,7 @@ def slider_page(browser):
     context.route("**/*", block_external)
     page = context.new_page()
 
-    from pages.slider_page import SliderPage
+    from pages.widgets.slider_page import SliderPage
     from data import URLs
 
     wait_selectors = [
@@ -180,7 +180,7 @@ def accordion_page(browser):
     context.route("**/*", block_external)
     page = context.new_page()
 
-    from pages.accordion_page import AccordionPage
+    from pages.widgets.accordion_page import AccordionPage
     from data import URLs
 
     wait_selectors = [("div.accordion", "visible", 10000)]
@@ -205,9 +205,9 @@ def autocomplete_page(browser):
     context.route("**/*", block_external)
     page = context.new_page()
 
-    from pages.auto_complete_page import AutoCompletePage
+    from pages.widgets.auto_complete_page import AutoCompletePage
     from data import URLs
-    from locators.auto_complete_locators import AutoCompleteLocators
+    from locators.widgets.auto_complete_locators import AutoCompleteLocators
 
     wait_selectors = [(AutoCompleteLocators.SINGLE_COLOR_INPUT, "visible", 10000)]
     create_page_with_wait(
@@ -231,9 +231,9 @@ def datepicker_page(browser):
     context.route("**/*", block_external)
     page = context.new_page()
 
-    from pages.date_picker_page import DatePickerPage
+    from pages.widgets.date_picker_page import DatePickerPage
     from data import URLs
-    from locators.date_picker_locators import DatePickerLocators
+    from locators.widgets.date_picker_locators import DatePickerLocators
 
     wait_selectors = [(DatePickerLocators.DATE_INPUT, "visible", 10000)]
     create_page_with_wait(
@@ -257,9 +257,9 @@ def tabs_page(browser):
     context.route("**/*", block_external)
     page = context.new_page()
 
-    from pages.tabs_page import TabsPage
+    from pages.widgets.tabs_page import TabsPage
     from data import URLs
-    from locators.tabs_locators import TabsLocators
+    from locators.widgets.tabs_locators import TabsLocators
 
     wait_selectors = [(TabsLocators.TAB_WHAT, "visible", 10000)]
     create_page_with_wait(page, URLs.TABS_URL, wait_selectors, stabilize_timeout=2000)
@@ -281,9 +281,9 @@ def tooltips_page(browser):
     context.route("**/*", block_external)
     page = context.new_page()
 
-    from pages.tool_tips_page import ToolTipsPage
+    from pages.widgets.tool_tips_page import ToolTipsPage
     from data import URLs
-    from locators.tool_tips_locators import ToolTipsLocators
+    from locators.widgets.tool_tips_locators import ToolTipsLocators
 
     wait_selectors = [(ToolTipsLocators.HOVER_BUTTON, "visible", 10000)]
     create_page_with_wait(
@@ -307,7 +307,7 @@ def menu_page(browser):
     context.route("**/*", block_external)
     page = context.new_page()
 
-    from pages.menu_page import MenuPage
+    from pages.widgets.menu_page import MenuPage
     from data import URLs
 
     wait_selectors = [("#app", "visible", 3000)]
@@ -375,7 +375,7 @@ def select_menu_page(browser):
     )
     context.route("**/*", block_external)
     page = context.new_page()
-    from pages.select_menu_page import SelectMenuPage
+    from pages.widgets.select_menu_page import SelectMenuPage
     from data import URLs
 
     create_page_with_wait(
