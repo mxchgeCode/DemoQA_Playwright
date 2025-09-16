@@ -1,0 +1,13 @@
+class WebTablesLocators:
+    ADD_BUTTON = "#addNewRecordButton"
+    FIRST_NAME_INPUT = "#firstName"
+    LAST_NAME_INPUT = "#lastName"
+    EMAIL_INPUT = "#userEmail"
+    AGE_INPUT = "#age"
+    SALARY_INPUT = "#salary"
+    DEPARTMENT_INPUT = "#department"
+    SUBMIT_BUTTON = "#submit"
+    DELETE_BUTTON_TEMPLATE = "span[title='Delete'][data-row-id='{}']"
+    TABLE_ROWS = ".rt-tr-group"
+    SEARCH_BOX = "#searchBox"
+    DELETE_ROW = ".rt-tr-group .rt-td:nth-child(1)"

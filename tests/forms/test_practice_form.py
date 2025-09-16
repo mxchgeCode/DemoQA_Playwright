@@ -4,6 +4,7 @@ import pytest
 from pages.forms.practice_form_page import AutomationPracticeFormPage
 from data import URLs
 
+
 @pytest.fixture(scope="function")
 def form_page(page):
     form = AutomationPracticeFormPage(page)

@@ -2,6 +2,7 @@ from playwright.sync_api import Page
 from locators.elements.check_box_locators import CheckboxLocators
 from data import URLs
 
+
 class CheckboxPage:
     def __init__(self, page: Page):
         self.page = page

@@ -21,9 +21,11 @@
 Реализованы проверки:
 
 Раздел Elements
-   1. Заполнение формы регистрации (https://demoqa.com/text-box
+   1. Заполнение формы регистрации (https://demoqa.com/text-box)
    2. Чек бокс дерево каталога (https://demoqa.com/checkbox)
-   3. Радиокнопки на странице (https://demoqa.com/radio-button))
+   3. Радиокнопки на странице (https://demoqa.com/radio-button)
+   4. Таблица данных на странице (https://demoqa.com/webtables) 
+   5. Кнопки на странице (https://demoqa.com/buttons)
 
 Раздел Forms:
    1. Заполнение формы регистрации (https://demoqa.com/automation-practice-form)  

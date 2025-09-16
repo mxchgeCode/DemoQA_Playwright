@@ -2,6 +2,7 @@ from playwright.sync_api import Page
 from locators.elements.radio_button_locators import RadioButtonLocators
 from data import URLs
 
+
 class RadioButtonPage:
     def __init__(self, page: Page):
         self.page = page

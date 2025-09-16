@@ -4,6 +4,8 @@ import time
 from playwright.sync_api import Page
 from locators.forms.practice_form_locators import AutomationPracticeFormLocators
 from data import URLs
+
+
 class AutomationPracticeFormPage:
     def __init__(self, page: Page):
         self.page = page
@@ -62,7 +64,9 @@ class AutomationPracticeFormPage:
                 label_locator.click()
 
     def upload_picture(self, filepath: str):
-        self.page.set_input_files(AutomationPracticeFormLocators.PICTURE_UPLOAD_INPUT, filepath)
+        self.page.set_input_files(
+            AutomationPracticeFormLocators.PICTURE_UPLOAD_INPUT, filepath
+        )
 
     def fill_current_address(self, address: str):
         self.page.fill(AutomationPracticeFormLocators.CURRENT_ADDRESS_TEXTAREA, address)
@@ -74,7 +78,9 @@ class AutomationPracticeFormPage:
         input_locator = self.page.locator("#react-select-3-input")
         input_locator.fill(state_name)
         # Явное ожидание появления опции с точным текстом state_name
-        option_locator = self.page.locator(f"div.css-1n7v3ny-option:has-text('{state_name}')")
+        option_locator = self.page.locator(
+            f"div.css-1n7v3ny-option:has-text('{state_name}')"
+        )
         option_locator.wait_for(state="visible", timeout=5000)
         option_locator.click()
 
@@ -85,18 +91,21 @@ class AutomationPracticeFormPage:
         input_locator = self.page.locator("#react-select-4-input")
         input_locator.fill(city_name)
         # Явное ожидание появления опции с точным текстом
-        option_locator = self.page.locator(f"div.css-1n7v3ny-option:has-text('{city_name}')")
+        option_locator = self.page.locator(
+            f"div.css-1n7v3ny-option:has-text('{city_name}')"
+        )
         option_locator.wait_for(state="visible", timeout=5000)
         option_locator.click()
         time.sleep(3)
-
 
     def submit_form(self):
         self.page.click(AutomationPracticeFormLocators.SUBMIT_BUTTON)
 
     def is_modal_visible(self):
         try:
-            self.page.locator(AutomationPracticeFormLocators.MODAL_DIALOG).wait_for(state="visible", timeout=5000)
+            self.page.locator(AutomationPracticeFormLocators.MODAL_DIALOG).wait_for(
+                state="visible", timeout=5000
+            )
             return True
         except TimeoutError:
             return False
@@ -105,4 +114,3 @@ class AutomationPracticeFormPage:
         close_btn = self.page.locator("#closeLargeModal")
         close_btn.wait_for(state="visible", timeout=5000)
         close_btn.click()
-

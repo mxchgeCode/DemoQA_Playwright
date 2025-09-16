@@ -1,6 +1,8 @@
 from playwright.sync_api import Page
 from locators.elements.text_box_locators import TextBoxLocators
 from data import URLs
+
+
 class TextBoxPage:
     def __init__(self, page: Page):
         self.page = page
