@@ -1,0 +1,11 @@
+class LinksLocators:
+    HOME_LINK = "a#simpleLink"
+    HOME79UDW_LINK = "a#dynamicLink"
+    CREATED_LINK = "a#created"
+    NO_CONTENT_LINK = "a#no-content"
+    MOVED_LINK = "a#moved"
+    BAD_REQUEST_LINK = "a#bad-request"
+    UNAUTHORIZED_LINK = "a#unauthorized"
+    FORBIDDEN_LINK = "a#forbidden"
+    NOT_FOUND_LINK = "a#invalid-url"
+    LINK_RESPONSE = "p#linkResponse"

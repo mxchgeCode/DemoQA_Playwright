@@ -23,11 +23,6 @@ class SelectMenuPage:
         )
 
     def get_multiselect_control(self):
-        # return (
-        #     self.page.locator(SelectMenuLocators.MULTISELECT_CONTROL)
-        #     .filter(has_text="Select...")
-        #     .first
-        # )
         return self.page.locator(SelectMenuLocators.DROPDOWN_VALUE).nth(2)
 
     def multiselect_open(self):

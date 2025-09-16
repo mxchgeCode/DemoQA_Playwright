@@ -7,6 +7,7 @@ class URLs:
     RADIO_BTN = "https://demoqa.com/radio-button"
     WEB_TABLES = "https://demoqa.com/webtables"
     PAGE_BTN = "https://demoqa.com/buttons"
+    LINKS_PAGE = "https://demoqa.com/links"
 
     # widgets
     PROGRESS_BAR = "https://demoqa.com/progress-bar"

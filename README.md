@@ -26,6 +26,7 @@
    3. Радиокнопки на странице (https://demoqa.com/radio-button)
    4. Таблица данных на странице (https://demoqa.com/webtables) 
    5. Кнопки на странице (https://demoqa.com/buttons)
+   6. Ссылки на странице (https://demoqa.com/links)
 
 Раздел Forms:
    1. Заполнение формы регистрации (https://demoqa.com/automation-practice-form)  

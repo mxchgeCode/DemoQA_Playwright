@@ -2,6 +2,9 @@
 import pytest
 from playwright.sync_api import sync_playwright, Browser, BrowserContext
 from datetime import datetime
+from pages.elements.links_page import LinksPage
+from data import URLs
+
 
 # --- Список доменов для блокировки внешних и рекламных запросов ---
 blocked_domains = [
@@ -78,21 +81,29 @@ def context(browser: Browser) -> BrowserContext:
 
 
 def create_page_with_wait(
-    page, url: str, wait_selectors: list, stabilize_timeout: int = 1000
+    page,
+    url: str,
+    wait_selectors: list,
+    stabilize_timeout: int = 1000,
+    expected_status: int = 200,
 ):
     """
-    Переходит по url с ожиданием появления указанных селекторов.
+    Переходит по url с проверкой кода ответа и ожиданием появления указанных селекторов.
     Повторяет попытку до 3 раз при неудаче.
-    Args:
-        page: экземпляр Playwright page
-        url: URL для перехода
-        wait_selectors: список кортежей (селектор, состояние, таймаут в мс)
-        stabilize_timeout: дополнительная задержка после загрузки
     """
     for attempt in range(3):
         try:
             print(f"Попытка {attempt + 1} перехода на {url}")
-            page.goto(url, wait_until="domcontentloaded", timeout=30000)
+
+            response = page.goto(url, wait_until="domcontentloaded", timeout=30000)
+            status = response.status if response else None
+            print(f"HTTP статус: {status}")
+
+            if status != expected_status:
+                raise Exception(
+                    f"Неверный HTTP статус: {status}, ожидается {expected_status}"
+                )
+
             break
         except Exception as e:
             print(f"Попытка {attempt + 1} не удалась: {e}")
@@ -125,7 +136,7 @@ def progress_page(browser):
     page = context.new_page()
 
     from pages.widgets.progress_bar_page import ProgressBarPage
-    from data import URLs
+
     from locators.widgets.progress_bar_locators import ProgressBarLocators
 
     wait_selectors = [
@@ -155,7 +166,6 @@ def slider_page(browser):
     page = context.new_page()
 
     from pages.widgets.slider_page import SliderPage
-    from data import URLs
 
     wait_selectors = [
         (".range-slider", "visible", 10000),
@@ -181,7 +191,6 @@ def accordion_page(browser):
     page = context.new_page()
 
     from pages.widgets.accordion_page import AccordionPage
-    from data import URLs
 
     wait_selectors = [("div.accordion", "visible", 10000)]
     create_page_with_wait(
@@ -206,7 +215,7 @@ def autocomplete_page(browser):
     page = context.new_page()
 
     from pages.widgets.auto_complete_page import AutoCompletePage
-    from data import URLs
+
     from locators.widgets.auto_complete_locators import AutoCompleteLocators
 
     wait_selectors = [(AutoCompleteLocators.SINGLE_COLOR_INPUT, "visible", 10000)]
@@ -232,7 +241,7 @@ def datepicker_page(browser):
     page = context.new_page()
 
     from pages.widgets.date_picker_page import DatePickerPage
-    from data import URLs
+
     from locators.widgets.date_picker_locators import DatePickerLocators
 
     wait_selectors = [(DatePickerLocators.DATE_INPUT, "visible", 10000)]
@@ -258,7 +267,7 @@ def tabs_page(browser):
     page = context.new_page()
 
     from pages.widgets.tabs_page import TabsPage
-    from data import URLs
+
     from locators.widgets.tabs_locators import TabsLocators
 
     wait_selectors = [(TabsLocators.TAB_WHAT, "visible", 10000)]
@@ -282,7 +291,7 @@ def tooltips_page(browser):
     page = context.new_page()
 
     from pages.widgets.tool_tips_page import ToolTipsPage
-    from data import URLs
+
     from locators.widgets.tool_tips_locators import ToolTipsLocators
 
     wait_selectors = [(ToolTipsLocators.HOVER_BUTTON, "visible", 10000)]
@@ -308,7 +317,6 @@ def menu_page(browser):
     page = context.new_page()
 
     from pages.widgets.menu_page import MenuPage
-    from data import URLs
 
     wait_selectors = [("#app", "visible", 3000)]
 
@@ -376,7 +384,6 @@ def select_menu_page(browser):
     context.route("**/*", block_external)
     page = context.new_page()
     from pages.widgets.select_menu_page import SelectMenuPage
-    from data import URLs
 
     create_page_with_wait(
         page,
@@ -390,6 +397,33 @@ def select_menu_page(browser):
 
     select_menu_page = SelectMenuPage(page)
     yield select_menu_page
+
+    page.close()
+    context.close()
+
+
+@pytest.fixture(scope="session")
+def links_page(browser):
+    context = browser.new_context(
+        ignore_https_errors=True,
+        bypass_csp=True,
+        viewport={"width": 1920, "height": 1080},
+    )
+    context.route("**/*", block_external)
+    page = context.new_page()
+
+    create_page_with_wait(
+        page,
+        URLs.LINKS_PAGE,
+        wait_selectors=[
+            ("#app", "visible", 10000),
+            ("select, .css-yk16ysz-control", "visible", 10000),
+        ],
+        stabilize_timeout=2000,
+    )
+
+    links_page = LinksPage(page)
+    yield links_page
 
     page.close()
     context.close()
