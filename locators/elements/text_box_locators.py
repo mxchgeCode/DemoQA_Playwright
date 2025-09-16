@@ -1,0 +1,10 @@
+class TextBoxLocators:
+    USER_NAME = "#userName"
+    USER_EMAIL = "#userEmail"
+    CURRENT_ADDRESS = "#currentAddress"
+    PERMANENT_ADDRESS = "#permanentAddress"
+    SUBMIT_BUTTON = "#submit"
+    OUTPUT_NAME = "#output #name"
+    OUTPUT_EMAIL = "#output #email"
+    OUTPUT_CURRENT_ADDRESS = "#output #currentAddress"
+    OUTPUT_PERMANENT_ADDRESS = "#output #permanentAddress"

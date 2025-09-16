@@ -20,9 +20,13 @@
 
 Реализованы проверки:
 
+Раздел Elements
+   1. Заполнение формы регистрации (https://demoqa.com/text-box
+   2. Чек бокс дерево каталога (https://demoqa.com/checkbox)
+   3. Радиокнопки на странице (https://demoqa.com/radio-button))
+
 Раздел Forms:
    1. Заполнение формы регистрации (https://demoqa.com/automation-practice-form)  
-
 
 Раздел Widgets:
    1. Прогресс бар на странице (https://demoqa.com/progress-bar)

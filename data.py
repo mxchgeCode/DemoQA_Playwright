@@ -2,7 +2,9 @@ class URLs:
     #PRACTICE_FORM
     PRACTICE_FORM = "https://demoqa.com/automation-practice-form"
     PICTURE_PATH = "utils/test_picture.png"
-
+    TEXT_BOX = "https://demoqa.com/text-box"
+    CHECK_BOX = "https://demoqa.com/checkbox"
+    RADIO_BTN = "https://demoqa.com/radio-button"
 
 
 
