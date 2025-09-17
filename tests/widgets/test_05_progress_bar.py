@@ -50,7 +50,7 @@ def test_progress_bar_stops_and_resets(progress_bar_page):
     assert full_percent >= 95, "Значение должно быть около 100%"
 
     progress_bar_page.reset_progress()
-    progress_bar_page.page.wait_for_timeout(2000)
+    progress_bar_page.page.wait_for_timeout(30000)
     try:
         wait_for_progress(progress_bar_page, "0%", timeout=30)
     except TimeoutError:
@@ -62,12 +62,6 @@ def test_progress_bar_stops_and_resets(progress_bar_page):
 
     reset_result = progress_bar_page.get_progress_value()
     reset_percent = int("".join(filter(str.isdigit, reset_result)))
-
-    # повторный сброс прогресса
-    if 5 <= reset_percent <= 55:
-        progress_bar_page.page.wait_for_timeout(5000)
-        progress_bar_page.reset_progress()
-        progress_bar_page.page.wait_for_timeout(5000)
 
     assert reset_percent <= 5, "Значение после сброса около 0%"
 

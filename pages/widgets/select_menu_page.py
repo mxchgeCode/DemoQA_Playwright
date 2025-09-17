@@ -25,23 +25,6 @@ class SelectMenuPage:
     def get_multiselect_control(self):
         return self.page.locator(SelectMenuLocators.DROPDOWN_VALUE).nth(2)
 
-    def multiselect_open(self):
-        control = self.get_multiselect_control()
-        control.wait_for(state="visible", timeout=5000)
-        control.click()
-        self.page.locator(SelectMenuLocators.DROPDOWN_MENU).wait_for(
-            state="visible", timeout=5000
-        )
-
-    def multiselect_select_option(self, option_text: str):
-        self.multiselect_open()
-        input_field = self.get_multiselect_control().locator("input").first
-        input_field.fill(option_text)
-        self.page.keyboard.press("Enter")
-        self.page.wait_for_timeout(300)
-        self.page.mouse.click(0, 0)
-        self.page.wait_for_timeout(300)
-
     def multiselect_get_placeholder(self) -> str:
         placeholder_loc = self.multiselect_control.locator(
             SelectMenuLocators.PLACEHOLDER
@@ -61,20 +44,74 @@ class SelectMenuPage:
                 selected.append(text.strip())
         return selected
 
-    def multiselect_remove_selected_option(self, option_text: str):
+    def multiselect_open(self):
+        control = self.multiselect_control
+        print("Waiting for multiselect control to be visible...")
+        try:
+            control.wait_for(state="visible", timeout=10000)
+            print("Multiselect control is visible.")
+        except Exception as e:
+            print(f"Failed to find multiselect control: {e}")
+            raise
+
+        print("Clicking on multiselect control to open menu...")
+        try:
+            control.click(force=True)
+            print("Clicked on multiselect control.")
+        except Exception as e:
+            print(f"Failed to click multiselect control: {e}")
+            raise
+
+        try:
+            print("Waiting for dropdown menu to be visible...")
+            self.page.locator(SelectMenuLocators.DROPDOWN_MENU).wait_for(
+                state="visible", timeout=10000
+            )
+            print("Dropdown menu is visible.")
+        except Exception as e:
+            print(f"Failed to find dropdown menu: {e}")
+            raise
+
+        self.page.wait_for_timeout(300)
+
+    def multiselect_select_options(self, option_text: str):
+        print(f"Selecting option: {option_text}")
+        self.multiselect_open()
+        option_locator = self.page.locator(
+            f'{SelectMenuLocators.DROPDOWN_MENU} >> text="{option_text}"'
+        ).first
+        try:
+            print("Waiting for option to be visible...")
+            option_locator.wait_for(state="visible", timeout=7000)
+            print(f"Option '{option_text}' is visible, clicking...")
+            option_locator.click(force=True)
+            print(f"Clicked option '{option_text}'.")
+        except Exception as e:
+            print(f"Failed to select option '{option_text}': {e}")
+            raise
+        self.page.wait_for_timeout(300)
+
+    def multiselect_remove_selected_options(self, option_text: str):
+        print(f"Removing option: {option_text}")
         tags = self.page.locator(SelectMenuLocators.SELECTED_TAG)
-        for i in range(tags.count()):
+        count = tags.count()
+        found = False
+        for i in range(count):
             text = (
                 tags.nth(i).locator(SelectMenuLocators.SELECTED_TAG_TEXT).text_content()
             )
             if text and option_text.strip().lower() == text.strip().lower():
                 close_btn = tags.nth(i).locator(SelectMenuLocators.CLOSEBUTTON)
-                close_btn.click()
+                print(f"Waiting for close button for option '{option_text}'...")
+                close_btn.wait_for(state="visible", timeout=7000)
+                print(f"Clicking close button for option '{option_text}'...")
+                close_btn.click(force=True)
                 self.page.wait_for_timeout(300)
-                self.page.mouse.click(0, 0)
-                self.page.wait_for_timeout(300)
-                return
-        raise Exception(f"Опция '{option_text}' для удаления не найдена")
+                found = True
+                print(f"Option '{option_text}' removed.")
+                break
+        if not found:
+            raise Exception(f"Option '{option_text}' not found for removal")
 
     # --- Simple Select ---
     def select_simple_option_by_value(self, value: str):
@@ -95,15 +132,6 @@ class SelectMenuPage:
     def get_simple_select_options_count(self) -> int:
         return self.simple_select.locator("option").count()
 
-    # def get_simple_select_options_text(self) -> list[str]:
-    #     options = []
-    #     count = self.get_simple_select_options_count()
-    #     for i in range(count):
-    #         text = self.simple_select.locator("option").nth(i).text_content()
-    #         if text:
-    #             options.append(text.strip())
-    #     return options
-
     # --- Select One ---
     def select_option_in_dropdown(self, option_text: str):
         dropdown_menu = self.page.locator(SelectMenuLocators.DROPDOWN_MENU)
@@ -120,7 +148,7 @@ class SelectMenuPage:
         locator = self.select_one_container.locator(
             SelectMenuLocators.SELECT_ONE_DISPLAY_TEXT
         )
-        locator.wait_for(state="visible", timeout=5000)
+        locator.wait_for(state="visible", timeout=3000)
         text = locator.text_content()
         return text.strip() if text else ""
 

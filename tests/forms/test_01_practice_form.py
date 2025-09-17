@@ -15,7 +15,6 @@ def test_fill_form_and_submit(practice_form_page):
     practice_form_page.select_state("NCR")
     practice_form_page.select_city("Delhi")
     practice_form_page.submit_form()
-
     assert (
         practice_form_page.is_modal_visible()
     ), "Ожидался модальный диалог с результатами"

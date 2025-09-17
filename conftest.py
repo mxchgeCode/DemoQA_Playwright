@@ -1,5 +1,7 @@
+import time
+
 import pytest
-from playwright.sync_api import sync_playwright, Browser, BrowserContext, Page
+from playwright.sync_api import Browser, Page
 from data import URLs
 from pages.elements import (
     LinksPage,
@@ -34,7 +36,27 @@ blocked_domains = [
     "google-analytics.com",
     "analytics.google.com",
     "googletagmanager.com",
+    "www.googletagmanager.com",
+    "connect.facebook.net",
     "facebook.com",
+    "twitter.com",
+    "taboola.com",
+    "outbrain.com",
+    "adnxs.com",
+    "c.amazon-adsystem.com",
+    "scorecardresearch.com",
+    "hotjar.com",
+    "mouseflow.com",
+    "fonts.googleapis.com",
+    "fonts.gstatic.com",
+    "cdn.jsdelivr.net",
+    "cdnjs.cloudflare.com",
+    "unpkg.com",
+    "serving.stat-rock.com",
+    "stat-rock.com",
+    "ad.plus",
+    "g.doubleclick.net",
+    "googletagservices.com",
 ]
 
 
@@ -50,35 +72,82 @@ def block_external(route):
     route.continue_()
 
 
-@pytest.fixture(scope="module")
-def browser():
-    pw = sync_playwright().start()
-    browser = pw.chromium.launch(headless=False)
-    yield browser
-    browser.close()
-    pw.stop()
+#
+# def pytest_addoption(parser):
+#     parser.addoption("--browser", action="store", default="chromium")
+#
+# @pytest.fixture
+# def browser_name(request):
+#     return request.config.getoption("--browser")
+#
+# @pytest.fixture
+# def browser_context_args(browser_name):
+#     return {}
+#
+# @pytest.fixture(scope="module")
+# def browser_context(browser_context_args, playwright, browser_name):
+#     browser = getattr(playwright, browser_name).launch(headless=False)
+#     context = browser.new_context(**browser_context_args)
+#     yield context
+#     context.close()
+#     browser.close()
+#
+# @pytest.fixture(scope="module")
+# def page(browser_context):
+#     page = browser_context.new_page()
+#     yield page
+#     page.close()
+#
+#
+#
+# @pytest.fixture(scope="module")
+# def context(browser: "Browser"):
+#     context = browser.new_context(
+#         ignore_https_errors=True,
+#         bypass_csp=True,
+#         viewport={"width": 1920, "height": 1080},
+#     )
+#     context.route("**/*", block_external)
+#     yield context
+#     context.close()
+
+
+def block_external(route, request):
+    # Пример фильтрации или блокировки запросов
+    # Пропускаем только свои запросы, остальные блокируем
+    if "yourdomain.com" in request.url:
+        route.continue_()
+    else:
+        route.abort()
 
 
 @pytest.fixture(scope="module")
-def context(browser: "Browser"):
+def browser_context_args():
+    return {}
+
+
+@pytest.fixture(scope="module")
+def browser_context(playwright, browser_name, browser_context_args):
+    # Запуск Firefox без параметра firefox_user_prefs
+    browser = getattr(playwright, browser_name).launch(headless=False)
     context = browser.new_context(
         ignore_https_errors=True,
         bypass_csp=True,
         viewport={"width": 1920, "height": 1080},
+        **browser_context_args,
     )
-    context.route("**/*", block_external)
     yield context
     context.close()
+    browser.close()
 
 
 @pytest.fixture(scope="module")
-def page(context: "BrowserContext"):
-    page = context.new_page()
+def page(browser_context):
+    page = browser_context.new_page()
     yield page
     page.close()
 
 
-# Универсальная функция для создания странички с ожиданиями
 def create_page_with_wait(
     page: "Page",
     url: str,
@@ -88,19 +157,23 @@ def create_page_with_wait(
 ):
     for attempt in range(3):
         try:
-            response = page.goto(url, wait_until="domcontentloaded", timeout=30000)
+            url_with_cache_bypass = f"{url}?_={int(time.time())}"
+            response = page.goto(
+                url_with_cache_bypass, wait_until="domcontentloaded", timeout=30000
+            )
             status = response.status if response else None
-            if status != expected_status:
-                raise Exception(f"HTTP статус {status}, ожидался {expected_status}")
-            break
-        except Exception:
+            if status not in (expected_status, 304):
+                raise Exception(
+                    f"HTTP статус {status}, ожидался {expected_status} или 304"
+                )
+            for selector, state, timeout in wait_selectors:
+                page.locator(selector).wait_for(state=state, timeout=timeout)
+            page.wait_for_timeout(stabilize_timeout)
+            return
+        except Exception as e:
             if attempt == 2:
                 raise
-            page.wait_for_timeout(2000)
-    for selector, state, timeout in wait_selectors:
-        page.wait_for_selector(selector, state=state, timeout=timeout)
-    if stabilize_timeout > 0:
-        page.wait_for_timeout(stabilize_timeout)
+            page.reload()
 
 
 # Тестовые фикстуры для всех страниц раздела elements

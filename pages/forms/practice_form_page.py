@@ -48,8 +48,17 @@ class AutomationPracticeFormPage:
         subj_input = self.page.locator(AutomationPracticeFormLocators.SUBJECTS_INPUT)
         for subj in subjects:
             subj_input.fill(subj)
-            subj_input.press("Enter")
-            self.page.wait_for_timeout(200)
+            self.page.wait_for_selector(".subjects-auto-complete__menu", timeout=7000)
+            option = self.page.locator(
+                f"div.subjects-auto-complete__option", has_text=subj
+            )
+            option.wait_for(state="visible", timeout=7000)
+            element = option.element_handle()
+            if element:
+                self.page.evaluate("(el) => el.click()", element)
+                self.page.wait_for_timeout(200)
+            else:
+                raise Exception(f"Option '{subj}' not found in autocomplete")
 
     def select_hobbies(self, hobbies: list[str]):
         # Получаем все чекбоксы input[name='hobbies-checkbox-X']
@@ -61,6 +70,8 @@ class AutomationPracticeFormPage:
             label_locator = self.page.locator(f"label[for='{input_id}']")
             label_text = label_locator.text_content().strip()
             if label_text in hobbies:
+                label_locator = self.page.locator(f"label[for='{input_id}']")
+                label_locator.wait_for(state="visible", timeout=5000)
                 label_locator.click()
 
     def upload_picture(self, filepath: str):

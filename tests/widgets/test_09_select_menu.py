@@ -62,23 +62,6 @@ def test_multiselect_placeholder(select_menu_page: SelectMenuPage):
     ), f"Ожидаемый placeholder 'Select...', получено '{placeholder}'"
 
 
-def test_multiselect_select_multiple_options(select_menu_page: SelectMenuPage):
-    options = ["Blue", "Black", "Green", "Red"]
-    for option in options:
-        select_menu_page.multiselect_select_option(option)
-    selected = select_menu_page.multiselect_get_selected_options()
-    for option in options:
-        assert (
-            option in selected
-        ), f"Опция '{option}' должна быть выбрана, выбранные: {selected}"
-    for option in options:
-        select_menu_page.multiselect_remove_selected_option(option)
-    selected_after_removal = select_menu_page.multiselect_get_selected_options()
-    assert (
-        not selected_after_removal
-    ), f"После удаления опций список не пустой: {selected_after_removal}"
-
-
 def test_select_multiple_options(select_menu_page: SelectMenuPage):
     options_to_select = ["volvo", "saab", "opel", "audi"]
     select_menu_page.select_standard_multiselect_options(options_to_select)
@@ -98,3 +81,32 @@ def test_deselect_all_options(select_menu_page: SelectMenuPage):
         selected == []
     ), f"После удаления выбранных опций ожидался пустой список, получили: {selected}"
     time.sleep(2)
+
+
+def test_multiselect_select_and_remove_options(select_menu_page: SelectMenuPage):
+    options = ["Blue", "Black", "Green", "Red"]
+    select_menu_page.multiselect_open()  # открыть меню один раз
+
+    for option in options:
+        print(f"Selecting option {option}")  # для логирования
+        option_locator = select_menu_page.page.locator(
+            f"{SelectMenuLocators.DROPDOWN_MENU} >> text='{option}'"
+        ).first
+        option_locator.wait_for(state="visible", timeout=7000)
+        option_locator.click(force=True)
+        select_menu_page.page.wait_for_timeout(300)
+
+    select_menu_page.page.mouse.click(0, 0)  # закрыть меню кликом вне
+
+    selected = select_menu_page.multiselect_get_selected_options()
+    for option in options:
+        assert (
+            option in selected
+        ), f"Опция '{option}' должна быть выбрана, выбранные: {selected}"
+
+    for option in options:
+        select_menu_page.multiselect_remove_selected_options(option)
+    selected_after_removal = select_menu_page.multiselect_get_selected_options()
+    assert (
+        not selected_after_removal
+    ), f"После удаления опций список не пустой: {selected_after_removal}"

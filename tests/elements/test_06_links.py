@@ -46,7 +46,7 @@ def test_click_home_link(links_page):
     with links_page.page.context.expect_page() as new_page_info:
         links_page.click_home_link()  # или другой метод, который кликает по <a id="simpleLink">
     new_page = new_page_info.value
-    new_page.wait_for_load_state(timeout=60000)  # важно для загрузки новой страницы
+    new_page.wait_for_load_state("domcontentloaded", timeout=10000)
     assert new_page.url == "https://demoqa.com/"  # сравниваем url новой страницы
     new_page.close()
 
@@ -55,6 +55,6 @@ def test_click_home79udw_link(links_page):
     with links_page.page.context.expect_page() as new_page_info:
         links_page.click_home79udw_link()  # кликает по <a id="dynamicLink">
     new_page = new_page_info.value
-    new_page.wait_for_load_state(timeout=60000)
+    new_page.wait_for_load_state("domcontentloaded", timeout=10000)
     assert new_page.url == "https://demoqa.com/"
     new_page.close()
