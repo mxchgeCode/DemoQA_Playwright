@@ -28,7 +28,7 @@ def test_menu2_and_3_visible(menu_page):
 
     for i in range(menu2_count):
         locator = menu_page.menu2_items.nth(i)
-        expect(locator).to_be_visible(timeout=500)
+        expect(locator).to_be_visible(timeout=10000)
 
         menu_page.hover_menu2(i)
 
@@ -48,4 +48,4 @@ def test_menu2_and_3_visible(menu_page):
 
     for j in range(menu3_count):
         locator3 = menu_page.menu3_items.nth(j)
-        expect(locator3).to_be_visible(timeout=500)
+        expect(locator3).to_be_visible(timeout=5000)

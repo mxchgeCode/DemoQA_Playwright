@@ -1,17 +1,4 @@
-import time
-
-import pytest
-from pages.elements.text_box_page import TextBoxPage
-
-
-@pytest.fixture(scope="function")
-def text_box_page(page):
-    tb_page = TextBoxPage(page)
-    tb_page.open()
-    return tb_page
-
-
-def test_fill_form_and_submit(text_box_page: TextBoxPage):
+def test_fill_text_form_and_submit(text_box_page):
     text_box_page.fill_user_name("John Doe")
     text_box_page.fill_user_email("john.doe@example.com")
     text_box_page.fill_current_address("123 Main St")

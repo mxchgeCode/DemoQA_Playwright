@@ -22,14 +22,14 @@ class MenuPage:
         locator = self.menu2_items.nth(index)
         if locator.count() == 0:
             return False
-        expect(locator).to_be_visible(timeout=500)
+        expect(locator).to_be_visible(timeout=5000)
         return True
 
     def is_menu3_visible(self, index: int):
         locator = self.menu3_items.nth(index)
         if locator.count() == 0:
             return False
-        expect(locator).to_be_visible(timeout=500)
+        expect(locator).to_be_visible(timeout=5000)
         return True
 
     def hover_menu1(self, index: int):

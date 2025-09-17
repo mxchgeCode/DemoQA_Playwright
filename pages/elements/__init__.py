@@ -2,3 +2,8 @@ from .links_page import LinksPage
 from .broken_links_page import BrokenLinksPage
 from .download_page import UploadDownloadPage
 from .dynamic_page import DynamicPropertiesPage
+from .text_box_page import TextBoxPage
+from .buttons_page import ButtonsPage
+from .check_box_page import CheckBoxPage
+from .radio_button_page import RadioButtonPage
+from .web_tables_page import WebTablesPage

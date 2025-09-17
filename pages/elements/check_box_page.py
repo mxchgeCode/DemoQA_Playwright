@@ -3,7 +3,7 @@ from locators.elements.check_box_locators import CheckboxLocators
 from data import URLs
 
 
-class CheckboxPage:
+class CheckBoxPage:
     def __init__(self, page: Page):
         self.page = page
 

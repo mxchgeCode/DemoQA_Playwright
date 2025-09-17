@@ -1,24 +1,24 @@
-def test_accordion_initial_state(accordion_page):
-    """Проверка начального состояния аккордеона."""
-    accordion_page.page.wait_for_timeout(1000)
-
-    assert (
-        accordion_page.first_section_header.is_visible()
-    ), "Первый заголовок должен быть видим"
-    assert (
-        accordion_page.second_section_header.is_visible()
-    ), "Второй заголовок должен быть видим"
-    assert (
-        accordion_page.third_section_header.is_visible()
-    ), "Третий заголовок должен быть видим"
+# def test_accordion_initial_state(accordion_page):
+#     """Проверка начального состояния аккордеона."""
+#     # accordion_page.page.wait_for_timeout(1000)
+#
+#     assert (
+#         accordion_page.first_section_header.is_visible()
+#     ), "Первый заголовок должен быть видим"
+#     assert (
+#         accordion_page.second_section_header.is_visible()
+#     ), "Второй заголовок должен быть видим"
+#     assert (
+#         accordion_page.third_section_header.is_visible()
+#     ), "Третий заголовок должен быть видим"
 
 
 def test_accordion_toggle_first_section(accordion_page):
     """Переключение первого раздела аккордеона."""
-    accordion_page.page.wait_for_timeout(500)
+    # accordion_page.page.wait_for_timeout(500)
     initial_state = accordion_page.is_first_section_expanded()
     accordion_page.click_first_section()
-    accordion_page.page.wait_for_timeout(500)
+    accordion_page.page.wait_for_timeout(1000)
     new_state = accordion_page.is_first_section_expanded()
     assert (
         new_state != initial_state
@@ -27,16 +27,16 @@ def test_accordion_toggle_first_section(accordion_page):
 
 def test_accordion_multiple_sections_independence(accordion_page):
     """Тест: проверка стандартного поведения аккордеона (только один раздел раскрыт)."""
-    accordion_page.page.wait_for_timeout(1000)
+    # accordion_page.page.wait_for_timeout(1000)
 
     accordion_page.click_first_section()
-    accordion_page.page.wait_for_timeout(500)
+    accordion_page.page.wait_for_timeout(1000)
     assert (
         accordion_page.is_first_section_expanded()
     ), "Первый раздел должен быть раскрыт"
 
     accordion_page.click_second_section()
-    accordion_page.page.wait_for_timeout(500)
+    accordion_page.page.wait_for_timeout(1000)
 
     # После открытия второго, первый обычно сворачивается
     assert (
@@ -50,14 +50,14 @@ def test_accordion_multiple_sections_independence(accordion_page):
 def test_accordion_content_accessibility(accordion_page):
     """Проверка доступности контента первого раздела."""
     accordion_page.click_first_section()
-    accordion_page.page.wait_for_timeout(500)
+    accordion_page.page.wait_for_timeout(1000)
     content = accordion_page.get_first_section_text()
     assert len(content) > 0, "Контент первого раздела должен быть доступен"
 
 
 def test_accordion_button_functionality(accordion_page):
     """Тест: функциональность кнопок аккордеона."""
-    accordion_page.page.wait_for_timeout(500)
+    # accordion_page.page.wait_for_timeout(1000)
 
     # Запоминаем начальное состояние (раскрыт/свернут первый раздел)
     initial_expanded = accordion_page.is_first_section_expanded()

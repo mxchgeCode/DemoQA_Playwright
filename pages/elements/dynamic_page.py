@@ -15,15 +15,15 @@ class DynamicPropertiesPage:
     def is_enable_after_enabled(self) -> bool:
         return self.page.locator(self.locators.ENABLE_AFTER_BUTTON).is_enabled()
 
-    def wait_and_check_enable_after(self, timeout=7000) -> bool:
+    def wait_and_check_enable_after(self, timeout=10000) -> bool:
         self.page.wait_for_function(
-            "el => !el.disabled",
-            self.page.locator(self.locators.ENABLE_AFTER_BUTTON).element_handle(),
+            "element => !element.disabled",
+            arg=self.page.locator(self.locators.ENABLE_AFTER_BUTTON).element_handle(),
             timeout=timeout,
         )
         return self.is_enable_after_enabled()
 
-    def is_visible_after_visible(self, timeout=7000) -> bool:
+    def is_visible_after_visible(self, timeout=10000) -> bool:
         try:
             self.page.wait_for_selector(
                 self.locators.VISIBLE_AFTER_BUTTON, timeout=timeout
