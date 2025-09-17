@@ -12,6 +12,13 @@ class URLs:
     DOWNLOAD = "https://demoqa.com/upload-download"
     DYNAMIC = "https://demoqa.com/dynamic-properties"
 
+    # Alerts
+    BROWSER_WINDOWS = "https://demoqa.com/browser-windows"
+    ALERTS = "https://demoqa.com/alerts"
+    FRAMES = "https://demoqa.com/frames"
+    NESTED_FRAMES = "https://demoqa.com/nestedframes"
+    MODAL_DIALOGS = "https://demoqa.com/modal-dialogs"
+
     # widgets
     PROGRESS_BAR = "https://demoqa.com/progress-bar"
     SLIDER = "https://demoqa.com/slider"

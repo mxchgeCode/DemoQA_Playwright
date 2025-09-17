@@ -31,6 +31,10 @@
    8. Страница загрузки файлов (https://demoqa.com/upload-download)
    9. Страница эффектов (https://demoqa.com/dynamic-properties)
 
+Раздел Alerts:
+   1. Новые окна (https://demoqa.com/browser-windows)
+   2. Алерты (https://demoqa.com/alerts)
+
 Раздел Forms:
    1. Заполнение формы регистрации (https://demoqa.com/automation-practice-form)  
 

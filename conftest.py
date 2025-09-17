@@ -3,6 +3,7 @@ import time
 import pytest
 from playwright.sync_api import Browser, Page
 from data import URLs
+
 from pages.elements import (
     LinksPage,
     BrokenLinksPage,
@@ -26,6 +27,11 @@ from pages.widgets import (
     SelectMenuPage,
 )
 from pages.forms import AutomationPracticeFormPage
+
+from pages.alerts import (
+    BrowserWindowsPage,
+    AlertsPage,
+)
 
 # Общий список блокировок ресурсов
 blocked_domains = [
@@ -60,6 +66,7 @@ blocked_domains = [
 ]
 
 
+# Функция блокировки запросов
 def block_external(route):
     url = route.request.url.lower()
     resource_type = route.request.resource_type
@@ -72,63 +79,9 @@ def block_external(route):
     route.continue_()
 
 
-#
-# def pytest_addoption(parser):
-#     parser.addoption("--browser", action="store", default="chromium")
-#
-# @pytest.fixture
-# def browser_name(request):
-#     return request.config.getoption("--browser")
-#
-# @pytest.fixture
-# def browser_context_args(browser_name):
-#     return {}
-#
-# @pytest.fixture(scope="module")
-# def browser_context(browser_context_args, playwright, browser_name):
-#     browser = getattr(playwright, browser_name).launch(headless=False)
-#     context = browser.new_context(**browser_context_args)
-#     yield context
-#     context.close()
-#     browser.close()
-#
-# @pytest.fixture(scope="module")
-# def page(browser_context):
-#     page = browser_context.new_page()
-#     yield page
-#     page.close()
-#
-#
-#
-# @pytest.fixture(scope="module")
-# def context(browser: "Browser"):
-#     context = browser.new_context(
-#         ignore_https_errors=True,
-#         bypass_csp=True,
-#         viewport={"width": 1920, "height": 1080},
-#     )
-#     context.route("**/*", block_external)
-#     yield context
-#     context.close()
-
-
-def block_external(route, request):
-    # Пример фильтрации или блокировки запросов
-    # Пропускаем только свои запросы, остальные блокируем
-    if "yourdomain.com" in request.url:
-        route.continue_()
-    else:
-        route.abort()
-
-
-@pytest.fixture(scope="module")
-def browser_context_args():
-    return {}
-
-
 @pytest.fixture(scope="module")
 def browser_context(playwright, browser_name, browser_context_args):
-    # Запуск Firefox без параметра firefox_user_prefs
+    # Основной браузерный контекст с блокировкой внешних запросов
     browser = getattr(playwright, browser_name).launch(headless=False)
     context = browser.new_context(
         ignore_https_errors=True,
@@ -136,16 +89,29 @@ def browser_context(playwright, browser_name, browser_context_args):
         viewport={"width": 1920, "height": 1080},
         **browser_context_args,
     )
+    context.route("**/*", block_external)
     yield context
     context.close()
     browser.close()
 
 
 @pytest.fixture(scope="module")
-def page(browser_context):
+def page(browser_context) -> Page:
     page = browser_context.new_page()
     yield page
     page.close()
+
+
+@pytest.fixture(scope="module")
+def context_without_blocking(browser: Browser):
+    # Контекст без блокировки (для broken_links_page)
+    context = browser.new_context(
+        ignore_https_errors=True,
+        bypass_csp=True,
+        viewport={"width": 1920, "height": 1080},
+    )
+    yield context
+    context.close()
 
 
 def create_page_with_wait(
@@ -320,3 +286,24 @@ def practice_form_page(page: "Page"):
     selectors = [("#app", "visible", 10000)]
     create_page_with_wait(page, URLs.PRACTICE_FORM, selectors)
     yield AutomationPracticeFormPage(page)
+
+
+@pytest.fixture(scope="module")
+def browser_windows_page(page: "Page"):
+    selectors = [("#app", "visible", 10000)]
+    create_page_with_wait(page, URLs.BROWSER_WINDOWS, selectors)
+    yield BrowserWindowsPage(page)
+
+
+@pytest.fixture(scope="module")
+def alerts_page(page: "Page"):
+    page.set_default_timeout(10000)
+    page.set_default_navigation_timeout(10000)
+    selectors = [("#app", "visible", 10000)]
+    # Изначальный переход с ожиданием нужных элементов
+    create_page_with_wait(page, URLs.ALERTS, selectors)
+    # Дальше дополнительный переход с нужными параметрами, если необходимо
+    page.goto(URLs.ALERTS, wait_until="domcontentloaded", timeout=0)
+    # Дополнительное ожидание конкретного элемента на странице
+    page.wait_for_selector("#alertButton", timeout=10000)
+    yield AlertsPage(page)
