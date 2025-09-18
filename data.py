@@ -36,3 +36,9 @@ class URLs:
     RESIZABLE = "https://demoqa.com/resizable"
     DROPPABLE = "https://demoqa.com/droppable"
     DRAGABBLE = "https://demoqa.com/dragabble"
+
+    # Login Page
+    LOGIN_PAGE = "https://demoqa.com/login"
+    BOOKS = "https://demoqa.com/books"
+    PROFILE = "https://demoqa.com/profile"
+    BOOK_API = "https://demoqa.com/swagger"

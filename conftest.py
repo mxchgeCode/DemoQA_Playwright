@@ -47,6 +47,11 @@ from pages.interactions import (
     DragabblePage,
 )
 
+from pages.bookstore import (
+    LoginPage,
+)
+
+
 # Общий список блокировок ресурсов
 blocked_domains = [
     "doubleclick.net",
@@ -382,3 +387,13 @@ def dragabble_page(page: "Page"):
     selectors = [("#app", "visible", 10000)]
     create_page_with_wait(page, URLs.DRAGABBLE, selectors)
     yield DragabblePage(page)
+
+
+# =============================================================
+
+
+@pytest.fixture(scope="module")
+def login_page(page: "Page"):
+    selectors = [("#app", "visible", 10000)]
+    create_page_with_wait(page, URLs.LOGIN_PAGE, selectors)
+    yield LoginPage(page)

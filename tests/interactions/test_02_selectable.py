@@ -1,10 +1,9 @@
 import logging
-from pages.interactions.selectable_page import SelectablePage
 
 logger = logging.getLogger(__name__)
 
 
-def test_select_list_items(selectable_page: SelectablePage):
+def test_select_list_items(selectable_page):
     selectable_page.activate_list_tab()
     items = selectable_page.get_list_items()
     logger.info(f"Доступные элементы списка: {items}")
@@ -17,7 +16,7 @@ def test_select_list_items(selectable_page: SelectablePage):
     assert items[2] in selected
 
 
-def test_select_grid_items(selectable_page: SelectablePage):
+def test_select_grid_items(selectable_page):
     selectable_page.activate_grid_tab()
     items = selectable_page.get_grid_items()
     logger.info(f"Доступные элементы сетки: {items}")

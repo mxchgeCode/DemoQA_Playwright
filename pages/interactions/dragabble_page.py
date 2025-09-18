@@ -12,10 +12,6 @@ class DragabblePage:
     def __init__(self, page: Page):
         self.page = page
 
-    def open(self):
-        logger.info("Open https://demoqa.com/dragabble")
-        self.page.goto(URLs.DRAGABBLE, wait_until="domcontentloaded")
-
     def drag_box(self, x_offset: int, y_offset: int):
         drag_box = self.page.locator(DragabbleLocators.DRAG_BOX)
         box_bounding = drag_box.bounding_box()
