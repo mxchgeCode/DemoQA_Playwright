@@ -34,6 +34,9 @@
 Раздел Alerts:
    1. Новые окна (https://demoqa.com/browser-windows)
    2. Алерты (https://demoqa.com/alerts)
+   3. Фреймы (https://demoqa.com/frames)
+   4. Вложенные фреймы (https://demoqa.com/nestedframes)
+   5. Модальные окна (https://demoqa.com/modal-dialogs)
 
 Раздел Forms:
    1. Заполнение формы регистрации (https://demoqa.com/automation-practice-form)  

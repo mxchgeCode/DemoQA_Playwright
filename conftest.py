@@ -3,6 +3,8 @@ import time
 import pytest
 from playwright.sync_api import Browser, Page
 from data import URLs
+from pages.alerts.frames_page import FramesPage
+from pages.alerts.nested_frames_page import NestedFramesPage
 
 from pages.elements import (
     LinksPage,
@@ -315,3 +317,17 @@ def modal_page(page: "Page"):
     selectors = [("#app", "visible", 10000)]
     create_page_with_wait(page, URLs.MODAL_DIALOGS, selectors)
     yield ModalDialogsPage(page)
+
+
+@pytest.fixture(scope="module")
+def frames_page(page: "Page"):
+    selectors = [("#app", "visible", 10000)]
+    create_page_with_wait(page, URLs.FRAMES, selectors)
+    yield FramesPage(page)
+
+
+@pytest.fixture(scope="module")
+def nested_frames_page(page: "Page"):
+    selectors = [("#app", "visible", 10000)]
+    create_page_with_wait(page, URLs.NESTED_FRAMES, selectors)
+    yield NestedFramesPage(page)
