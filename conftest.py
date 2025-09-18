@@ -31,6 +31,7 @@ from pages.forms import AutomationPracticeFormPage
 from pages.alerts import (
     BrowserWindowsPage,
     AlertsPage,
+    ModalDialogsPage,
 )
 
 # Общий список блокировок ресурсов
@@ -307,3 +308,10 @@ def alerts_page(page: "Page"):
     # Дополнительное ожидание конкретного элемента на странице
     page.wait_for_selector("#alertButton", timeout=10000)
     yield AlertsPage(page)
+
+
+@pytest.fixture(scope="module")
+def modal_page(page: "Page"):
+    selectors = [("#app", "visible", 10000)]
+    create_page_with_wait(page, URLs.MODAL_DIALOGS, selectors)
+    yield ModalDialogsPage(page)
