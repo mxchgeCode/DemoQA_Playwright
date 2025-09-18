@@ -25,6 +25,7 @@ from pages.alerts import (
     AlertsPage,
     ModalDialogsPage,
 )
+from pages.interactions.droppable_page import DroppablePage
 from pages.interactions.resizable_page import ResizablePage
 
 from pages.widgets import (
@@ -43,8 +44,8 @@ from pages.widgets import (
 from pages.interactions import (
     SortablePage,
     SelectablePage,
-    SelectablePage,
-    # ResizablePage,
+    ResizablePage,
+    DroppablePage,
 )
 
 # Общий список блокировок ресурсов
@@ -370,9 +371,8 @@ def resizable_page(page: "Page"):
     yield ResizablePage(page)
 
 
-#
-# @pytest.fixture(scope="module")
-# def nested_frames_page(page: "Page"):
-#     selectors = [("#app", "visible", 10000)]
-#     create_page_with_wait(page, URLs.NESTED_FRAMES, selectors)
-#     yield NestedFramesPage(page)
+@pytest.fixture(scope="module")
+def droppable_page(page: "Page"):
+    selectors = [("#app", "visible", 10000)]
+    create_page_with_wait(page, URLs.DROPPABLE, selectors)
+    yield DroppablePage(page)
