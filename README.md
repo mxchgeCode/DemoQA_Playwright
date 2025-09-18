@@ -52,3 +52,15 @@
    8. Меню на странице (http://demoqa.com/menu)
    9. Dropdown меню на странице (https://demoqa.com/select-menu)
 
+Раздел Interactions:
+   1. Сортируемые списки (https://demoqa.com/sortable)
+   2. Выбираемые списки (https://demoqa.com/selectable)
+   3. Изменяемые элементы (https://demoqa.com/resizable)
+   4. Перемещаемые элементы (https://demoqa.com/droppable)
+   5. Перемещаемые элементы 2 (https://demoqa.com/dragabble)
+
+Раздел Book Store Application:
+   1. Страница авторизации (https://demoqa.com/login)
+   2. Страница магазина (https://demoqa.com/books)
+   3. Страница профиля (https://demoqa.com/profile)
+   4. Страница апи магазина (https://demoqa.com/swagger/)

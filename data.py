@@ -29,3 +29,10 @@ class URLs:
     TOOLTIPS = "https://demoqa.com/tool-tips"
     MENU = "https://demoqa.com/menu"
     SELECT_MENU = "https://demoqa.com/select-menu"
+
+    # interactions
+    SORTABLE = "https://demoqa.com/sortable"
+    SELECTABLE = "https://demoqa.com/selectable"
+    RESIZABLE = "https://demoqa.com/resizable"
+    DROPPABLE = "https://demoqa.com/droppable"
+    DRAGABBLE = "https://demoqa.com/dragabble"

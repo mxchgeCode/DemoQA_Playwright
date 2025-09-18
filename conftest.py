@@ -17,6 +17,16 @@ from pages.elements import (
     TextBoxPage,
     WebTablesPage,
 )
+from pages.forms import AutomationPracticeFormPage
+
+
+from pages.alerts import (
+    BrowserWindowsPage,
+    AlertsPage,
+    ModalDialogsPage,
+)
+from pages.interactions.resizable_page import ResizablePage
+
 from pages.widgets import (
     AccordionPage,
     AutoCompletePage,
@@ -28,12 +38,13 @@ from pages.widgets import (
     MenuPage,
     SelectMenuPage,
 )
-from pages.forms import AutomationPracticeFormPage
 
-from pages.alerts import (
-    BrowserWindowsPage,
-    AlertsPage,
-    ModalDialogsPage,
+
+from pages.interactions import (
+    SortablePage,
+    SelectablePage,
+    SelectablePage,
+    # ResizablePage,
 )
 
 # Общий список блокировок ресурсов
@@ -331,3 +342,37 @@ def nested_frames_page(page: "Page"):
     selectors = [("#app", "visible", 10000)]
     create_page_with_wait(page, URLs.NESTED_FRAMES, selectors)
     yield NestedFramesPage(page)
+
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+@pytest.fixture(scope="module")
+def sortable_page(page: "Page"):
+    selectors = [("#app", "visible", 10000)]
+    create_page_with_wait(page, URLs.SORTABLE, selectors)
+    yield SortablePage(page)
+
+
+@pytest.fixture(scope="module")
+def selectable_page(page: "Page"):
+    selectors = [("#app", "visible", 10000)]
+    create_page_with_wait(page, URLs.SELECTABLE, selectors)
+    yield SelectablePage(page)
+
+
+@pytest.fixture(scope="module")
+def resizable_page(page: "Page"):
+    selectors = [("#app", "visible", 10000)]
+    create_page_with_wait(page, URLs.RESIZABLE, selectors)
+    yield ResizablePage(page)
+
+
+#
+# @pytest.fixture(scope="module")
+# def nested_frames_page(page: "Page"):
+#     selectors = [("#app", "visible", 10000)]
+#     create_page_with_wait(page, URLs.NESTED_FRAMES, selectors)
+#     yield NestedFramesPage(page)
