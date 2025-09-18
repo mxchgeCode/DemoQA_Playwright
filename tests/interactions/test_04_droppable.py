@@ -12,6 +12,7 @@ def test_simple_droppable(droppable_page):
     logger.info(f"Simple drop result text: {text}")
     assert text == "Dropped!", "Simple tab: drop failed"
 
+
 def test_accept_droppable_non_accept(droppable_page):
     droppable_page.activate_accept_tab()
 

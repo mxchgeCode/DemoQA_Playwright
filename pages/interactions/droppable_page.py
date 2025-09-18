@@ -1,9 +1,9 @@
-import logging
 import time
 from playwright.sync_api import Page
 
 from data import URLs
 from locators.interactions.droppable_locators import DroppableLocators
+import logging
 
 logger = logging.getLogger(__name__)
 
