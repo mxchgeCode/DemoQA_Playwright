@@ -60,4 +60,84 @@ class DragabblePage:
 
         self.page.mouse.up()
 
+    # 3d tab
+    def container_restricted_tab(self):
+        logger.info("Container Restricted Tab")
+        self.page.click(DragabbleLocators.TAB_CONTAINER_RESTRICTED)
+        time.sleep(1)
 
+    def drag_box_container(
+        self, locator, x_offset: int, y_offset: int, vertical_only=False
+    ):
+        element = self.page.locator(locator)
+
+        self.page.eval_on_selector(
+            locator,
+            """
+            (el) => {
+                el.style.userSelect = 'none';
+                el.style.webkitUserSelect = 'none';
+                el.style.msUserSelect = 'none';
+            }
+        """,
+        )
+
+        box_bounding = element.bounding_box()
+        start_x = box_bounding["x"] + box_bounding["width"] / 2
+        start_y = box_bounding["y"] + box_bounding["height"] / 2
+
+        self.page.mouse.move(start_x, start_y)
+        self.page.mouse.down()
+
+        steps = abs(y_offset) if vertical_only else max(abs(x_offset), abs(y_offset))
+        steps = max(steps, 10)  # минимум 10 шагов
+
+        for step in range(1, steps + 1):
+            if vertical_only:
+                new_y = start_y + y_offset * step / steps
+                self.page.mouse.move(start_x, new_y)
+            else:
+                new_x = start_x + x_offset * step / steps
+                new_y = start_y + y_offset * step / steps
+                self.page.mouse.move(new_x, new_y)
+            # time.sleep(0.015)  # пауза 15мс
+
+        self.page.mouse.up()
+
+        self.page.eval_on_selector(
+            locator,
+            """
+            (el) => {
+                el.style.userSelect = '';
+                el.style.webkitUserSelect = '';
+                el.style.msUserSelect = '';
+            }
+        """,
+        )
+
+    def js_drag_vertical(self, locator, y_offset):
+        self.page.eval_on_selector(
+            locator,
+            f"""
+            el => {{
+                const currentTop = parseFloat(window.getComputedStyle(el).top) || 0;
+                el.style.top = (currentTop + {y_offset}) + 'px';
+            }}
+        """,
+        )
+
+    def cursor_style_tab(self):
+        logger.info("Cursor Style Tab")
+        self.page.click(DragabbleLocators.TAB_CURSOR_STYLE)
+        time.sleep(1)
+
+    def drag_box_cursor(self, locator, x_offset: int, y_offset: int):
+        element = self.page.locator(locator)
+        box_bounding = element.bounding_box()
+        start_x = box_bounding["x"] + box_bounding["width"] / 2
+        start_y = box_bounding["y"] + box_bounding["height"] / 2
+
+        self.page.mouse.move(start_x, start_y)
+        self.page.mouse.down()
+        self.page.mouse.move(start_x + x_offset, start_y + y_offset, steps=10)
+        self.page.mouse.up()

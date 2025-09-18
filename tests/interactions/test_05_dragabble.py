@@ -25,18 +25,56 @@ def test_axis_restricted_tab(dragabble_page):
     box_y_after = elt_y.bounding_box()
     assert box_y_before != box_y_after
 
-# def test_container_restricted_tab(dragabble_page):
-#     dragabble_page.container_restricted_tab()
-#
-#     div_element = dragabble_page.page.locator(DragabbleLocators.DRAGGABLE_DIV_CONTAINER)
-#     box_div_before = div_element.bounding_box()
-#     dragabble_page.drag_box_container(DragabbleLocators.DRAGGABLE_DIV_CONTAINER, 50, 50)
-#     box_div_after = div_element.bounding_box()
-#     assert box_div_before != box_div_after, "Div container restricted drag box did not move"
-#
-#     span_element = dragabble_page.page.locator(DragabbleLocators.DRAGGABLE_SPAN_CONTAINER)
-#     box_span_before = span_element.bounding_box()
-#     dragabble_page.drag_box_container(DragabbleLocators.DRAGGABLE_SPAN_CONTAINER, 30, 30)
-#     box_span_after = span_element.bounding_box()
-#     assert box_span_before != box_span_after, "Span container restricted drag box did not move"
 
+def test_container_restricted_tab(dragabble_page):
+    dragabble_page.container_restricted_tab()
+
+    # Перемещение div элемента (все направления)
+    div_locator = DragabbleLocators.DRAGGABLE_DIV_CONTAINER
+    div_element = dragabble_page.page.locator(div_locator)
+    box_div_before = div_element.bounding_box()
+    dragabble_page.drag_box_container(div_locator, 50, 50)
+    box_div_after = div_element.bounding_box()
+    assert (
+        box_div_before != box_div_after
+    ), "Div container restricted drag box did not move"
+
+    # Перемещение span элемента (только по вертикали)
+    span_locator = DragabbleLocators.DRAGGABLE_SPAN_CONTAINER
+    span_element = dragabble_page.page.locator(span_locator)
+    box_span_before = span_element.bounding_box()
+
+    dragabble_page.js_drag_vertical(span_locator, 50)
+
+    box_span_after = span_element.bounding_box()
+    assert (
+        box_span_before != box_span_after
+    ), "Span container restricted drag box did not move"
+
+
+def test_cursor_style_tab(dragabble_page):
+    dragabble_page.cursor_style_tab()
+
+    # I will always stick to the center
+    locator = DragabbleLocators.CURSOR_CENTER
+    element = dragabble_page.page.locator(locator)
+    box_before = element.bounding_box()
+    dragabble_page.drag_box_cursor(locator, 40, 40)
+    box_after = element.bounding_box()
+    assert box_before != box_after, "Cursor Center box did not move"
+
+    # My cursor is at top left
+    locator = DragabbleLocators.CURSOR_TOP_LEFT
+    element = dragabble_page.page.locator(locator)
+    box_before = element.bounding_box()
+    dragabble_page.drag_box_cursor(locator, 40, 40)
+    box_after = element.bounding_box()
+    assert box_before != box_after, "Cursor Top Left box did not move"
+
+    # My cursor is at bottom
+    locator = DragabbleLocators.CURSOR_BOTTOM
+    element = dragabble_page.page.locator(locator)
+    box_before = element.bounding_box()
+    dragabble_page.drag_box_cursor(locator, 40, 40)
+    box_after = element.bounding_box()
+    assert box_before != box_after, "Cursor Bottom box did not move"
