@@ -25,8 +25,6 @@ from pages.alerts import (
     AlertsPage,
     ModalDialogsPage,
 )
-from pages.interactions.droppable_page import DroppablePage
-from pages.interactions.resizable_page import ResizablePage
 
 from pages.widgets import (
     AccordionPage,
@@ -46,6 +44,7 @@ from pages.interactions import (
     SelectablePage,
     ResizablePage,
     DroppablePage,
+    DragabblePage,
 )
 
 # Общий список блокировок ресурсов
@@ -376,3 +375,10 @@ def droppable_page(page: "Page"):
     selectors = [("#app", "visible", 10000)]
     create_page_with_wait(page, URLs.DROPPABLE, selectors)
     yield DroppablePage(page)
+
+
+@pytest.fixture(scope="module")
+def dragabble_page(page: "Page"):
+    selectors = [("#app", "visible", 10000)]
+    create_page_with_wait(page, URLs.DRAGABBLE, selectors)
+    yield DragabblePage(page)

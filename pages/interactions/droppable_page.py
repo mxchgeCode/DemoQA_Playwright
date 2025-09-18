@@ -2,6 +2,7 @@ import logging
 import time
 from playwright.sync_api import Page
 
+from data import URLs
 from locators.interactions.droppable_locators import DroppableLocators
 
 logger = logging.getLogger(__name__)
@@ -13,7 +14,7 @@ class DroppablePage:
 
     def open(self):
         logger.info("Open https://demoqa.com/droppable")
-        self.page.goto("https://demoqa.com/droppable", wait_until="domcontentloaded")
+        self.page.goto(URLs.DROPPABLE, wait_until="domcontentloaded")
 
     def activate_simple_tab(self):
         logger.info("Activate Simple Tab")
