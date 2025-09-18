@@ -1,3 +1,4 @@
+import random
 import time
 
 import pytest
@@ -397,3 +398,9 @@ def login_page(page: "Page"):
     selectors = [("#app", "visible", 10000)]
     create_page_with_wait(page, URLs.LOGIN_PAGE, selectors)
     yield LoginPage(page)
+
+
+@pytest.fixture(scope="session")
+def unique_username():
+    username = f"asd{random.randint(0, 10000)}"
+    return username
