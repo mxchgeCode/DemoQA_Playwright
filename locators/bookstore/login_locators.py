@@ -2,12 +2,9 @@ class LoginLocators:
     USERNAME_INPUT = "#userName"
     PASSWORD_INPUT = "#password"
 
-
     ERROR_MESSAGE = "#name"  # ошибка при неуспешном входе
 
     FORGOT_PASSWORD_LINK = "text=Forgot Password"
-
-
 
     NEW_USER_BUTTON = "#newUser"
     PAGE_HEADER = "h1.text-center"

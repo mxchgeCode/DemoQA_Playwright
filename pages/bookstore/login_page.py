@@ -14,15 +14,6 @@ class LoginPage:
         self.page.click(LoginLocators.LOGIN_BUTTON)
         time.sleep(5)
 
-    def get_error_message(self):
-        try:
-            # Ожидаем появления элемента ошибки до 5 секунд
-            error_elem = self.page.locator(LoginLocators.ERROR_MESSAGE)
-            error_elem.wait_for(state="visible", timeout=5000)
-            return error_elem.text_content()
-        except:
-            return None
-
     def click_new_user(self):
         self.page.click(LoginLocators.NEW_USER_BUTTON)
 
@@ -35,17 +26,6 @@ class LoginPage:
     def is_field_invalid(self, field_locator: str):
         return self.page.is_visible(field_locator)
 
-    def fill_registration_form(self, first_name, last_name, username, password):
-        self.page.fill(LoginLocators.FIRST_NAME, first_name)
-        self.page.fill(LoginLocators.LAST_NAME, last_name)
-        self.page.fill(LoginLocators.USER_NAME_REG, username)
-        self.page.fill(LoginLocators.PASSWORD_REG, password)
-
-    def get_password_error(self):
-        if self.page.is_visible(LoginLocators.PASSWORD_ERROR):
-            return self.page.text_content(LoginLocators.PASSWORD_ERROR)
-        return None
-
 
     def get_captcha_error(self):
         try:
@@ -55,11 +35,6 @@ class LoginPage:
         except:
             return None
 
-    def check_captcha_checkbox(self):
-        # Переключаемся во фрейм с reCAPTCHA по атрибуту title
-        frame = self.page.frame_locator("iframe[title='reCAPTCHA']")
-        # Кликаем по чекбоксу внутри фрейма
-        frame.locator(".recaptcha-checkbox-border").click()
 
     def click_back_to_login(self):
         self.page.click(LoginLocators.BACK_TO_LOGIN_BUTTON)
@@ -75,3 +50,4 @@ class LoginPage:
         if self.page.is_visible(LoginLocators.USER_DISPLAY):
             return self.page.text_content(LoginLocators.USER_DISPLAY)
         return None
+

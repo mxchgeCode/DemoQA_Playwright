@@ -1,4 +1,3 @@
-import random
 import time
 
 import pytest
@@ -102,7 +101,7 @@ def block_external(route):
 @pytest.fixture(scope="module")
 def browser_context(playwright, browser_name, browser_context_args):
     # Основной браузерный контекст с блокировкой внешних запросов
-    browser = getattr(playwright, browser_name).launch(headless=False)
+    browser = getattr(playwright, browser_name).launch(headless=False, slow_mo=100)
     context = browser.new_context(
         ignore_https_errors=True,
         bypass_csp=True,
@@ -389,18 +388,8 @@ def dragabble_page(page: "Page"):
     create_page_with_wait(page, URLs.DRAGABBLE, selectors)
     yield DragabblePage(page)
 
-
-# =============================================================
-
-
 @pytest.fixture(scope="module")
 def login_page(page: "Page"):
     selectors = [("#app", "visible", 10000)]
     create_page_with_wait(page, URLs.LOGIN_PAGE, selectors)
     yield LoginPage(page)
-
-
-@pytest.fixture(scope="session")
-def unique_username():
-    username = f"asd{random.randint(0, 10000)}"
-    return username

@@ -63,4 +63,4 @@
    1. Страница авторизации (https://demoqa.com/login)
    2. Страница магазина (https://demoqa.com/books)
    3. Страница профиля (https://demoqa.com/profile)
-   4. Страница апи магазина (https://demoqa.com/swagger/)
+ 
