@@ -48,3 +48,9 @@ class LoginPage:
         if self.page.is_visible(LoginLocators.USER_DISPLAY):
             return self.page.text_content(LoginLocators.USER_DISPLAY)
         return None
+
+    def fill_registration_form(self, first_name, last_name, username, password):
+        self.page.fill(LoginLocators.FIRST_NAME, first_name)
+        self.page.fill(LoginLocators.LAST_NAME, last_name)
+        self.page.fill(LoginLocators.USER_NAME_REG, username)
+        self.page.fill(LoginLocators.PASSWORD_REG, password)

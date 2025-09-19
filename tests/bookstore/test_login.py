@@ -4,7 +4,7 @@ from locators.bookstore.login_locators import LoginLocators
 
 def test_invalid_login(login_page):
     login_page.login("wrong_user", "wrong_password")
-    error = login_page.get_error_message()
+    error = login_page.page.get_error_message()
     assert (
         error == "Invalid username or password!"
     ), f"Expected error message, got: {error}"
@@ -44,7 +44,7 @@ def test_new_user_register_empty_fields(login_page):
 
 def test_register_password_rules(login_page):
     login_page.click_new_user()
-    login_page.fill_registration_form("John", "Doe", "johndoe123", "123")
+    login_page.page.fill_registration_form("John", "Doe", "johndoe123", "123")
     login_page.click_register_button()
     error = login_page.get_captcha_error()
     assert error == "Please verify reCaptcha to register!"
