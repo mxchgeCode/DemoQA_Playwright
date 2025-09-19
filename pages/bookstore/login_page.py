@@ -26,7 +26,6 @@ class LoginPage:
     def is_field_invalid(self, field_locator: str):
         return self.page.is_visible(field_locator)
 
-
     def get_captcha_error(self):
         try:
             error_elem = self.page.locator(LoginLocators.CAPTCHA_ERROR)
@@ -34,7 +33,6 @@ class LoginPage:
             return error_elem.text_content()
         except:
             return None
-
 
     def click_back_to_login(self):
         self.page.click(LoginLocators.BACK_TO_LOGIN_BUTTON)
@@ -50,4 +48,3 @@ class LoginPage:
         if self.page.is_visible(LoginLocators.USER_DISPLAY):
             return self.page.text_content(LoginLocators.USER_DISPLAY)
         return None
-

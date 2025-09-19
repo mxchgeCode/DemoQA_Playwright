@@ -41,6 +41,7 @@ def test_new_user_register_empty_fields(login_page):
     time.sleep(1)
     login_page.click_back_to_login()
 
+
 def test_register_password_rules(login_page):
     login_page.click_new_user()
     login_page.fill_registration_form("John", "Doe", "johndoe123", "123")
@@ -68,6 +69,7 @@ def test_valid_login(login_page):
         time.sleep(1)
     assert username == "asd"
 
+
 def test_go_to_book_store(login_page):
     """
     ТОЛЬКО ПОСЛЕ ТЕСТА test_valid_login ДЛЯ ЛОГИНА
@@ -78,9 +80,10 @@ def test_go_to_book_store(login_page):
     login_page.page.wait_for_url("**/books")
     assert "books" in login_page.page.url
 
+
 def test_search_book_and_go_back(login_page):
     """
-        ТОЛЬКО ПОСЛЕ ТЕСТА test_valid_login ДЛЯ ЛОГИНА
+    ТОЛЬКО ПОСЛЕ ТЕСТА test_valid_login ДЛЯ ЛОГИНА
     """
     # page = login_page.page
     login_page.page.goto("https://demoqa.com/books")
@@ -88,9 +91,7 @@ def test_search_book_and_go_back(login_page):
     login_page.page.fill("input#searchBox", "Git Pocket Guide")
     login_page.page.wait_for_selector(".rt-tbody .rt-tr-group")
 
-
     rows = login_page.page.locator(".rt-tbody .rt-tr")
-
 
     title = rows.nth(0).locator(".rt-td").nth(1).text_content()
     assert "Git Pocket Guide" in title
@@ -100,7 +101,7 @@ def test_search_book_and_go_back(login_page):
 
 def test_delete_account_cancel(login_page):
     """
-        ТОЛЬКО ПОСЛЕ ТЕСТА test_valid_login ДЛЯ ЛОГИНА
+    ТОЛЬКО ПОСЛЕ ТЕСТА test_valid_login ДЛЯ ЛОГИНА
     """
 
     def on_dialog(dialog):
@@ -111,6 +112,5 @@ def test_delete_account_cancel(login_page):
     try:
         # login_page.page.click("div.buttonWrap button.btn-primary:has-text('Delete Account')")
         login_page.page.click("button:has-text('Delete Account')")
-    except : pass
-
-
+    except:
+        pass

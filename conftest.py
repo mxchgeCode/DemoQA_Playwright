@@ -388,6 +388,7 @@ def dragabble_page(page: "Page"):
     create_page_with_wait(page, URLs.DRAGABBLE, selectors)
     yield DragabblePage(page)
 
+
 @pytest.fixture(scope="module")
 def login_page(page: "Page"):
     selectors = [("#app", "visible", 10000)]
