@@ -1,10 +1,40 @@
+"""
+Page Object для страницы Progress Bar с интерактивным прогресс-баром.
+Содержит методы для управления прогрессом и получения текущего значения.
+"""
+
 import time
-from pages.widgets.base_page import BasePage
+from playwright.sync_api import Page
 from locators.widgets.progress_bar_locators import ProgressBarLocators
+from pages.base_page import BasePage
 
 
 class ProgressBarPage(BasePage):
-    def _wait_for_enabled(self, locator, timeout=5000):
+    """
+    Страница тестирования прогресс-бара с кнопками Start/Stop/Reset.
+    Позволяет управлять ходом выполнения прогресса и получать текущие значения.
+    """
+
+    def __init__(self, page: Page):
+        """
+        Инициализация страницы прогресс-бара.
+
+        Args:
+            page: Экземпляр страницы Playwright
+        """
+        super().__init__(page)
+
+    def _wait_for_enabled(self, locator, timeout: int = 5000) -> None:
+        """
+        Вспомогательный метод для ожидания активности элемента.
+
+        Args:
+            locator: Локатор элемента для ожидания
+            timeout: Максимальное время ожидания в миллисекундах
+
+        Raises:
+            TimeoutError: Если элемент не стал активным за указанное время
+        """
         start_time = time.time()
         while True:
             if locator.is_enabled():
@@ -13,11 +43,23 @@ class ProgressBarPage(BasePage):
                 raise TimeoutError(f"Element did not become enabled in {timeout} ms")
             self.page.wait_for_timeout(100)
 
-    def start_progress(self, retries=3):
+    def start_progress(self, retries: int = 3) -> None:
+        """
+        Запускает выполнение прогресс-бара.
+
+        Args:
+            retries: Количество попыток в случае неудачи
+
+        Postconditions: прогресс-бар начинает заполняться, кнопка меняется на Stop
+
+        Raises:
+            Exception: Если не удалось запустить после всех попыток
+        """
+        self.log_step("Запускаем прогресс-бар")
         for attempt in range(retries):
             try:
                 button = self.page.locator(ProgressBarLocators.START_STOP_BUTTON)
-                button.wait_for(state="visible", timeout=10000)
+                self.wait_for_visible(ProgressBarLocators.START_STOP_BUTTON, 10000)
                 self._wait_for_enabled(button, timeout=5000)
                 button.click()
                 return
@@ -26,11 +68,20 @@ class ProgressBarPage(BasePage):
                     raise Exception(f"Failed to start after {retries} attempts") from e
                 self.page.wait_for_timeout(1000)
 
-    def stop_progress(self, retries=3):
+    def stop_progress(self, retries: int = 3) -> None:
+        """
+        Останавливает выполнение прогресс-бара.
+
+        Args:
+            retries: Количество попыток в случае неудачи
+
+        Postconditions: прогресс-бар останавливается, кнопка меняется на Start
+        """
+        self.log_step("Останавливаем прогресс-бар")
         for attempt in range(retries):
             try:
                 button = self.page.locator(ProgressBarLocators.START_STOP_BUTTON)
-                button.wait_for(state="visible", timeout=10000)
+                self.wait_for_visible(ProgressBarLocators.START_STOP_BUTTON, 10000)
                 self._wait_for_enabled(button, timeout=5000)
                 button.click()
                 return
@@ -39,24 +90,42 @@ class ProgressBarPage(BasePage):
                     raise Exception(f"Failed to stop after {retries} attempts") from e
                 self.page.wait_for_timeout(1000)
 
-    def reset_progress(self, retries=3):
+    def reset_progress(self, retries: int = 3) -> None:
+        """
+        Сбрасывает прогресс-бар в начальное состояние.
+
+        Args:
+            retries: Количество попыток в случае неудачи
+
+        Postconditions: прогресс сбрасывается на 0%, появляется кнопка Reset
+        """
+        self.log_step("Сбрасываем прогресс-бар")
         for attempt in range(retries):
             try:
                 button = self.page.locator(ProgressBarLocators.RESET_BUTTON)
-                button.wait_for(state="visible", timeout=10000)
+                self.wait_for_visible(ProgressBarLocators.RESET_BUTTON, 10000)
                 self._wait_for_enabled(button, timeout=5000)
-                print("Clicking reset button")
                 button.click()
-                print("Clicked reset button")
                 return
             except Exception as e:
                 if attempt == retries - 1:
                     raise Exception(f"Failed to reset after {retries} attempts") from e
                 self.page.wait_for_timeout(1000)
 
-    def wait_for_progress_value(self, expected_value: str, timeout=30_000):
-        import time
+    def wait_for_progress_value(
+        self, expected_value: str, timeout: int = 30000
+    ) -> None:
+        """
+        Ожидает достижения прогрессом определенного значения.
 
+        Args:
+            expected_value: Ожидаемое значение прогресса (например, "50%")
+            timeout: Максимальное время ожидания в миллисекундах
+
+        Raises:
+            TimeoutError: Если значение не достигнуто за указанное время
+        """
+        self.log_step(f"Ожидаем значение прогресса: {expected_value}")
         start = time.time()
         while time.time() - start < timeout / 1000:
             val = self.get_progress_value()
@@ -66,11 +135,23 @@ class ProgressBarPage(BasePage):
         raise TimeoutError(f"Timeout waiting for progress value {expected_value}")
 
     def get_progress_value(self) -> str:
+        """
+        Получает текущее значение прогресс-бара.
+
+        Returns:
+            str: Текущее значение прогресса в процентах (например, "25%")
+        """
         progress_bar = self.page.locator(ProgressBarLocators.PROGRESS_BAR)
-        progress_bar.wait_for(state="visible", timeout=10000)
+        self.wait_for_visible(ProgressBarLocators.PROGRESS_BAR, 10000)
         return progress_bar.inner_text().strip()
 
     def get_button_text(self) -> str:
+        """
+        Получает текст кнопки управления прогрессом.
+
+        Returns:
+            str: Текст кнопки ("Start", "Stop" или "Reset")
+        """
         button = self.page.locator(ProgressBarLocators.START_STOP_BUTTON)
-        button.wait_for(state="visible", timeout=10000)
+        self.wait_for_visible(ProgressBarLocators.START_STOP_BUTTON, 10000)
         return button.inner_text().strip()

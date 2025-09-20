@@ -1,77 +1,113 @@
+"""
+Page Object для страницы Resizable.
+Содержит методы для изменения размеров элементов через drag handle.
+"""
+
 from playwright.sync_api import Page
-import logging
+from locators.interactions.resizable_locators import ResizableLocators
+from pages.base_page import BasePage
 
-logger = logging.getLogger(__name__)
 
+class ResizablePage(BasePage):
+    """
+    Страница тестирования изменения размеров элементов.
+    Содержит resizable box с ограничениями и без ограничений.
+    """
 
-class ResizablePage:
     def __init__(self, page: Page):
-        self.page = page
+        """
+        Инициализация страницы Resizable.
 
-    def resize_box(self, delta_x: int, delta_y: int):
-        logger.info(
-            f"Начинаем ресайз блока с ограничением на dx={delta_x}, dy={delta_y}"
+        Args:
+            page: Экземпляр страницы Playwright
+        """
+        super().__init__(page)
+
+    def resize_box_with_restriction(self, x_offset: int, y_offset: int) -> None:
+        """
+        Изменяет размер ограниченного resizable box.
+
+        Args:
+            x_offset: Изменение ширины в пикселях
+            y_offset: Изменение высоты в пикселях
+
+        Postconditions: размер box изменен в пределах ограничений (150x150 - 500x300)
+        """
+        self.log_step(f"Изменяем размер ограниченного box на ({x_offset}, {y_offset})")
+        resize_handle = self.page.locator(ResizableLocators.RESIZE_HANDLE_RESTRICTED)
+
+        # Получаем позицию handle
+        handle_box = resize_handle.bounding_box()
+        handle_x = handle_box["x"] + handle_box["width"] / 2
+        handle_y = handle_box["y"] + handle_box["height"] / 2
+
+        # Выполняем drag для resize
+        self.page.mouse.move(handle_x, handle_y)
+        self.page.mouse.down()
+        self.page.mouse.move(handle_x + x_offset, handle_y + y_offset, steps=5)
+        self.page.mouse.up()
+
+    def resize_box_no_restriction(self, x_offset: int, y_offset: int) -> None:
+        """
+        Изменяет размер неограниченного resizable box.
+
+        Args:
+            x_offset: Изменение ширины в пикселях
+            y_offset: Изменение высоты в пикселях
+
+        Postconditions: размер box изменен без ограничений
+        """
+        self.log_step(
+            f"Изменяем размер неограниченного box на ({x_offset}, {y_offset})"
         )
-        handle = self.page.locator(
-            "#resizableBoxWithRestriction > span.react-resizable-handle-se"
+        resize_handle = self.page.locator(
+            ResizableLocators.RESIZE_HANDLE_NO_RESTRICTION
         )
-        box = self.page.locator("#resizableBoxWithRestriction")
-        size_before = self.get_box_size()
 
-        box_bounding = box.bounding_box()
-        handle_bounding = handle.bounding_box()
+        handle_box = resize_handle.bounding_box()
+        handle_x = handle_box["x"] + handle_box["width"] / 2
+        handle_y = handle_box["y"] + handle_box["height"] / 2
 
-        # Координаты начала drag (центр ручки)
-        start_x = handle_bounding["x"] + handle_bounding["width"] / 2
-        start_y = handle_bounding["y"] + handle_bounding["height"] / 2
+        self.page.mouse.move(handle_x, handle_y)
+        self.page.mouse.down()
+        self.page.mouse.move(handle_x + x_offset, handle_y + y_offset, steps=5)
+        self.page.mouse.up()
 
-        # Координаты конца drag с учетом смещений
-        end_x = start_x + delta_x
-        end_y = start_y + delta_y
+    def get_restricted_box_size(self) -> tuple[int, int]:
+        """
+        Получает текущий размер ограниченного resizable box.
 
-        mouse = self.page.mouse
-        mouse.move(start_x, start_y)
-        mouse.down()
-        mouse.move(end_x, end_y, steps=10)
-        mouse.up()
+        Returns:
+            tuple: (ширина, высота) в пикселях
+        """
+        box = self.page.locator(ResizableLocators.RESIZABLE_BOX_RESTRICTED)
+        bounding_box = box.bounding_box()
+        return int(bounding_box["width"]), int(bounding_box["height"])
 
-        size_after = self.get_box_size()
-        logger.info(f"Размер блока до: {size_before}, после: {size_after}")
-        return size_before, size_after
+    def get_no_restriction_box_size(self) -> tuple[int, int]:
+        """
+        Получает текущий размер неограниченного resizable box.
 
-    def get_box_size(self):
-        box = self.page.locator("#resizableBoxWithRestriction")
-        width = box.evaluate("el => el.offsetWidth")
-        height = box.evaluate("el => el.offsetHeight")
-        return width, height
+        Returns:
+            tuple: (ширина, высота) в пикселях
+        """
+        box = self.page.locator(ResizableLocators.RESIZABLE_BOX_NO_RESTRICTION)
+        bounding_box = box.bounding_box()
+        return int(bounding_box["width"]), int(bounding_box["height"])
 
-    # Аналогично можно для кнопки resizable
-    def resize_button(self, delta_x: int, delta_y: int):
-        logger.info(f"Начинаем ресайз кнопки на dx={delta_x}, dy={delta_y}")
-        handle = self.page.locator("#resizable > span.react-resizable-handle-se")
-        btn = self.page.locator("#resizable")
-        size_before = self.get_button_size()
+    def is_resize_handle_visible(self, restricted: bool = True) -> bool:
+        """
+        Проверяет видимость resize handle.
 
-        btn_bounding = btn.bounding_box()
-        handle_bounding = handle.bounding_box()
+        Args:
+            restricted: True для ограниченного box, False для неограниченного
 
-        start_x = handle_bounding["x"] + handle_bounding["width"] / 2
-        start_y = handle_bounding["y"] + handle_bounding["height"] / 2
-        end_x = start_x + delta_x
-        end_y = start_y + delta_y
-
-        mouse = self.page.mouse
-        mouse.move(start_x, start_y)
-        mouse.down()
-        mouse.move(end_x, end_y, steps=10)
-        mouse.up()
-
-        size_after = self.get_button_size()
-        logger.info(f"Размер кнопки до: {size_before}, после: {size_after}")
-        return size_before, size_after
-
-    def get_button_size(self):
-        btn = self.page.locator("#resizable")
-        width = btn.evaluate("el => el.offsetWidth")
-        height = btn.evaluate("el => el.offsetHeight")
-        return width, height
+        Returns:
+            bool: True если handle видим
+        """
+        locator = (
+            ResizableLocators.RESIZE_HANDLE_RESTRICTED
+            if restricted
+            else ResizableLocators.RESIZE_HANDLE_NO_RESTRICTION
+        )
+        return self.page.locator(locator).is_visible()

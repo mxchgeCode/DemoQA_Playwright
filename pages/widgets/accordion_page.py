@@ -1,113 +1,135 @@
+"""
+Page Object для страницы Accordion с раскрывающимися секциями.
+Содержит методы для работы с тремя секциями аккордеона.
+"""
+
 from playwright.sync_api import Page
+from locators.widgets.accordion_locators import AccordionLocators
+from pages.base_page import BasePage
 
 
-class AccordionPage:
+class AccordionPage(BasePage):
+    """
+    Страница тестирования аккордеона с тремя раскрывающимися секциями.
+    Каждая секция может быть раскрыта/свернута независимо.
+    """
+
     def __init__(self, page: Page):
-        self.page = page
-        self.first_section_header = page.locator("#section1Heading")
-        self.first_section_content = page.locator("#section1Content")
-        self.first_section_button = page.locator("#section1Heading button")
+        """
+        Инициализация страницы аккордеона.
 
-        self.second_section_header = page.locator("#section2Heading")
-        self.second_section_content = page.locator("#section2Content")
-        self.second_section_button = page.locator("#section2Heading button")
+        Args:
+            page: Экземпляр страницы Playwright
+        """
+        super().__init__(page)
+        self.first_section_header = page.locator(AccordionLocators.FIRST_SECTION_HEADER)
+        self.first_section_content = page.locator(
+            AccordionLocators.FIRST_SECTION_CONTENT
+        )
+        self.first_section_button = page.locator(AccordionLocators.FIRST_SECTION_BUTTON)
 
-        self.third_section_header = page.locator("#section3Heading")
-        self.third_section_content = page.locator("#section3Content")
-        self.third_section_button = page.locator("#section3Heading button")
+        self.second_section_header = page.locator(
+            AccordionLocators.SECOND_SECTION_HEADER
+        )
+        self.second_section_content = page.locator(
+            AccordionLocators.SECOND_SECTION_CONTENT
+        )
+        self.second_section_button = page.locator(
+            AccordionLocators.SECOND_SECTION_BUTTON
+        )
 
-    def click_first_section(self):
+        self.third_section_header = page.locator(AccordionLocators.THIRD_SECTION_HEADER)
+        self.third_section_content = page.locator(
+            AccordionLocators.THIRD_SECTION_CONTENT
+        )
+        self.third_section_button = page.locator(AccordionLocators.THIRD_SECTION_BUTTON)
+
+    def click_first_section(self) -> None:
+        """
+        Кликает по заголовку первой секции для раскрытия/сворачивания.
+        Postconditions: состояние первой секции изменяется (раскрыта/свернута).
+        """
+        self.log_step("Кликаем по первой секции аккордеона")
         self.first_section_header.click(force=True)
         self.page.wait_for_timeout(1000)
 
-    def click_second_section(self):
+    def click_second_section(self) -> None:
+        """
+        Кликает по заголовку второй секции для раскрытия/сворачивания.
+        Postconditions: состояние второй секции изменяется.
+        """
+        self.log_step("Кликаем по второй секции аккордеона")
         self.second_section_header.click(force=True)
         self.page.wait_for_timeout(1000)
 
-    def click_third_section(self):
+    def click_third_section(self) -> None:
+        """
+        Кликает по заголовку третьей секции для раскрытия/сворачивания.
+        Postconditions: состояние третьей секции изменяется.
+        """
+        self.log_step("Кликаем по третьей секции аккордеона")
         self.third_section_header.click(force=True)
         self.page.wait_for_timeout(1000)
 
-    def click_first_button(self):
-        try:
-            if self.first_section_button.is_visible():
-                self.first_section_button.click(force=True)
-            else:
-                self.first_section_header.click(force=True)
-        except:
-            self.first_section_header.click(force=True)
-        self.page.wait_for_timeout(1000)
-
-    def click_second_button(self):
-        try:
-            if self.second_section_button.is_visible():
-                self.second_section_button.click(force=True)
-            else:
-                self.second_section_header.click(force=True)
-        except:
-            self.second_section_header.click(force=True)
-        self.page.wait_for_timeout(1000)
-
-    def click_third_button(self):
-        try:
-            if self.third_section_button.is_visible():
-                self.third_section_button.click(force=True)
-            else:
-                self.third_section_header.click(force=True)
-        except:
-            self.third_section_header.click(force=True)
-        self.page.wait_for_timeout(1000)
-
     def is_first_section_expanded(self) -> bool:
+        """
+        Проверяет, раскрыта ли первая секция аккордеона.
+
+        Returns:
+            bool: True если секция раскрыта и контент виден
+        """
         try:
             return self.first_section_content.is_visible()
         except:
             return False
 
     def is_second_section_expanded(self) -> bool:
+        """
+        Проверяет, раскрыта ли вторая секция аккордеона.
+
+        Returns:
+            bool: True если секция раскрыта и контент виден
+        """
         try:
             return self.second_section_content.is_visible()
         except:
             return False
 
     def is_third_section_expanded(self) -> bool:
+        """
+        Проверяет, раскрыта ли третья секция аккордеона.
+
+        Returns:
+            bool: True если секция раскрыта и контент виден
+        """
         try:
             return self.third_section_content.is_visible()
         except:
             return False
 
-    def is_first_section_collapsed(self) -> bool:
-        try:
-            return not self.first_section_content.is_visible()
-        except:
-            return True
-
-    def is_second_section_collapsed(self) -> bool:
-        try:
-            return not self.second_section_content.is_visible()
-        except:
-            return True
-
-    def is_third_section_collapsed(self) -> bool:
-        try:
-            return not self.third_section_content.is_visible()
-        except:
-            return True
-
     def get_first_section_text(self) -> str:
-        return self.first_section_content.text_content().strip()
+        """
+        Получает текстовое содержимое первой секции.
+
+        Returns:
+            str: Текст содержимого первой секции
+        """
+        return self.get_text_safe(AccordionLocators.FIRST_SECTION_CONTENT)
 
     def get_second_section_text(self) -> str:
-        return self.second_section_content.text_content().strip()
+        """
+        Получает текстовое содержимое второй секции.
+
+        Returns:
+            str: Текст содержимого второй секции
+        """
+        return self.get_text_safe(AccordionLocators.SECOND_SECTION_CONTENT)
 
     def get_third_section_text(self) -> str:
-        return self.third_section_content.text_content().strip()
+        """
+        Получает текстовое содержимое третьей секции.
 
-    def get_first_section_header_text(self) -> str:
-        return self.first_section_header.text_content().strip()
-
-    def get_second_section_header_text(self) -> str:
-        return self.second_section_header.text_content().strip()
-
-    def get_third_section_header_text(self) -> str:
-        return self.third_section_header.text_content().strip()
+        Returns:
+            str: Текст содержимого третьей секции
+        """
+        return self.get_text_safe(AccordionLocators.THIRD_SECTION_CONTENT)

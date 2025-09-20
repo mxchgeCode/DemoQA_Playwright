@@ -1,4 +1,4 @@
-class ToolTipsLocators:
+class TooltipsLocators:
     # Hover elements
     HOVER_BUTTON = "#toolTipButton"
     HOVER_FIELD = "#toolTipTextField"

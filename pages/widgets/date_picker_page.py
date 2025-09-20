@@ -1,145 +1,231 @@
+"""
+Page Object для страницы Date Picker.
+Содержит методы для работы с календарем и выбором даты/времени.
+"""
+
+import time
 from playwright.sync_api import Page
-from locators.widgets.date_picker_locators import DatePickerLocators
-from datetime import datetime
+from locators.widgets.datepicker_locators import DatePickerLocators
+from pages.widgets.base_page import WidgetBasePage
 
 
-class DatePickerPage:
+class DatePickerPage(WidgetBasePage):
+    """
+    Страница тестирования календарей и выбора даты.
+    Поддерживает простой date picker и date/time picker с временем.
+    """
+
     def __init__(self, page: Page):
-        self.page = page
-        self.date_input = page.locator(DatePickerLocators.DATE_INPUT)
-        self.date_time_input = page.locator(DatePickerLocators.DATE_TIME_INPUT)
-        self.calendar_popup = page.locator(DatePickerLocators.CALENDAR_POPUP)
-        self.calendar_month_select = page.locator(
-            DatePickerLocators.CALENDAR_MONTH_SELECT
-        )
-        self.calendar_year_select = page.locator(
-            DatePickerLocators.CALENDAR_YEAR_SELECT
-        )
-        self.calendar_next_month_button = page.locator(
-            DatePickerLocators.CALENDAR_NEXT_MONTH_BUTTON
-        )
-        self.calendar_prev_month_button = page.locator(
-            DatePickerLocators.CALENDAR_PREV_MONTH_BUTTON
-        )
-        self.calendar_days = page.locator(DatePickerLocators.CALENDAR_DAY)
-        self.calendar_selected_day = page.locator(
-            DatePickerLocators.CALENDAR_DAY_SELECTED
-        )
-        self.calendar_today = page.locator(DatePickerLocators.CALENDAR_DAY_TODAY)
-        self.time_picker_list = page.locator(DatePickerLocators.TIME_PICKER_LIST)
-        self.time_picker_items = page.locator(DatePickerLocators.TIME_PICKER_ITEM)
-        self.time_picker_selected = page.locator(
-            DatePickerLocators.TIME_PICKER_ITEM_SELECTED
-        )
+        """
+        Инициализация страницы Date Picker.
 
-    def click_date_input(self):
-        self.date_input.click()
-        self.page.wait_for_timeout(1000)
+        Args:
+            page: Экземпляр страницы Playwright
+        """
+        super().__init__(page)
 
-    def click_date_time_input(self):
-        if self.is_calendar_visible():
-            self.page.mouse.click(10, 10)
-            self.page.wait_for_timeout(500)
-        self.date_time_input.click()
-        self.page.wait_for_timeout(1000)
+    def open_date_picker(self) -> None:
+        """
+        Открывает простой календарь для выбора даты.
+        Postconditions: календарь открыт и готов для выбора даты.
+        """
+        self.log_step("Открываем date picker")
+        self.safe_click(DatepickerLocators.DATE_INPUT)
+        self.wait_for_visible(".react-datepicker", timeout=3000)
 
-    def select_date_by_day(self, day: int):
-        if not self.is_calendar_visible():
-            self.click_date_input()
-        self.wait_for_calendar()
-        day_locator = self.page.locator(
-            f"{DatePickerLocators.CALENDAR_DAY}:has-text('{day}')"
-        )
-        if day_locator.count() > 0:
-            day_locator.first.click()
+    def open_date_time_picker(self) -> None:
+        """
+        Открывает календарь с выбором даты и времени.
+        Postconditions: календарь с временем открыт и готов для выбора.
+        """
+        self.log_step("Открываем date time picker")
+        self.safe_click(DatepickerLocators.DATE_TIME_INPUT)
+        self.wait_for_visible(".react-datepicker", timeout=3000)
+
+    def select_date(self, day: str, month: str = None, year: str = None) -> None:
+        """
+        Выбирает дату в календаре.
+
+        Args:
+            day: День месяца (например, "15")
+            month: Месяц (например, "January", опционально)
+            year: Год (например, "2024", опционально)
+
+        Postconditions: выбранная дата установлена в поле ввода
+        """
+        self.log_step(f"Выбираем дату: {day}/{month}/{year}")
+
+        # Если указан год, выбираем его
+        if year:
+            year_dropdown = self.page.locator(DatepickerLocators.YEAR_DROPDOWN)
+            if year_dropdown.is_visible():
+                year_dropdown.select_option(year)
+
+        # Если указан месяц, выбираем его
+        if month:
+            month_dropdown = self.page.locator(DatepickerLocators.MONTH_DROPDOWN)
+            if month_dropdown.is_visible():
+                month_dropdown.select_option(month)
+
+        # Выбираем день
+        # Нормализуем номер дня (добавляем ведущий ноль если нужно)
+        day_normalized = day.zfill(2)
+        day_selector = f".react-datepicker__day--0{day_normalized}:not(.react-datepicker__day--outside-month)"
+
+        day_element = self.page.locator(day_selector).first
+        if day_element.is_visible():
+            day_element.click()
         else:
-            for i in range(self.calendar_days.count()):
-                day_el = self.calendar_days.nth(i)
-                if day_el.is_visible():
-                    day_text = day_el.text_content().strip()
-                    if day_text.isdigit() and int(day_text) == day:
-                        day_el.click()
-                        break
-        self.page.wait_for_timeout(1000)
+            # Альтернативный способ - поиск по тексту
+            day_elements = self.page.locator(
+                f".react-datepicker__day:not(.react-datepicker__day--outside-month)"
+            )
+            for i in range(day_elements.count()):
+                element = day_elements.nth(i)
+                if element.inner_text().strip() == day:
+                    element.click()
+                    break
 
-    def select_today(self):
-        self.click_date_input()
-        self.wait_for_calendar()
-        if self.calendar_today.is_visible():
-            self.calendar_today.click()
-        self.page.wait_for_timeout(1000)
+    def select_time(self, hour: str, minute: str = "00") -> None:
+        """
+        Выбирает время в time picker (только для date-time picker).
 
-    def navigate_to_next_month(self):
-        if self.is_calendar_visible():
-            self.calendar_next_month_button.click()
-        self.page.wait_for_timeout(1000)
+        Args:
+            hour: Час в формате "14" или "02"
+            minute: Минута в формате "30" или "00"
 
-    def navigate_to_prev_month(self):
-        if self.is_calendar_visible():
-            self.calendar_prev_month_button.click()
-        self.page.wait_for_timeout(1000)
+        Postconditions: выбранное время установлено
+        """
+        self.log_step(f"Выбираем время: {hour}:{minute}")
 
-    def select_month(self, month: str):
-        if self.is_calendar_visible():
-            self.calendar_month_select.select_option(month)
-        self.page.wait_for_timeout(1000)
-
-    def select_year(self, year: str):
-        if self.is_calendar_visible():
-            self.calendar_year_select.select_option(year)
-        self.page.wait_for_timeout(1000)
+        # Кликаем по полю времени если оно есть
+        time_input = self.page.locator(".react-datepicker__time-container")
+        if time_input.is_visible():
+            # Ищем нужное время в списке
+            time_option = self.page.locator(f"text={hour}:{minute}")
+            if time_option.is_visible():
+                time_option.click()
 
     def get_selected_date(self) -> str:
-        return self.date_input.input_value().strip()
+        """
+        Получает выбранную дату из простого date picker.
+
+        Returns:
+            str: Выбранная дата в формате поля ввода
+        """
+        date_input = self.page.locator(DatepickerLocators.DATE_INPUT)
+        return date_input.input_value()
 
     def get_selected_date_time(self) -> str:
-        return self.date_time_input.input_value().strip()
+        """
+        Получает выбранную дату и время из date-time picker.
+
+        Returns:
+            str: Выбранная дата и время в формате поля ввода
+        """
+        datetime_input = self.page.locator(DatepickerLocators.DATE_TIME_INPUT)
+        return datetime_input.input_value()
+
+    def clear_date(self) -> None:
+        """
+        Очищает поле простой даты.
+        Postconditions: поле даты очищено.
+        """
+        self.log_step("Очищаем поле даты")
+        date_input = self.page.locator(DatepickerLocators.DATE_INPUT)
+        date_input.clear()
+
+    def clear_date_time(self) -> None:
+        """
+        Очищает поле даты и времени.
+        Postconditions: поле даты и времени очищено.
+        """
+        self.log_step("Очищаем поле даты и времени")
+        datetime_input = self.page.locator(DatepickerLocators.DATE_TIME_INPUT)
+        datetime_input.clear()
 
     def is_calendar_visible(self) -> bool:
-        try:
-            return self.calendar_popup.is_visible()
-        except:
-            return False
+        """
+        Проверяет видимость календаря.
 
-    def wait_for_calendar(self, timeout: int = 5000):
-        try:
-            self.calendar_popup.wait_for(state="visible", timeout=timeout)
-            return True
-        except:
-            return False
+        Returns:
+            bool: True если календарь открыт и видим
+        """
+        return self.page.locator(".react-datepicker").is_visible()
 
-    def wait_for_calendar_hidden(self, timeout: int = 5000):
-        try:
-            self.calendar_popup.wait_for(state="hidden", timeout=timeout)
-            return True
-        except:
-            return False
+    def close_calendar(self) -> None:
+        """
+        Закрывает календарь кликом вне его области.
+        Postconditions: календарь скрыт.
+        """
+        self.log_step("Закрываем календарь")
+        # Кликаем в пустое место рядом с календарем
+        self.page.click("body", position={"x": 10, "y": 10})
 
-    def select_time(self, time_text: str):
-        self.click_date_time_input()
-        self.wait_for_calendar()
-        time_item = self.page.locator(
-            f"{DatePickerLocators.TIME_PICKER_ITEM}:has-text('{time_text}')"
-        )
-        if time_item.count() > 0:
-            time_item.first.click()
-        self.page.wait_for_timeout(1000)
+    def navigate_to_previous_month(self) -> None:
+        """
+        Переходит к предыдущему месяцу в календаре.
+        Preconditions: календарь должен быть открыт.
+        Postconditions: отображается предыдущий месяц.
+        """
+        self.log_step("Переходим к предыдущему месяцу")
+        prev_button = self.page.locator(".react-datepicker__navigation--previous")
+        if prev_button.is_visible():
+            prev_button.click()
+            time.sleep(500)
 
-    def get_calendar_month(self) -> str:
-        if self.is_calendar_visible():
-            return self.calendar_month_select.input_value()
+    def navigate_to_next_month(self) -> None:
+        """
+        Переходит к следующему месяцу в календаре.
+        Preconditions: календарь должен быть открыт.
+        Postconditions: отображается следующий месяц.
+        """
+        self.log_step("Переходим к следующему месяцу")
+        next_button = self.page.locator(".react-datepicker__navigation--next")
+        if next_button.is_visible():
+            next_button.click()
+            time.sleep(500)
+
+    def get_current_month_year(self) -> str:
+        """
+        Получает текущий отображаемый месяц и год в календаре.
+
+        Returns:
+            str: Месяц и год в формате "January 2024"
+        """
+        month_year = self.page.locator(".react-datepicker__current-month")
+        if month_year.is_visible():
+            return month_year.inner_text()
         return ""
 
-    def get_calendar_year(self) -> str:
-        if self.is_calendar_visible():
-            return self.calendar_year_select.input_value()
-        return ""
+    def select_today(self) -> None:
+        """
+        Выбирает сегодняшнюю дату в календаре.
+        Postconditions: выбрана текущая дата.
+        """
+        self.log_step("Выбираем сегодняшнюю дату")
+        today_button = self.page.locator(".react-datepicker__day--today")
+        if today_button.is_visible():
+            today_button.click()
 
-    def get_available_dates_count(self) -> int:
-        if self.is_calendar_visible():
-            return self.calendar_days.count()
-        return 0
+    def set_date_by_typing(self, date_string: str, is_datetime: bool = False) -> None:
+        """
+        Устанавливает дату путем прямого ввода в поле.
 
-    def get_today_date_formatted(self) -> str:
-        today = datetime.now()
-        return today.strftime("%m/%d/%Y")
+        Args:
+            date_string: Строка даты в правильном формате
+            is_datetime: True для поля date-time, False для простой даты
+
+        Postconditions: дата установлена в поле ввода
+        """
+        self.log_step(f"Устанавливаем дату вводом: {date_string}")
+
+        if is_datetime:
+            input_field = self.page.locator(DatepickerLocators.DATE_TIME_INPUT)
+        else:
+            input_field = self.page.locator(DatepickerLocators.DATE_INPUT)
+
+        input_field.clear()
+        input_field.type(date_string)
+        # Нажимаем Enter для подтверждения
+        input_field.press("Enter")

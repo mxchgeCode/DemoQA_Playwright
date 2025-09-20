@@ -1,23 +1,50 @@
 # DemoQA_Playwright
 
 
-Как запустить тесты с разными браузерами(Chromium, Firefox) через CLI:
+## КОМАНДЫ ДЛЯ ЗАПУСКА И ГЕНЕРАЦИИ ОТЧЕТОВ
 
-```shell
-   pytest --profile=full
-````
-или запустить в браузере Chromium:
-```shell
-   pytest --profile=demo
+### Установка зависимостей
+
+ Через uv
+```bash
+uv add --dev pytest allure-pytest pytest-dependency
 ```
-или запустить в Chromium в headless:
-```shell
-   pytest --profile=smoke
+
+ Или через pip
+```bash
+pip install pytest allure-pytest pytest-dependency
 ```
-Установить все зависимости из pyproject.toml
-```shell
-uv sync --frozen
+
+### Запуск тестов
+```bash
+# Все тесты с Allure
+pytest --alluredir=allure-results
+
+# Только smoke тесты
+pytest -m smoke --alluredir=allure-results
+
+# Конкретная категория
+pytest -m elements --alluredir=allure-results
+
+# С детальным выводом
+pytest -v -s --alluredir=allure-results
+
+# Параллельный запуск (если установлен pytest-xdist)
+pytest -n auto --alluredir=allure-results
 ```
+
+### Генерация отчетов Allure
+```bash
+# Интерактивный отчет
+allure serve allure-results
+
+# Статический HTML отчет
+allure generate allure-results -o allure-report --clean
+
+# Открыть готовый отчет
+allure open allure-report
+```
+
 
 Автоматизированные тесты созданные с использованием pytest и playwright
 

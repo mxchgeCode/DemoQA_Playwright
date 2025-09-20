@@ -1,72 +1,132 @@
+"""
+Page Object для страницы Slider.
+Содержит методы для работы с ползунком (slider) и получения его значений.
+"""
+
 from playwright.sync_api import Page
-from locators.widgets.slider_locators import SLIDER_HANDLE
+from locators.widgets.slider_locators import SliderLocators
+from pages.base_page import BasePage
 
 
-class SliderPage:
+class SliderPage(BasePage):
+    """
+    Страница тестирования slider элемента.
+    Позволяет перемещать ползунок и получать его текущее значение.
+    """
+
     def __init__(self, page: Page):
-        self.page = page
-        self.slider_handle = page.locator(SLIDER_HANDLE)
-        self.page.wait_for_timeout(1000)
+        """
+        Инициализация страницы Slider.
 
-    def get_current_value(self) -> str:
-        value = self.page.evaluate(
-            """
-            () => {
-                const input = document.querySelector('.range-slider');
-                if (input && input.value !== null && input.value !== undefined) {
-                    return input.value;
-                } else {
-                    return "0";
-                }
-            }
-            """
-        )
-        return str(value).strip() if value is not None else "0"
+        Args:
+            page: Экземпляр страницы Playwright
+        """
+        super().__init__(page)
 
-    def set_value(self, target_value: int) -> None:
-        if not isinstance(target_value, int) or target_value < 0 or target_value > 100:
-            raise ValueError(
-                f"Значение должно быть целым числом от 0 до 100, получено: {target_value}"
-            )
+    def set_slider_value(self, target_value: int) -> None:
+        """
+        Устанавливает значение слайдера путем перемещения ползунка.
 
-        self.page.evaluate(
-            f"""
-            const input = document.querySelector('{SLIDER_HANDLE}');
-            if (input) {{
-                input.value = {target_value};
-                input.style.setProperty('--value', '{target_value}');
-                input.dispatchEvent(new Event('input', {{ bubbles: true }}));
-                input.dispatchEvent(new Event('change', {{ bubbles: true }}));
-                input.dispatchEvent(new Event('mouseup', {{ bubbles: true }}));
-                input.dispatchEvent(new Event('blur', {{ bubbles: true }}));
-            }}
-            """
-        )
-        self.page.wait_for_function(
-            f"""
-            () => {{
-                const input = document.querySelector('{SLIDER_HANDLE}');
-                return input && input.value === '{target_value}';
-            }}
-            """,
-            timeout=5000,
-        )
+        Args:
+            target_value: Целевое значение слайдера (0-100)
 
-    def move_to_max(self) -> None:
-        self.set_value(100)
+        Postconditions: слайдер установлен на указанное значение
+        """
+        self.log_step(f"Устанавливаем значение слайдера: {target_value}")
 
-    def move_to_min(self) -> None:
-        self.set_value(0)
+        # Получаем элементы
+        slider = self.page.locator(SliderLocators.SLIDER)
+        thumb = self.page.locator(SliderLocators.SLIDER_THUMB)
 
-    def move_to_middle(self) -> None:
-        self.set_value(50)
+        # Получаем размеры слайдера
+        slider_box = slider.bounding_box()
+        slider_width = slider_box["width"]
 
-    def focus_and_press_arrow_right(self) -> None:
-        self.slider_handle.focus()
-        self.page.press(SLIDER_HANDLE, "ArrowRight")
-        self.page.wait_for_timeout(300)
+        # Вычисляем позицию для целевого значения (0-100)
+        target_percentage = target_value / 100
+        target_x = slider_box["x"] + (slider_width * target_percentage)
+        target_y = slider_box["y"] + slider_box["height"] / 2
 
-    def focus_and_press_arrow_left(self) -> None:
-        self.slider_handle.focus()
-        self.page.press(SLIDER_HANDLE, "ArrowLeft")
-        self.page.wait_for_timeout(300)
+        # Перемещаем ползунок
+        thumb_box = thumb.bounding_box()
+        current_x = thumb_box["x"] + thumb_box["width"] / 2
+        current_y = thumb_box["y"] + thumb_box["height"] / 2
+
+        self.page.mouse.move(current_x, current_y)
+        self.page.mouse.down()
+        self.page.mouse.move(target_x, target_y, steps=10)
+        self.page.mouse.up()
+
+    def drag_slider_by_offset(self, x_offset: int) -> None:
+        """
+        Перемещает ползунок на указанное смещение.
+
+        Args:
+            x_offset: Смещение в пикселях (положительное - вправо, отрицательное - влево)
+
+        Postconditions: ползунок смещен на указанное количество пикселей
+        """
+        self.log_step(f"Перемещаем слайдер на смещение: {x_offset}px")
+        thumb = self.page.locator(SliderLocators.SLIDER_THUMB)
+
+        thumb_box = thumb.bounding_box()
+        start_x = thumb_box["x"] + thumb_box["width"] / 2
+        start_y = thumb_box["y"] + thumb_box["height"] / 2
+
+        self.page.mouse.move(start_x, start_y)
+        self.page.mouse.down()
+        self.page.mouse.move(start_x + x_offset, start_y, steps=5)
+        self.page.mouse.up()
+
+    def get_slider_value(self) -> int:
+        """
+        Получает текущее значение слайдера из поля отображения.
+
+        Returns:
+            int: Текущее значение слайдера (0-100)
+        """
+        value_text = self.get_text_safe(SliderLocators.SLIDER_VALUE)
+        try:
+            return int(value_text.strip())
+        except (ValueError, AttributeError):
+            return 0
+
+    def get_slider_attribute_value(self) -> int:
+        """
+        Получает значение слайдера из атрибута aria-valuenow.
+
+        Returns:
+            int: Значение из атрибута или 0 при ошибке
+        """
+        slider = self.page.locator(SliderLocators.SLIDER)
+        value = slider.get_attribute("aria-valuenow")
+        try:
+            return int(value) if value else 0
+        except ValueError:
+            return 0
+
+    def is_slider_enabled(self) -> bool:
+        """
+        Проверяет, активен ли слайдер для взаимодействия.
+
+        Returns:
+            bool: True если слайдер активен
+        """
+        slider = self.page.locator(SliderLocators.SLIDER)
+        return slider.is_enabled()
+
+    def get_slider_range(self) -> tuple[int, int]:
+        """
+        Получает диапазон значений слайдера из атрибутов.
+
+        Returns:
+            tuple: (минимальное_значение, максимальное_значение)
+        """
+        slider = self.page.locator(SliderLocators.SLIDER)
+        min_val = slider.get_attribute("aria-valuemin")
+        max_val = slider.get_attribute("aria-valuemax")
+
+        try:
+            return int(min_val or "0"), int(max_val or "100")
+        except ValueError:
+            return 0, 100

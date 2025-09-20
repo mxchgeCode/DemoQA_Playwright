@@ -1,79 +1,154 @@
+"""
+Page Object для страницы AutoComplete.
+Содержит методы для тестирования полей с автодополнением.
+"""
+
+import time
 from playwright.sync_api import Page
-from locators.widgets.auto_complete_locators import AutoCompleteLocators
+from locators.widgets.autocomplete_locators import AutoCompleteLocators
+from pages.base_page import BasePage
 
 
-class AutoCompletePage:
+class AutoCompletePage(BasePage):
+    """
+    Страница тестирования автодополнения.
+    Содержит поля для множественного и единичного выбора с автодополнением.
+    """
+
     def __init__(self, page: Page):
-        self.page = page
-        self.main_container = page.locator(AutoCompleteLocators.MAIN_CONTAINER)
-        self.single_color_input = page.locator(AutoCompleteLocators.SINGLE_COLOR_INPUT)
-        self.multi_color_input = page.locator(AutoCompleteLocators.MULTI_COLOR_INPUT)
-        self.dropdown_options = page.locator(AutoCompleteLocators.DROPDOWN_OPTIONS)
-        self.dropdown_container = page.locator(AutoCompleteLocators.DROPDOWN_OPTIONS)
+        """
+        Инициализация страницы AutoComplete.
 
-    def is_page_loaded(self) -> bool:
-        try:
-            return self.main_container.is_visible()
-        except:
-            return False
+        Args:
+            page: Экземпляр страницы Playwright
+        """
+        super().__init__(page)
 
-    def fill_single_color(self, text: str):
-        self.single_color_input.fill(text)
-        self.page.wait_for_timeout(500)
-        self.page.keyboard.press("Enter")
+    def fill_multiple_colors(self, colors: list[str]) -> None:
+        """
+        Заполняет поле множественного выбора цветов.
 
-    def fill_multiple_colors(self, text: str):
-        self.multi_color_input.focus()
-        self.multi_color_input.fill(text)
-        self.page.wait_for_timeout(1000)  # Увеличено ожидание dropdown
-        self.page.keyboard.press("Enter")
+        Args:
+            colors: Список названий цветов для ввода
 
-    def select_multi_color_option(self, index: int):
-        option = self.dropdown_options.nth(index)
-        if option.is_visible():
-            option.click()
-        else:
-            option_text = option.text_content().strip()
-            self.page.locator(f"//*[text()='{option_text}']").first.click()
-        self.page.wait_for_timeout(500)
+        Postconditions: выбранные цвета отображаются как теги в поле
+        """
+        self.log_step(f"Заполняем множественное поле цветами: {colors}")
+        input_field = self.page.locator(AutoCompleteLocators.MULTIPLE_INPUT)
 
-    def get_single_color_value_correctly(self):
-        try:
-            selected_items = self.page.locator("div.auto-complete__single-value")
-            text = selected_items.text_content().strip()
-        except Exception as e:
-            print(f"Ошибка получения значения: {e}")
-            text = ""
-        return text
+        for color in colors:
+            input_field.click()
+            input_field.fill(color)
+            time.sleep(500)  # Ждем появления dropdown
 
-    def get_multi_color_values_correctly(self) -> list:
+            # Выбираем первый вариант из dropdown
+            suggestions = self.page.locator(AutoCompleteLocators.MULTIPLE_OPTIONS)
+            if suggestions.count() > 0:
+                suggestions.first.click()
+
+    def fill_single_color(self, color: str) -> None:
+        """
+        Заполняет поле единичного выбора цвета.
+
+        Args:
+            color: Название цвета для ввода
+
+        Postconditions: выбранный цвет отображается в поле
+        """
+        self.log_step(f"Заполняем одиночное поле цветом: {color}")
+        input_field = self.page.locator(AutoCompleteLocators.SINGLE_INPUT)
+
+        input_field.click()
+        input_field.fill(color)
+        time.sleep(500)  # Ждем появления dropdown
+
+        suggestions = self.page.locator(AutoCompleteLocators.SINGLE_OPTIONS)
+        if suggestions.count() > 0:
+            suggestions.first.click()
+
+    def get_multiple_values(self) -> list[str]:
+        """
+        Получает список выбранных значений из множественного поля.
+
+        Returns:
+            list: Список выбранных цветов
+        """
         values = []
-        try:
-            selected_items = self.page.locator("div.css-1rhbuit-multiValue")
-            count = selected_items.count()
-            for i in range(count):
-                text = selected_items.nth(i).text_content().strip()
-                if text:
-                    values.append(text.rstrip("×").strip())
-        except Exception as e:
-            print(f"Ошибка получения выбранных значений: {e}")
+        tags = self.page.locator(AutoCompleteLocators.MULTIPLE_VALUES)
+
+        for i in range(tags.count()):
+            tag_text = tags.nth(i).inner_text()
+            values.append(tag_text.strip())
+
         return values
 
-    def wait_for_dropdown(self, timeout=2000) -> bool:
-        try:
-            self.dropdown_container.wait_for(state="visible", timeout=timeout)
-            return True
-        except:
-            return False
+    def get_single_value(self) -> str:
+        """
+        Получает выбранное значение из одиночного поля.
 
-    def get_dropdown_options_text(self) -> list:
-        options = []
-        try:
-            count = self.dropdown_options.count()
-            for i in range(count):
-                option_text = self.dropdown_options.nth(i).text_content().strip()
-                if option_text:
-                    options.append(option_text)
-        except:
-            pass
-        return options
+        Returns:
+            str: Выбранный цвет или пустая строка
+        """
+        input_field = self.page.locator(AutoCompleteLocators.SINGLE_INPUT)
+        return input_field.input_value().strip()
+
+    def remove_multiple_value(self, index: int = 0) -> None:
+        """
+        Удаляет значение из множественного поля по индексу.
+
+        Args:
+            index: Индекс удаляемого элемента (по умолчанию первый)
+
+        Postconditions: указанный тег удален из поля
+        """
+        self.log_step(f"Удаляем значение с индексом {index}")
+        remove_buttons = self.page.locator(AutoCompleteLocators.REMOVE_VALUE)
+
+        if remove_buttons.count() > index:
+            remove_buttons.nth(index).click()
+
+    def clear_single_value(self) -> None:
+        """
+        Очищает одиночное поле автодополнения.
+        Postconditions: поле очищено от выбранного значения.
+        """
+        self.log_step("Очищаем одиночное поле")
+        clear_button = self.page.locator(AutoCompleteLocators.SINGLE_CLEAR)
+        if clear_button.is_visible():
+            clear_button.click()
+
+    def is_dropdown_visible(self, multiple: bool = True) -> bool:
+        """
+        Проверяет видимость dropdown с вариантами.
+
+        Args:
+            multiple: True для множественного поля, False для одиночного
+
+        Returns:
+            bool: True если dropdown виден
+        """
+        locator = (
+            AutoCompleteLocators.MULTIPLE_OPTIONS
+            if multiple
+            else AutoCompleteLocators.SINGLE_OPTIONS
+        )
+        return self.page.locator(locator).count() > 0
+
+    def get_dropdown_options(self, multiple: bool = True) -> list[str]:
+        """
+        Получает список доступных опций в dropdown.
+
+        Args:
+            multiple: True для множественного поля, False для одиночного
+
+        Returns:
+            list: Список текстов доступных опций
+        """
+        locator = (
+            AutoCompleteLocators.MULTIPLE_OPTIONS
+            if multiple
+            else AutoCompleteLocators.SINGLE_OPTIONS
+        )
+        options = self.page.locator(locator)
+
+        return [options.nth(i).inner_text() for i in range(options.count())]

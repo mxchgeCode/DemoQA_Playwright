@@ -1,168 +1,314 @@
+"""
+Page Object для страницы Select Menu.
+Содержит методы для работы с различными типами выпадающих списков.
+"""
+
+import time
 from playwright.sync_api import Page
-from locators.widgets.select_menu_locators import SelectMenuLocators
+from locators.widgets.selectmenu_locators import SelectMenuLocators
+from pages.widgets.base_page import WidgetBasePage
 
 
-class SelectMenuPage:
+class SelectMenuPage(WidgetBasePage):
+    """
+    Страница тестирования различных типов select меню.
+    Включает одиночный выбор, множественный выбор, стандартный select и группированные опции.
+    """
+
     def __init__(self, page: Page):
-        self.page = page
-        self.main_container = page.locator(SelectMenuLocators.MAIN_CONTAINER)
-        self.simple_select = page.locator(SelectMenuLocators.SELECT_VALUE)
-        self.select_one_container = page.locator(
-            SelectMenuLocators.SELECT_ONE_CONTAINER
-        )
-        self.select_one_control = page.locator(
-            f"{SelectMenuLocators.SELECT_ONE_CONTAINER} div[class*='control']"
-        )
-        self.select_one_input = page.locator(
-            f"{SelectMenuLocators.SELECT_ONE_CONTAINER} input"
-        )
-        self.multiselect_control = (
-            page.locator(SelectMenuLocators.MULTISELECT_CONTROL)
-            .filter(has_text="Select...")
-            .first
-        )
+        """
+        Инициализация страницы Select Menu.
 
-    def get_multiselect_control(self):
-        return self.page.locator(SelectMenuLocators.DROPDOWN_VALUE).nth(2)
+        Args:
+            page: Экземпляр страницы Playwright
+        """
+        super().__init__(page)
 
-    def multiselect_get_placeholder(self) -> str:
-        placeholder_loc = self.multiselect_control.locator(
-            SelectMenuLocators.PLACEHOLDER
-        ).first
-        placeholder_loc.wait_for(state="visible", timeout=5000)
-        text = placeholder_loc.text_content()
-        return text.strip() if text else ""
+    def select_value(self, value_text: str) -> None:
+        """
+        Выбирает значение в dropdown "Select Value".
 
-    def multiselect_get_selected_options(self):
-        tags = self.page.locator(SelectMenuLocators.SELECTED_TAG)
-        selected = []
+        Args:
+            value_text: Текст опции для выбора
+
+        Postconditions: выбранное значение отображается в поле
+        """
+        self.log_step(f"Выбираем значение в Select Value: {value_text}")
+
+        # Кликаем по dropdown для его открытия
+        self.safe_click(SelectMenuLocators.SELECT_VALUE)
+        self.wait_for_dropdown_to_appear(".css-26l3qy-menu")
+
+        # Выбираем опцию по тексту
+        option = self.page.locator(f"text={value_text}").first
+        if option.is_visible():
+            option.click()
+
+    def select_one(self, option_text: str) -> None:
+        """
+        Выбирает опцию в dropdown "Select One".
+
+        Args:
+            option_text: Текст опции для выбора
+
+        Postconditions: выбранная опция отображается в поле
+        """
+        self.log_step(f"Выбираем опцию в Select One: {option_text}")
+
+        # Кликаем по dropdown
+        self.safe_click(SelectMenuLocators.SELECT_ONE)
+        self.wait_for_dropdown_to_appear(".css-26l3qy-menu")
+
+        # Выбираем опцию
+        option = self.page.locator(f"text={option_text}").first
+        if option.is_visible():
+            option.click()
+
+    def select_old_style_menu(self, value: str) -> None:
+        """
+        Выбирает значение в стандартном HTML select элементе.
+
+        Args:
+            value: Значение опции для выбора
+
+        Postconditions: выбранное значение установлено в select
+        """
+        self.log_step(f"Выбираем в старом стиле меню: {value}")
+        select_element = self.page.locator(SelectMenuLocators.OLD_STYLE_SELECT_MENU)
+        select_element.select_option(value)
+
+    def select_multiple_values(self, values: list[str]) -> None:
+        """
+        Выбирает несколько значений в multiselect dropdown.
+
+        Args:
+            values: Список текстов опций для выбора
+
+        Postconditions: все выбранные значения отображаются как теги
+        """
+        self.log_step(f"Выбираем множественные значения: {values}")
+
+        for value in values:
+            # Кликаем по multiselect полю
+            self.safe_click(SelectMenuLocators.MULTISELECT)
+
+            # Ждем появления dropdown
+            time.sleep(500)
+
+            # Выбираем опцию
+            option = self.page.locator(f".css-26l3qy-menu text={value}").first
+            if option.is_visible():
+                option.click()
+
+    def select_standard_multiselect(self, values: list[str]) -> None:
+        """
+        Выбирает множественные значения в стандартном HTML multiselect.
+
+        Args:
+            values: Список значений для выбора
+
+        Postconditions: все указанные опции выбраны в multiselect
+        """
+        self.log_step(f"Выбираем в стандартном multiselect: {values}")
+        multiselect = self.page.locator(SelectMenuLocators.STANDARD_MULTISELECT)
+
+        # Выбираем каждое значение с зажатым Ctrl
+        for i, value in enumerate(values):
+            if i == 0:
+                multiselect.select_option(value)
+            else:
+                # Для множественного выбора используем модификатор
+                multiselect.select_option(value, modifiers=["Control"])
+
+    def get_selected_value(self) -> str:
+        """
+        Получает выбранное значение из "Select Value" dropdown.
+
+        Returns:
+            str: Текст выбранного значения
+        """
+        selected_element = self.page.locator(
+            f"{SelectMenuLocators.SELECT_VALUE} .css-1wa3eu0-placeholder"
+        )
+        return selected_element.inner_text() if selected_element.is_visible() else ""
+
+    def get_selected_one(self) -> str:
+        """
+        Получает выбранную опцию из "Select One" dropdown.
+
+        Returns:
+            str: Текст выбранной опции
+        """
+        selected_element = self.page.locator(
+            f"{SelectMenuLocators.SELECT_ONE} .css-1wa3eu0-placeholder"
+        )
+        return selected_element.inner_text() if selected_element.is_visible() else ""
+
+    def get_old_style_selected(self) -> str:
+        """
+        Получает выбранное значение из стандартного select.
+
+        Returns:
+            str: Значение выбранной опции
+        """
+        select_element = self.page.locator(SelectMenuLocators.OLD_STYLE_SELECT_MENU)
+        return select_element.input_value()
+
+    def get_multiselect_values(self) -> list[str]:
+        """
+        Получает список выбранных значений из multiselect dropdown.
+
+        Returns:
+            list: Список текстов выбранных значений
+        """
+        values = []
+        tags = self.page.locator(f"{SelectMenuLocators.MULTISELECT} .css-12jo7m5")
+
         for i in range(tags.count()):
-            text = (
-                tags.nth(i).locator(SelectMenuLocators.SELECTED_TAG_TEXT).text_content()
-            )
-            if text:
-                selected.append(text.strip())
-        return selected
+            tag_text = tags.nth(i).inner_text()
+            # Убираем символ X из текста тега
+            clean_text = tag_text.replace("×", "").strip()
+            if clean_text:
+                values.append(clean_text)
 
-    def multiselect_open(self):
-        control = self.multiselect_control
-        print("Waiting for multiselect control to be visible...")
-        try:
-            control.wait_for(state="visible", timeout=10000)
-            print("Multiselect control is visible.")
-        except Exception as e:
-            print(f"Failed to find multiselect control: {e}")
-            raise
+        return values
 
-        print("Clicking on multiselect control to open menu...")
-        try:
-            control.click(force=True)
-            print("Clicked on multiselect control.")
-        except Exception as e:
-            print(f"Failed to click multiselect control: {e}")
-            raise
+    def get_standard_multiselect_values(self) -> list[str]:
+        """
+        Получает выбранные значения из стандартного HTML multiselect.
 
-        try:
-            print("Waiting for dropdown menu to be visible...")
-            self.page.locator(SelectMenuLocators.DROPDOWN_MENU).wait_for(
-                state="visible", timeout=10000
-            )
-            print("Dropdown menu is visible.")
-        except Exception as e:
-            print(f"Failed to find dropdown menu: {e}")
-            raise
+        Returns:
+            list: Список значений выбранных опций
+        """
+        multiselect = self.page.locator(SelectMenuLocators.STANDARD_MULTISELECT)
+        return multiselect.evaluate(
+            "el => Array.from(el.selectedOptions).map(o => o.value)"
+        )
 
-        self.page.wait_for_timeout(300)
+    def clear_select_value(self) -> None:
+        """
+        Очищает выбранное значение в "Select Value" dropdown.
+        Postconditions: dropdown возвращается к состоянию placeholder.
+        """
+        self.log_step("Очищаем Select Value")
+        clear_button = self.page.locator(
+            f"{SelectMenuLocators.SELECT_VALUE} .css-1wy0on6"
+        )
+        if clear_button.is_visible():
+            clear_button.click()
 
-    def multiselect_select_options(self, option_text: str):
-        print(f"Selecting option: {option_text}")
-        self.multiselect_open()
-        option_locator = self.page.locator(
-            f'{SelectMenuLocators.DROPDOWN_MENU} >> text="{option_text}"'
+    def clear_select_one(self) -> None:
+        """
+        Очищает выбранную опцию в "Select One" dropdown.
+        Postconditions: dropdown возвращается к состоянию placeholder.
+        """
+        self.log_step("Очищаем Select One")
+        clear_button = self.page.locator(
+            f"{SelectMenuLocators.SELECT_ONE} .css-1wy0on6"
+        )
+        if clear_button.is_visible():
+            clear_button.click()
+
+    def remove_multiselect_value(self, value_text: str) -> None:
+        """
+        Удаляет конкретное значение из multiselect dropdown.
+
+        Args:
+            value_text: Текст значения для удаления
+
+        Postconditions: указанное значение удалено из выбранных
+        """
+        self.log_step(f"Удаляем значение из multiselect: {value_text}")
+
+        # Ищем тег с указанным текстом и кликаем по кнопке X
+        tags = self.page.locator(f"{SelectMenuLocators.MULTISELECT} .css-12jo7m5")
+
+        for i in range(tags.count()):
+            tag = tags.nth(i)
+            if value_text in tag.inner_text():
+                remove_button = tag.locator(".css-1wy0on6")
+                if remove_button.is_visible():
+                    remove_button.click()
+                    break
+
+    def clear_all_multiselect(self) -> None:
+        """
+        Очищает все выбранные значения в multiselect dropdown.
+        Postconditions: все значения удалены из multiselect.
+        """
+        self.log_step("Очищаем все значения multiselect")
+        clear_all_button = self.page.locator(
+            f"{SelectMenuLocators.MULTISELECT} .css-1wy0on6"
         ).first
-        try:
-            print("Waiting for option to be visible...")
-            option_locator.wait_for(state="visible", timeout=7000)
-            print(f"Option '{option_text}' is visible, clicking...")
-            option_locator.click(force=True)
-            print(f"Clicked option '{option_text}'.")
-        except Exception as e:
-            print(f"Failed to select option '{option_text}': {e}")
-            raise
-        self.page.wait_for_timeout(300)
+        if clear_all_button.is_visible():
+            clear_all_button.click()
 
-    def multiselect_remove_selected_options(self, option_text: str):
-        print(f"Removing option: {option_text}")
-        tags = self.page.locator(SelectMenuLocators.SELECTED_TAG)
-        count = tags.count()
-        found = False
-        for i in range(count):
-            text = (
-                tags.nth(i).locator(SelectMenuLocators.SELECTED_TAG_TEXT).text_content()
-            )
-            if text and option_text.strip().lower() == text.strip().lower():
-                close_btn = tags.nth(i).locator(SelectMenuLocators.CLOSEBUTTON)
-                print(f"Waiting for close button for option '{option_text}'...")
-                close_btn.wait_for(state="visible", timeout=7000)
-                print(f"Clicking close button for option '{option_text}'...")
-                close_btn.click(force=True)
-                self.page.wait_for_timeout(300)
-                found = True
-                print(f"Option '{option_text}' removed.")
-                break
-        if not found:
-            raise Exception(f"Option '{option_text}' not found for removal")
+    def is_dropdown_open(self, dropdown_selector: str) -> bool:
+        """
+        Проверяет, открыт ли указанный dropdown.
 
-    # --- Simple Select ---
-    def select_simple_option_by_value(self, value: str):
-        self.simple_select.select_option(value)
-        self.page.wait_for_timeout(500)
+        Args:
+            dropdown_selector: CSS селектор dropdown элемента
 
-    def select_simple_option_by_index(self, index: int):
-        self.simple_select.select_option(index=index)
-        self.page.wait_for_timeout(500)
+        Returns:
+            bool: True если dropdown открыт
+        """
+        menu = self.page.locator(".css-26l3qy-menu")
+        return menu.is_visible()
 
-    def select_simple_option_by_text(self, text: str):
-        self.simple_select.select_option(label=text)
-        self.page.wait_for_timeout(500)
+    def get_available_options(self, dropdown_selector: str) -> list[str]:
+        """
+        Получает список доступных опций в открытом dropdown.
 
-    def get_simple_select_selected_value(self) -> str:
-        return self.simple_select.input_value()
+        Args:
+            dropdown_selector: CSS селектор dropdown для открытия
 
-    def get_simple_select_options_count(self) -> int:
-        return self.simple_select.locator("option").count()
+        Returns:
+            list: Список текстов доступных опций
+        """
+        self.log_step("Получаем список доступных опций")
 
-    # --- Select One ---
-    def select_option_in_dropdown(self, option_text: str):
-        dropdown_menu = self.page.locator(SelectMenuLocators.DROPDOWN_MENU)
-        dropdown_menu.wait_for(state="visible", timeout=5000)
-        options = dropdown_menu.locator(SelectMenuLocators.DROPDOWN_OPTIONS)
-        for i in range(options.count()):
-            text = options.nth(i).text_content()
-            if text and option_text in text:
-                options.nth(i).click()
-                return
-        raise Exception(f"Опция '{option_text}' не найдена в dropdown")
+        # Открываем dropdown
+        self.safe_click(dropdown_selector)
+        self.wait_for_dropdown_to_appear(".css-26l3qy-menu")
 
-    def get_select_one_display_text(self) -> str:
-        locator = self.select_one_container.locator(
-            SelectMenuLocators.SELECT_ONE_DISPLAY_TEXT
-        )
-        locator.wait_for(state="visible", timeout=3000)
-        text = locator.text_content()
-        return text.strip() if text else ""
+        # Собираем опции
+        options = []
+        option_elements = self.page.locator(".css-26l3qy-menu .css-1n7v3ny-option")
 
-    # --- Standard Multi Select ---
-    def select_standard_multiselect_options(self, options: list[str]):
-        multi_select = self.page.locator(SelectMenuLocators.MULTISELECT)
-        multi_select.select_option(options)
+        for i in range(option_elements.count()):
+            option_text = option_elements.nth(i).inner_text()
+            options.append(option_text)
 
-    def get_selected_standard_multiselect_options(self) -> list[str]:
-        multi_select = self.page.locator(SelectMenuLocators.MULTISELECT)
-        return multi_select.evaluate(
-            "el => Array.from(el.selectedOptions).map(opt => opt.value)"
-        )
+        # Закрываем dropdown кликом вне его
+        self.page.click("body", position={"x": 10, "y": 10})
 
-    def clear_standard_multiselect_selection(self):
-        multi_select = self.page.locator(SelectMenuLocators.MULTISELECT)
-        multi_select.select_option([])
+        return options
+
+    def type_and_select(self, dropdown_selector: str, search_text: str) -> None:
+        """
+        Печатает текст в searchable dropdown и выбирает первую найденную опцию.
+
+        Args:
+            dropdown_selector: CSS селектор dropdown
+            search_text: Текст для поиска
+
+        Postconditions: выбрана первая найденная опция
+        """
+        self.log_step(f"Печатаем и выбираем в dropdown: {search_text}")
+
+        # Кликаем по dropdown
+        self.safe_click(dropdown_selector)
+
+        # Печатаем текст поиска
+        search_input = self.page.locator(f"{dropdown_selector} input")
+        if search_input.is_visible():
+            search_input.type(search_text)
+            time.sleep(500)
+
+            # Выбираем первую опцию
+            first_option = self.page.locator(
+                ".css-26l3qy-menu .css-1n7v3ny-option"
+            ).first
+            if first_option.is_visible():
+                first_option.click()
