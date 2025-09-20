@@ -389,6 +389,12 @@ def dragabble_page(page: "Page"):
     yield DragabblePage(page)
 
 
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers", "dependency: marks tests with dependencies between them"
+    )
+
+
 @pytest.fixture(scope="module")
 def login_page(page: "Page"):
     selectors = [("#app", "visible", 10000)]

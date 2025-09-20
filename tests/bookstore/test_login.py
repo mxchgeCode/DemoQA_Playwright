@@ -1,10 +1,11 @@
 import time
+import pytest
 from locators.bookstore.login_locators import LoginLocators
 
 
 def test_invalid_login(login_page):
     login_page.login("wrong_user", "wrong_password")
-    error = login_page.page.get_error_message()
+    error = login_page.get_error_message()
     assert (
         error == "Invalid username or password!"
     ), f"Expected error message, got: {error}"
@@ -44,7 +45,7 @@ def test_new_user_register_empty_fields(login_page):
 
 def test_register_password_rules(login_page):
     login_page.click_new_user()
-    login_page.page.fill_registration_form("John", "Doe", "johndoe123", "123")
+    login_page.fill_registration_form("John", "Doe", "johndoe123", "123")
     login_page.click_register_button()
     error = login_page.get_captcha_error()
     assert error == "Please verify reCaptcha to register!"
@@ -52,6 +53,7 @@ def test_register_password_rules(login_page):
     login_page.click_back_to_login()
 
 
+@pytest.mark.dependency()
 def test_valid_login(login_page):
     """
     СНАЧАЛА
@@ -60,7 +62,7 @@ def test_valid_login(login_page):
     """
     login_page.fill_login_form("asd", "Password123###")
     login_page.click_login()
-    time.sleep(10)
+
     # Ждем, что пользователь залогинен и его имя отображается
     for _ in range(10):
         username = login_page.get_logged_in_username()
@@ -70,22 +72,18 @@ def test_valid_login(login_page):
     assert username == "asd"
 
 
+@pytest.mark.dependency(depends=["test_valid_login"])
 def test_go_to_book_store(login_page):
-    """
-    ТОЛЬКО ПОСЛЕ ТЕСТА test_valid_login ДЛЯ ЛОГИНА
-    """
-
-    # login_page.page.goto("https://demoqa.com/profile")
     login_page.page.click("button#gotoStore")
     login_page.page.wait_for_url("**/books")
     assert "books" in login_page.page.url
 
 
+@pytest.mark.dependency(depends=["test_valid_login"])
 def test_search_book_and_go_back(login_page):
     """
     ТОЛЬКО ПОСЛЕ ТЕСТА test_valid_login ДЛЯ ЛОГИНА
     """
-    # page = login_page.page
     login_page.page.goto("https://demoqa.com/books")
 
     login_page.page.fill("input#searchBox", "Git Pocket Guide")
@@ -99,18 +97,11 @@ def test_search_book_and_go_back(login_page):
     login_page.page.goto("https://demoqa.com/profile")
 
 
+@pytest.mark.dependency(depends=["test_valid_login"])
 def test_delete_account_cancel(login_page):
-    """
-    ТОЛЬКО ПОСЛЕ ТЕСТА test_valid_login ДЛЯ ЛОГИНА
-    """
-
     def on_dialog(dialog):
         assert dialog.type == "confirm"
         dialog.dismiss()
 
     login_page.page.on("dialog", on_dialog)
-    try:
-        # login_page.page.click("div.buttonWrap button.btn-primary:has-text('Delete Account')")
-        login_page.page.click("button:has-text('Delete Account')")
-    except:
-        pass
+    login_page.page.click("button:has-text('Delete Account')")

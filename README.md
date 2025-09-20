@@ -14,7 +14,10 @@
 ```shell
    pytest --profile=smoke
 ```
-
+Установить все зависимости из pyproject.toml
+```shell
+uv sync --frozen
+```
 
 Автоматизированные тесты созданные с использованием pytest и playwright
 

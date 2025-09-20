@@ -26,6 +26,15 @@ class LoginPage:
     def is_field_invalid(self, field_locator: str):
         return self.page.is_visible(field_locator)
 
+    def get_error_message(self):
+        try:
+            # Ожидаем появления элемента ошибки до 5 секунд
+            error_elem = self.page.locator(LoginLocators.ERROR_MESSAGE)
+            error_elem.wait_for(state="visible", timeout=5000)
+            return error_elem.text_content()
+        except:
+            return None
+
     def get_captcha_error(self):
         try:
             error_elem = self.page.locator(LoginLocators.CAPTCHA_ERROR)
