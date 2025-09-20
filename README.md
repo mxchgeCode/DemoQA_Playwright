@@ -1,51 +1,5 @@
 # DemoQA_Playwright
 
-
-## КОМАНДЫ ДЛЯ ЗАПУСКА И ГЕНЕРАЦИИ ОТЧЕТОВ
-
-### Установка зависимостей
-
- Через uv
-```bash
-uv add --dev pytest allure-pytest pytest-dependency
-```
-
- Или через pip
-```bash
-pip install pytest allure-pytest pytest-dependency
-```
-
-### Запуск тестов
-```bash
-# Все тесты с Allure
-pytest --alluredir=allure-results
-
-# Только smoke тесты
-pytest -m smoke --alluredir=allure-results
-
-# Конкретная категория
-pytest -m elements --alluredir=allure-results
-
-# С детальным выводом
-pytest -v -s --alluredir=allure-results
-
-# Параллельный запуск (если установлен pytest-xdist)
-pytest -n auto --alluredir=allure-results
-```
-
-### Генерация отчетов Allure
-```bash
-# Интерактивный отчет
-allure serve allure-results
-
-# Статический HTML отчет
-allure generate allure-results -o allure-report --clean
-
-# Открыть готовый отчет
-allure open allure-report
-```
-
-
 Автоматизированные тесты созданные с использованием pytest и playwright
 
 Реализованы проверки:

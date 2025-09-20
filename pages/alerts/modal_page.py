@@ -4,7 +4,7 @@ Page Object для страницы Modal Dialogs.
 """
 
 from playwright.sync_api import Page
-from locators.alerts.modal_locators import ModalLocators
+from locators.alerts.modal_locators import ModalDialogsLocators
 from pages.base_page import BasePage
 
 
@@ -29,8 +29,8 @@ class ModalPage(BasePage):
         Postconditions: появляется малый модальный диалог с коротким текстом.
         """
         self.log_step("Открываем малый модальный диалог")
-        self.safe_click(ModalLocators.SMALL_MODAL_BUTTON)
-        self.wait_for_visible(ModalLocators.MODAL_DIALOG, timeout=5000)
+        self.safe_click(ModalDialogsLocators.SMALL_MODAL_BUTTON)
+        self.wait_for_visible(ModalDialogsLocators.MODAL_DIALOG, timeout=5000)
 
     def open_large_modal(self) -> None:
         """
@@ -38,8 +38,8 @@ class ModalPage(BasePage):
         Postconditions: появляется большой модальный диалог с длинным текстом.
         """
         self.log_step("Открываем большой модальный диалог")
-        self.safe_click(ModalLocators.LARGE_MODAL_BUTTON)
-        self.wait_for_visible(ModalLocators.MODAL_DIALOG, timeout=5000)
+        self.safe_click(ModalDialogsLocators.LARGE_MODAL_BUTTON)
+        self.wait_for_visible(ModalDialogsLocators.MODAL_DIALOG, timeout=5000)
 
     def close_modal_by_x(self) -> None:
         """
@@ -47,7 +47,7 @@ class ModalPage(BasePage):
         Postconditions: модальный диалог скрыт.
         """
         self.log_step("Закрываем модальный диалог кнопкой X")
-        self.safe_click(ModalLocators.CLOSE_MODAL_X)
+        self.safe_click(ModalDialogsLocators.MODAL_CLOSE_BUTTON)
 
     def close_modal_by_close_button(self) -> None:
         """
@@ -55,7 +55,7 @@ class ModalPage(BasePage):
         Postconditions: модальный диалог скрыт.
         """
         self.log_step("Закрываем модальный диалог кнопкой Close")
-        self.safe_click(ModalLocators.CLOSE_MODAL_BUTTON)
+        self.safe_click(ModalDialogsLocators.MODAL_CLOSE_BUTTON_ALT)
 
     def close_modal_by_overlay(self) -> None:
         """
@@ -64,7 +64,7 @@ class ModalPage(BasePage):
         """
         self.log_step("Закрываем модальный диалог кликом по overlay")
         # Кликаем по затемненной области рядом с диалогом
-        modal_backdrop = self.page.locator(ModalLocators.MODAL_BACKDROP)
+        modal_backdrop = self.page.locator(ModalDialogsLocators.MODAL_BACKDROP)
         modal_backdrop.click(
             position={"x": 10, "y": 10}
         )  # Клик в левый верхний угол overlay
@@ -76,7 +76,7 @@ class ModalPage(BasePage):
         Returns:
             bool: True если модальный диалог видим
         """
-        return self.page.locator(ModalLocators.MODAL_DIALOG).is_visible()
+        return self.page.locator(ModalDialogsLocators.MODAL_DIALOG).is_visible()
 
     def get_modal_title(self) -> str:
         """
@@ -85,7 +85,7 @@ class ModalPage(BasePage):
         Returns:
             str: Текст заголовка модального диалога
         """
-        return self.get_text_safe(ModalLocators.MODAL_TITLE) or ""
+        return self.get_text_safe(ModalDialogsLocators.MODAL_TITLE) or ""
 
     def get_modal_body_text(self) -> str:
         """
@@ -94,7 +94,7 @@ class ModalPage(BasePage):
         Returns:
             str: Текст тела модального диалога
         """
-        return self.get_text_safe(ModalLocators.MODAL_BODY) or ""
+        return self.get_text_safe(ModalDialogsLocators.MODAL_BODY) or ""
 
     def wait_for_modal_to_close(self, timeout: int = 5000) -> bool:
         """
@@ -109,7 +109,7 @@ class ModalPage(BasePage):
         self.log_step("Ожидаем закрытия модального диалога")
         try:
             self.page.wait_for_selector(
-                ModalLocators.MODAL_DIALOG, state="hidden", timeout=timeout
+                ModalDialogsLocators.MODAL_DIALOG, state="hidden", timeout=timeout
             )
             return True
         except:
@@ -122,7 +122,7 @@ class ModalPage(BasePage):
         Returns:
             str: CSS класс определяющий размер модального диалога
         """
-        modal = self.page.locator(ModalLocators.MODAL_DIALOG)
+        modal = self.page.locator(ModalDialogsLocators.MODAL_DIALOG)
         class_attr = modal.get_attribute("class") or ""
 
         if "modal-sm" in class_attr:

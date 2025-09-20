@@ -8,7 +8,7 @@ import json
 import random
 import string
 import time
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Any
 from datetime import datetime, timedelta
 
 
@@ -255,7 +255,7 @@ class ValidationHelper:
     @staticmethod
     def contains_all_words(text: str, words: List[str]) -> bool:
         """
-        Проверяет содержит ли текст все указанные слова.
+        Проверяет, содержит ли текст все указанные слова.
 
         Args:
             text: Текст для проверки

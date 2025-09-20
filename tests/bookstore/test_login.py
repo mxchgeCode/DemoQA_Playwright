@@ -6,6 +6,9 @@
 import time
 import pytest
 import allure
+from playwright.sync_api import expect
+from data import TestData
+
 from locators.bookstore.login_locators import LoginLocators
 
 
@@ -113,22 +116,14 @@ def test_valid_login(login_page):
     ПРЕДВАРИТЕЛЬНО СОЗДАТЬ ПОЛЬЗОВАТЕЛЯ С УКАЗАННЫМИ КРЕДАМИ
     PLAYWRIGHT НЕ МОЖЕТ ОБОЙТИ КАПЧУ ПРИ РЕГИСТРАЦИИ.
     """
-    with allure.step("Заполнение формы входа валидными данными"):
-        login_page.fill_login_form("asd", "Password123###")
+    p = TestData.USERS.test_user
 
-    with allure.step("Нажатие кнопки входа"):
-        login_page.click_login()
+    with allure.step("Делаем логин с валидными данными"):
+        login_page.login(p.username, p.password)
 
-    with allure.step("Ожидание успешной авторизации"):
-        username = None
-        for attempt in range(10):
-            username = login_page.get_logged_in_username()
-            if username:
-                break
-            time.sleep(1)
+    with allure.step("Ожидание и проверка успешной авторизации"):
+        expect(login_page.get_logged_in_username().to_have_text(p.username))
 
-    with allure.step("Проверка отображения имени пользователя"):
-        assert username == "asd", f"Expected username 'asd', got: {username}"
 
 
 @pytest.mark.dependency(depends=["test_valid_login"])

@@ -32,7 +32,7 @@ class NestedFramesPage(BasePage):
         """
         self.log_step("Получаем текст из родительского фрейма")
         parent_frame = self.page.frame_locator(NestedFramesLocators.PARENT_FRAME)
-        return parent_frame.locator("body").inner_text()
+        return parent_frame.locator(NestedFramesLocators.PARENT_BODY).inner_text()
 
     def get_child_frame_text(self) -> str:
         """
@@ -44,7 +44,7 @@ class NestedFramesPage(BasePage):
         self.log_step("Получаем текст из дочернего фрейма")
         parent_frame = self.page.frame_locator(NestedFramesLocators.PARENT_FRAME)
         child_frame = parent_frame.frame_locator(NestedFramesLocators.CHILD_FRAME)
-        return child_frame.locator("p").inner_text()
+        return child_frame.locator(NestedFramesLocators.CHILD_TEXT).inner_text()
 
     def is_parent_frame_visible(self) -> bool:
         """
@@ -63,12 +63,12 @@ class NestedFramesPage(BasePage):
             int: Общее количество фреймов
         """
         # Подсчитываем фреймы на основной странице
-        main_frames = self.page.locator("iframe").count()
+        main_frames = self.page.locator(NestedFramesLocators.CHILD_FRAME_ALT).count()
 
         # Подсчитываем вложенные фреймы в родительском фрейме
         try:
             parent_frame = self.page.frame_locator(NestedFramesLocators.PARENT_FRAME)
-            nested_frames = parent_frame.locator("iframe").count()
+            nested_frames = parent_frame.locator(NestedFramesLocators.CHILD_FRAME_ALT).count()
             return main_frames + nested_frames
         except:
             return main_frames

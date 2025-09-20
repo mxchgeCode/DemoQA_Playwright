@@ -3,8 +3,9 @@ Page Object для страницы Dynamic Properties.
 Содержит методы для работы с элементами, изменяющими свои свойства во времени.
 """
 
-import time
 from playwright.sync_api import Page
+
+from data import Colors
 from locators.elements.dynamic_locators import DynamicPropertiesLocators
 from pages.base_page import BasePage
 
@@ -78,7 +79,7 @@ class DynamicPropertiesPage(BasePage):
 
     def wait_for_text_color_change(
         self,
-        expected_hex_color: str = "#dc3545",
+        expected_hex_color: str = Colors.RED,
         timeout: int = 10000,
         poll_interval: int = 200,
     ) -> bool:

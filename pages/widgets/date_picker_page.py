@@ -30,7 +30,7 @@ class DatePickerPage(WidgetBasePage):
         Postconditions: календарь открыт и готов для выбора даты.
         """
         self.log_step("Открываем date picker")
-        self.safe_click(DatepickerLocators.DATE_INPUT)
+        self.safe_click(DatePickerLocators.DATE_INPUT)
         self.wait_for_visible(".react-datepicker", timeout=3000)
 
     def open_date_time_picker(self) -> None:
@@ -39,7 +39,7 @@ class DatePickerPage(WidgetBasePage):
         Postconditions: календарь с временем открыт и готов для выбора.
         """
         self.log_step("Открываем date time picker")
-        self.safe_click(DatepickerLocators.DATE_TIME_INPUT)
+        self.safe_click(DatePickerLocators.DATE_TIME_INPUT)
         self.wait_for_visible(".react-datepicker", timeout=3000)
 
     def select_date(self, day: str, month: str = None, year: str = None) -> None:
@@ -57,13 +57,13 @@ class DatePickerPage(WidgetBasePage):
 
         # Если указан год, выбираем его
         if year:
-            year_dropdown = self.page.locator(DatepickerLocators.YEAR_DROPDOWN)
+            year_dropdown = self.page.locator(DatePickerLocators.YEAR_DROPDOWN)
             if year_dropdown.is_visible():
                 year_dropdown.select_option(year)
 
         # Если указан месяц, выбираем его
         if month:
-            month_dropdown = self.page.locator(DatepickerLocators.MONTH_DROPDOWN)
+            month_dropdown = self.page.locator(DatePickerLocators.MONTH_DROPDOWN)
             if month_dropdown.is_visible():
                 month_dropdown.select_option(month)
 
@@ -113,7 +113,7 @@ class DatePickerPage(WidgetBasePage):
         Returns:
             str: Выбранная дата в формате поля ввода
         """
-        date_input = self.page.locator(DatepickerLocators.DATE_INPUT)
+        date_input = self.page.locator(DatePickerLocators.DATE_INPUT)
         return date_input.input_value()
 
     def get_selected_date_time(self) -> str:
@@ -123,7 +123,7 @@ class DatePickerPage(WidgetBasePage):
         Returns:
             str: Выбранная дата и время в формате поля ввода
         """
-        datetime_input = self.page.locator(DatepickerLocators.DATE_TIME_INPUT)
+        datetime_input = self.page.locator(DatePickerLocators.DATE_TIME_INPUT)
         return datetime_input.input_value()
 
     def clear_date(self) -> None:
@@ -132,7 +132,7 @@ class DatePickerPage(WidgetBasePage):
         Postconditions: поле даты очищено.
         """
         self.log_step("Очищаем поле даты")
-        date_input = self.page.locator(DatepickerLocators.DATE_INPUT)
+        date_input = self.page.locator(DatePickerLocators.DATE_INPUT)
         date_input.clear()
 
     def clear_date_time(self) -> None:
@@ -141,7 +141,7 @@ class DatePickerPage(WidgetBasePage):
         Postconditions: поле даты и времени очищено.
         """
         self.log_step("Очищаем поле даты и времени")
-        datetime_input = self.page.locator(DatepickerLocators.DATE_TIME_INPUT)
+        datetime_input = self.page.locator(DatePickerLocators.DATE_TIME_INPUT)
         datetime_input.clear()
 
     def is_calendar_visible(self) -> bool:
@@ -221,9 +221,9 @@ class DatePickerPage(WidgetBasePage):
         self.log_step(f"Устанавливаем дату вводом: {date_string}")
 
         if is_datetime:
-            input_field = self.page.locator(DatepickerLocators.DATE_TIME_INPUT)
+            input_field = self.page.locator(DatePickerLocators.DATE_TIME_INPUT)
         else:
-            input_field = self.page.locator(DatepickerLocators.DATE_INPUT)
+            input_field = self.page.locator(DatePickerLocators.DATE_INPUT)
 
         input_field.clear()
         input_field.type(date_string)

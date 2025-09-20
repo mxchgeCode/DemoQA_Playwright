@@ -3,7 +3,6 @@ Page Object для страницы авторизации BookStore.
 Содержит методы для входа, регистрации и управления учетными записями.
 """
 
-import time
 import logging
 from typing import Optional
 from playwright.sync_api import Page
@@ -41,8 +40,7 @@ class LoginPage(BasePage):
         self.safe_fill(LoginLocators.USERNAME_INPUT, username)
         self.safe_fill(LoginLocators.PASSWORD_INPUT, password)
         self.safe_click(LoginLocators.LOGIN_BUTTON)
-        # TODO: Заменить на явное ожидание успешной авторизации
-        time.sleep(5)
+
 
     def fill_login_form(self, username: str, password: str) -> None:
         """
@@ -56,12 +54,6 @@ class LoginPage(BasePage):
         self.safe_fill(LoginLocators.USER_NAME_LOGIN, username)
         self.safe_fill(LoginLocators.PASSWORD_LOGIN, password)
 
-    def click_login(self) -> None:
-        """
-        Нажимает кнопку входа в систему.
-        """
-        self.log_step("Нажимаем кнопку входа")
-        self.safe_click(LoginLocators.LOGIN_BUTTON)
 
     def click_new_user(self) -> None:
         """

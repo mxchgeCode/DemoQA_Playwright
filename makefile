@@ -1,4 +1,4 @@
-# Makefile для автоматизации запуска тестов
+# makefile для автоматизации запуска тестов
 
 .PHONY: help install test smoke regression allure clean
 

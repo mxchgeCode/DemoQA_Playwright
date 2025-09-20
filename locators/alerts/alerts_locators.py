@@ -22,14 +22,8 @@ class AlertsLocators:
     RESULT_CONTAINER = "#output"  # Контейнер результатов
 
 
-class AlertsLocators:
-    """CSS селекторы для элементов страницы Alerts."""
-
     # Исправленные селекторы (исходная версия имеет опечатки)
     ALERT_BUTTON = "button#alertButton"
-    TIMER_ALERT_BUTTON = "button#timerAlertButton"
-    CONFIRM_BUTTON = "button#confirmButton"
-    PROMPT_BUTTON = "button#promtButton"  # Оставляем как в исходном коде (с опечаткой)
 
     # Результаты
     CONFIRM_RESULT = "#confirmResult"

@@ -4,7 +4,7 @@ Page Object для страницы Practice Form.
 """
 
 from playwright.sync_api import Page
-from locators.forms.practice_form_locators import PracticeFormLocators
+from locators.forms.practice_form_locators import AutomationPracticeFormLocators
 from pages.base_page import BasePage
 
 
@@ -31,7 +31,7 @@ class AutomationPracticeFormPage(BasePage):
             first_name: Имя для заполнения
         """
         self.log_step(f"Заполняем поле First Name: {first_name}")
-        self.safe_fill(PracticeFormLocators.FIRST_NAME, first_name)
+        self.safe_fill(AutomationPracticeFormLocators.FIRST_NAME_INPUT, first_name)
 
     def fill_last_name(self, last_name: str) -> None:
         """
@@ -41,7 +41,7 @@ class AutomationPracticeFormPage(BasePage):
             last_name: Фамилия для заполнения
         """
         self.log_step(f"Заполняем поле Last Name: {last_name}")
-        self.safe_fill(PracticeFormLocators.LAST_NAME, last_name)
+        self.safe_fill(AutomationPracticeFormLocators.LAST_NAME_INPUT, last_name)
 
     def fill_email(self, email: str) -> None:
         """
@@ -51,7 +51,7 @@ class AutomationPracticeFormPage(BasePage):
             email: Email адрес для заполнения
         """
         self.log_step(f"Заполняем поле Email: {email}")
-        self.safe_fill(PracticeFormLocators.EMAIL, email)
+        self.safe_fill(AutomationPracticeFormLocators.EMAIL_INPUT, email)
 
     def select_gender(self, gender: str) -> None:
         """
@@ -62,11 +62,11 @@ class AutomationPracticeFormPage(BasePage):
         """
         self.log_step(f"Выбираем пол: {gender}")
         if gender.lower() == "male":
-            self.safe_click(PracticeFormLocators.GENDER_MALE)
+            self.safe_click(AutomationPracticeFormLocators.MALE_GENDER)
         elif gender.lower() == "female":
-            self.safe_click(PracticeFormLocators.GENDER_FEMALE)
+            self.safe_click(AutomationPracticeFormLocators.FEMALE_GENDER)
         elif gender.lower() == "other":
-            self.safe_click(PracticeFormLocators.GENDER_OTHER)
+            self.safe_click(AutomationPracticeFormLocators.OTHER_GENDER)
 
     def fill_mobile_number(self, mobile: str) -> None:
         """
@@ -76,7 +76,7 @@ class AutomationPracticeFormPage(BasePage):
             mobile: Номер телефона для заполнения
         """
         self.log_step(f"Заполняем номер телефона: {mobile}")
-        self.safe_fill(PracticeFormLocators.MOBILE, mobile)
+        self.safe_fill(AutomationPracticeFormLocators.MOBILE_INPUT, mobile)
 
     def set_date_of_birth(self, day: str, month: str, year: str) -> None:
         """
@@ -90,14 +90,14 @@ class AutomationPracticeFormPage(BasePage):
         self.log_step(f"Устанавливаем дату рождения: {day}/{month}/{year}")
 
         # Кликаем по полю даты для открытия календаря
-        self.safe_click(PracticeFormLocators.DATE_OF_BIRTH)
+        self.safe_click(AutomationPracticeFormLocators.DATE_PICKER)
 
         # Выбираем месяц
-        month_dropdown = self.page.locator(PracticeFormLocators.MONTH_DROPDOWN)
+        month_dropdown = self.page.locator(AutomationPracticeFormLocators.DATE_MONTH_SELECT)
         month_dropdown.select_option(month)
 
         # Выбираем год
-        year_dropdown = self.page.locator(PracticeFormLocators.YEAR_DROPDOWN)
+        year_dropdown = self.page.locator(AutomationPracticeFormLocators.DATE_YEAR_SELECT)
         year_dropdown.select_option(year)
 
         # Выбираем день
@@ -112,7 +112,7 @@ class AutomationPracticeFormPage(BasePage):
             subjects: Список предметов для добавления
         """
         self.log_step(f"Заполняем предметы: {subjects}")
-        subjects_input = self.page.locator(PracticeFormLocators.SUBJECTS)
+        subjects_input = self.page.locator(AutomationPracticeFormLocators.SUBJECTS_INPUT)
 
         for subject in subjects:
             subjects_input.click()
@@ -133,11 +133,11 @@ class AutomationPracticeFormPage(BasePage):
         self.log_step(f"Выбираем хобби: {hobbies}")
         for hobby in hobbies:
             if hobby.lower() == "sports":
-                self.safe_click(PracticeFormLocators.HOBBY_SPORTS)
+                self.safe_click(AutomationPracticeFormLocators.SPORTS_HOBBY)
             elif hobby.lower() == "reading":
-                self.safe_click(PracticeFormLocators.HOBBY_READING)
+                self.safe_click(AutomationPracticeFormLocators.READING_HOBBY)
             elif hobby.lower() == "music":
-                self.safe_click(PracticeFormLocators.HOBBY_MUSIC)
+                self.safe_click(AutomationPracticeFormLocators.MUSIC_HOBBY)
 
     def upload_picture(self, file_path: str) -> None:
         """
@@ -147,7 +147,7 @@ class AutomationPracticeFormPage(BasePage):
             file_path: Путь к файлу изображения
         """
         self.log_step(f"Загружаем изображение: {file_path}")
-        self.page.set_input_files(PracticeFormLocators.UPLOAD_PICTURE, file_path)
+        self.page.set_input_files(AutomationPracticeFormLocators.PICTURE_UPLOAD_INPUT, file_path)
 
     def fill_current_address(self, address: str) -> None:
         """
@@ -157,7 +157,7 @@ class AutomationPracticeFormPage(BasePage):
             address: Адрес для заполнения
         """
         self.log_step(f"Заполняем текущий адрес: {address}")
-        self.safe_fill(PracticeFormLocators.CURRENT_ADDRESS, address)
+        self.safe_fill(AutomationPracticeFormLocators.CURRENT_ADDRESS_TEXTAREA, address)
 
     def select_state(self, state: str) -> None:
         """
@@ -168,7 +168,7 @@ class AutomationPracticeFormPage(BasePage):
         """
         self.log_step(f"Выбираем штат: {state}")
         # Кликаем по dropdown для его открытия
-        state_dropdown = self.page.locator(PracticeFormLocators.STATE_DROPDOWN)
+        state_dropdown = self.page.locator(AutomationPracticeFormLocators.STATE_DROPDOWN)
         state_dropdown.click()
 
         # Выбираем опцию
@@ -184,7 +184,7 @@ class AutomationPracticeFormPage(BasePage):
         """
         self.log_step(f"Выбираем город: {city}")
         # Кликаем по dropdown для его открытия
-        city_dropdown = self.page.locator(PracticeFormLocators.CITY_DROPDOWN)
+        city_dropdown = self.page.locator(AutomationPracticeFormLocators.CITY_DROPDOWN)
         city_dropdown.click()
 
         # Выбираем опцию
@@ -197,7 +197,7 @@ class AutomationPracticeFormPage(BasePage):
         Postconditions: появляется модальное окно с результатами отправки.
         """
         self.log_step("Отправляем форму")
-        self.safe_click(PracticeFormLocators.SUBMIT_BUTTON)
+        self.safe_click(AutomationPracticeFormLocators.SUBMIT_BUTTON)
 
     def is_modal_visible(self) -> bool:
         """
@@ -206,7 +206,7 @@ class AutomationPracticeFormPage(BasePage):
         Returns:
             bool: True если модальное окно с результатами видимо
         """
-        return self.page.locator(PracticeFormLocators.MODAL_CONTENT).is_visible()
+        return self.page.locator(AutomationPracticeFormLocators.MODAL_DIALOG).is_visible()
 
     def get_modal_title(self) -> str:
         """
@@ -215,7 +215,7 @@ class AutomationPracticeFormPage(BasePage):
         Returns:
             str: Заголовок модального окна
         """
-        return self.get_text_safe(PracticeFormLocators.MODAL_TITLE) or ""
+        return self.get_text_safe(AutomationPracticeFormLocators.MODAL_TITLE) or ""
 
     def close_modal(self) -> None:
         """
@@ -223,7 +223,7 @@ class AutomationPracticeFormPage(BasePage):
         Postconditions: модальное окно скрыто.
         """
         self.log_step("Закрываем модальное окно с результатами")
-        self.safe_click(PracticeFormLocators.CLOSE_MODAL_BUTTON)
+        self.safe_click(AutomationPracticeFormLocators.MODAL_CLOSE_BUTTON)
 
     def get_form_results(self) -> dict:
         """
@@ -233,7 +233,7 @@ class AutomationPracticeFormPage(BasePage):
             dict: Словарь с парами ключ-значение из таблицы результатов
         """
         results = {}
-        table_rows = self.page.locator(f"{PracticeFormLocators.MODAL_CONTENT} tbody tr")
+        table_rows = self.page.locator(f"{AutomationPracticeFormLocators.MODAL_TABLE} tbody tr")
 
         for i in range(table_rows.count()):
             row = table_rows.nth(i)

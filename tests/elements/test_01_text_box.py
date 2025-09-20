@@ -228,7 +228,7 @@ def test_text_length_handling(text_box_page, text_length, description):
     "special_text,description",
     [
         ("Hello <script>alert('test')</script>", "HTML/JavaScript injection"),
-        ("Text with 'quotes' and \"double quotes\", Various quote types"),
+        ("Text with 'quotes' and \"double quotes\"", "Various quote types"),
         ("Special chars: @#$%^&*()+=[]{}|;:,.<>?", "Symbol characters"),
         ("Unicode: ñáéíóú 中文 🎉", "Unicode and emojis"),
         ("Newlines\nand\ttabs", "Escape sequences"),

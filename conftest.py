@@ -17,6 +17,7 @@ from data import URLs
 
 # Импорты всех страниц
 from pages.base_page import BasePage
+from pages.alerts.modal_page import ModalPage
 from pages.alerts.alerts_page import AlertsPage
 from pages.alerts.browser_windows_page import BrowserWindowsPage
 from pages.alerts.frames_page import FramesPage
