@@ -8,23 +8,15 @@ class AlertsLocators:
     """CSS селекторы для элементов страницы Alerts."""
 
     # Кнопки для вызова различных типов alert диалогов
-    SIMPLE_ALERT_BUTTON = "button#alertButton"
+    ALERT_BUTTON = "button#alertButton"  # Простой alert
     TIMER_ALERT_BUTTON = "button#timerAlertButton"  # Alert с задержкой 5 секунд
     CONFIRM_BUTTON = "button#confirmButton"  # Confirm диалог с OK/Cancel
-    PROMPT_BUTTON = "button#promtButton"  # Prompt диалог с полем ввода
+    PROMPT_BUTTON = "button#promtButton"  # Prompt диалог (сохраняем опечатку в ID на реальном сайте)
 
     # Элементы отображения результатов
-    CONFIRM_RESULT_TEXT = "#confirmResult"  # Результат confirm диалога
-    PROMPT_RESULT_TEXT = "#promptResult"  # Результат prompt диалога
+    CONFIRM_RESULT = "#confirmResult"  # Результат confirm диалога
+    PROMPT_RESULT = "#promptResult"   # Результат prompt диалога
 
-    # Дополнительные селекторы для надежности
-    ALL_ALERT_BUTTONS = "button[id$='Button']"  # Все кнопки alert на странице
-    RESULT_CONTAINER = "#output"  # Контейнер результатов
-
-
-    # Исправленные селекторы (исходная версия имеет опечатки)
-    ALERT_BUTTON = "button#alertButton"
-
-    # Результаты
-    CONFIRM_RESULT = "#confirmResult"
-    PROMPT_RESULT = "#promptResult"
+    # Альтернативные селекторы для проверки
+    ALERT_SECTION = ".card-body"  # Секция с кнопками
+    ALL_BUTTONS = "button[id*='Button']"  # Все кнопки с 'Button' в ID

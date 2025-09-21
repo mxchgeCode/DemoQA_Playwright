@@ -1,8 +1,9 @@
 """
-Page Object для страницы Alerts.
-Содержит методы для работы с различными типами JavaScript alert диалогов.
+Page Object для страницы Alerts с JavaScript диалогами.
+Переписан для корректной работы с Playwright dialog handling.
 """
 
+import allure
 from playwright.sync_api import Page
 from locators.alerts.alerts_locators import AlertsLocators
 from pages.base_page import BasePage
@@ -10,8 +11,8 @@ from pages.base_page import BasePage
 
 class AlertsPage(BasePage):
     """
-    Страница тестирования различных типов alert диалогов.
-    Поддерживает простые alert, confirm и prompt диалоги.
+    Страница тестирования JavaScript alert диалогов.
+    Использует корректную обработку диалогов через Playwright.
     """
 
     def __init__(self, page: Page):
@@ -23,128 +24,215 @@ class AlertsPage(BasePage):
         """
         super().__init__(page)
 
-    def click_alert_button(self) -> None:
-        """
-        Кликает кнопку для вызова простого alert диалога.
-        Postconditions: появляется alert с сообщением для подтверждения.
-        """
-        self.log_step("Кликаем кнопку для вызова Alert")
-        self.safe_click(AlertsLocators.ALERT_BUTTON)
-
-    def click_timer_alert_button(self) -> None:
-        """
-        Кликает кнопку для вызова alert с задержкой в 5 секунд.
-        Postconditions: через 5 секунд появляется alert диалог.
-        """
-        self.log_step("Кликаем кнопку для вызова Timer Alert")
-        self.safe_click(AlertsLocators.TIMER_ALERT_BUTTON)
-
-    def click_confirm_button(self) -> None:
-        """
-        Кликает кнопку для вызова confirm диалога.
-        Postconditions: появляется confirm диалог с кнопками OK/Cancel.
-        """
-        self.log_step("Кликаем кнопку для вызова Confirm")
-        self.safe_click(AlertsLocators.CONFIRM_BUTTON)
-
-    def click_prompt_button(self) -> None:
-        """
-        Кликает кнопку для вызова prompt диалога.
-        Postconditions: появляется prompt диалог с полем для ввода текста.
-        """
-        self.log_step("Кликаем кнопку для вызова Prompt")
-        self.safe_click(AlertsLocators.PROMPT_BUTTON)
-
-    def handle_alert(self, accept: bool = True) -> None:
+    @allure.step("Обрабатываем простой alert и получаем его текст")
+    def handle_simple_alert(self) -> str:
         """
         Обрабатывает простой alert диалог.
 
-        Args:
-            accept: True для подтверждения (OK), False не применимо для alert
-
-        Postconditions: alert диалог закрыт
+        Returns:
+            str: Текст alert диалога
         """
-        self.log_step(f"Обрабатываем alert: accept={accept}")
+        dialog_text = ""
 
-        def alert_handler(dialog):
-            if accept:
-                dialog.accept()
-            else:
-                dialog.accept()  # Alert можно только подтвердить
+        def handle_dialog(dialog):
+            nonlocal dialog_text
+            dialog_text = dialog.message
+            dialog.accept()
 
-        self.page.on("dialog", alert_handler)
+        # Устанавливаем обработчик перед кликом
+        self.page.on("dialog", handle_dialog)
 
-    def handle_confirm(self, accept: bool = True) -> None:
+        try:
+            self.safe_click(AlertsLocators.ALERT_BUTTON)
+            self.page.wait_for_timeout(1000)  # Ждем обработки
+        finally:
+            # Удаляем обработчик
+            self.page.remove_listener("dialog", handle_dialog)
+
+        return dialog_text
+
+    @allure.step("Обрабатываем timer alert и получаем его текст")
+    def handle_timer_alert(self, timeout: int = 7000) -> str:
         """
-        Обрабатывает confirm диалог.
-
-        Args:
-            accept: True для OK, False для Cancel
-
-        Postconditions: confirm диалог закрыт, результат отображен на странице
-        """
-        self.log_step(f"Обрабатываем confirm: accept={accept}")
-
-        def confirm_handler(dialog):
-            if accept:
-                dialog.accept()
-            else:
-                dialog.dismiss()
-
-        self.page.on("dialog", confirm_handler)
-
-    def handle_prompt(self, text: str = "", accept: bool = True) -> None:
-        """
-        Обрабатывает prompt диалог.
+        Обрабатывает alert с задержкой.
 
         Args:
-            text: Текст для ввода в prompt (по умолчанию пустой)
-            accept: True для OK, False для Cancel
-
-        Postconditions: prompt диалог закрыт, результат отображен на странице
-        """
-        self.log_step(f"Обрабатываем prompt с текстом: '{text}', accept={accept}")
-
-        def prompt_handler(dialog):
-            if accept:
-                dialog.accept(text)
-            else:
-                dialog.dismiss()
-
-        self.page.on("dialog", prompt_handler)
-
-    def get_confirm_result(self) -> str:
-        """
-        Получает результат обработки confirm диалога.
+            timeout: Максимальное время ожидания alert (мс)
 
         Returns:
-            str: Сообщение о результате (OK или Cancel)
+            str: Текст alert диалога
         """
+        dialog_text = ""
+        dialog_handled = False
+
+        def handle_dialog(dialog):
+            nonlocal dialog_text, dialog_handled
+            dialog_text = dialog.message
+            dialog_handled = True
+            dialog.accept()
+
+        # Устанавливаем обработчик перед кликом
+        self.page.on("dialog", handle_dialog)
+
+        try:
+            self.safe_click(AlertsLocators.TIMER_ALERT_BUTTON)
+            self.page.wait_for_timeout(timeout)  # Ждем появления alert
+        finally:
+            # Удаляем обработчик
+            self.page.remove_listener("dialog", handle_dialog)
+
+        return dialog_text if dialog_handled else ""
+
+    @allure.step("Принимаем confirm dialog")
+    def accept_confirm_dialog(self) -> str:
+        """
+        Принимает confirm диалог (нажимает OK).
+
+        Returns:
+            str: Текст результата или пустая строка
+        """
+        def handle_dialog(dialog):
+            dialog.accept()
+
+        # Устанавливаем обработчик перед кликом
+        self.page.on("dialog", handle_dialog)
+
+        try:
+            self.safe_click(AlertsLocators.CONFIRM_BUTTON)
+            self.page.wait_for_timeout(1000)
+        finally:
+            # Удаляем обработчик
+            self.page.remove_listener("dialog", handle_dialog)
+
+        # Пытаемся получить результат
         return self.get_text_safe(AlertsLocators.CONFIRM_RESULT) or ""
 
-    def get_prompt_result(self) -> str:
+    @allure.step("Отклоняем confirm dialog")
+    def dismiss_confirm_dialog(self) -> str:
         """
-        Получает результат обработки prompt диалога.
+        Отклоняет confirm диалог (нажимает Cancel).
 
         Returns:
-            str: Сообщение с введенным текстом или результатом отмены
+            str: Текст результата или пустая строка
         """
-        return self.get_text_safe(AlertsLocators.PROMPT_RESULT) or ""
+        def handle_dialog(dialog):
+            dialog.dismiss()
 
-    def wait_for_timer_alert(self, timeout: int = 6000) -> bool:
+        # Устанавливаем обработчик перед кликом
+        self.page.on("dialog", handle_dialog)
+
+        try:
+            self.safe_click(AlertsLocators.CONFIRM_BUTTON)
+            self.page.wait_for_timeout(1000)
+        finally:
+            # Удаляем обработчик
+            self.page.remove_listener("dialog", handle_dialog)
+
+        # Пытаемся получить результат
+        return self.get_text_safe(AlertsLocators.CONFIRM_RESULT) or ""
+
+    @allure.step("Вводим текст в prompt dialog")
+    def handle_prompt_with_text(self, text: str) -> str:
         """
-        Ожидает появления timer alert диалога.
+        Обрабатывает prompt диалог с вводом текста.
 
         Args:
-            timeout: Максимальное время ожидания в миллисекундах
+            text: Текст для ввода
 
         Returns:
-            bool: True если alert появился в указанное время
+            str: Результат prompt диалога или пустая строка
         """
-        self.log_step("Ожидаем появления timer alert")
+        def handle_dialog(dialog):
+            dialog.accept(text)
+
+        # Устанавливаем обработчик перед кликом
+        self.page.on("dialog", handle_dialog)
+
         try:
-            with self.page.expect_event("dialog", timeout=timeout):
-                pass
+            self.safe_click(AlertsLocators.PROMPT_BUTTON)
+            self.page.wait_for_timeout(1000)
+        finally:
+            # Удаляем обработчик
+            self.page.remove_listener("dialog", handle_dialog)
+
+        # Пытаемся получить результат
+        return self.get_text_safe(AlertsLocators.PROMPT_RESULT) or ""
+
+    @allure.step("Отклоняем prompt dialog")
+    def dismiss_prompt_dialog(self) -> str:
+        """
+        Отклоняет prompt диалог.
+
+        Returns:
+            str: Результат prompt диалога или пустая строка
+        """
+        def handle_dialog(dialog):
+            dialog.dismiss()
+
+        # Устанавливаем обработчик перед кликом
+        self.page.on("dialog", handle_dialog)
+
+        try:
+            self.safe_click(AlertsLocators.PROMPT_BUTTON)
+            self.page.wait_for_timeout(1000)
+        finally:
+            # Удаляем обработчик
+            self.page.remove_listener("dialog", handle_dialog)
+
+        # Пытаемся получить результат
+        return self.get_text_safe(AlertsLocators.PROMPT_RESULT) or ""
+
+    def check_all_buttons_visible(self) -> bool:
+        """
+        Проверяет видимость всех кнопок alert на странице.
+
+        Returns:
+            bool: True если все кнопки видны
+        """
+        buttons = [
+            AlertsLocators.ALERT_BUTTON,
+            AlertsLocators.TIMER_ALERT_BUTTON,
+            AlertsLocators.CONFIRM_BUTTON,
+            AlertsLocators.PROMPT_BUTTON
+        ]
+
+        try:
+            for button in buttons:
+                if not self.page.locator(button).is_visible():
+                    return False
             return True
         except Exception:
             return False
+
+    def check_element_exists(self, selector: str) -> bool:
+        """
+        Проверяет существование элемента в DOM.
+
+        Args:
+            selector: CSS селектор элемента
+
+        Returns:
+            bool: True если элемент существует
+        """
+        try:
+            return self.page.locator(selector).count() > 0
+        except Exception:
+            return False
+
+    def get_confirm_result_safe(self) -> str:
+        """Безопасно получает результат confirm."""
+        try:
+            element = self.page.locator(AlertsLocators.CONFIRM_RESULT)
+            element.wait_for(state="visible", timeout=2000)
+            return element.inner_text()
+        except Exception:
+            return ""
+
+    def get_prompt_result_safe(self) -> str:
+        """Безопасно получает результат prompt."""
+        try:
+            element = self.page.locator(AlertsLocators.PROMPT_RESULT)
+            element.wait_for(state="visible", timeout=2000)
+            return element.inner_text()
+        except Exception:
+            return ""
