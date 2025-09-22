@@ -41,7 +41,6 @@ class LoginPage(BasePage):
         self.safe_fill(LoginLocators.PASSWORD_INPUT, password)
         self.safe_click(LoginLocators.LOGIN_BUTTON)
 
-
     def fill_login_form(self, username: str, password: str) -> None:
         """
         Заполняет форму логина без отправки.
@@ -53,7 +52,6 @@ class LoginPage(BasePage):
         self.log_step(f"Заполняем форму логина для пользователя: {username}")
         self.safe_fill(LoginLocators.USER_NAME_LOGIN, username)
         self.safe_fill(LoginLocators.PASSWORD_LOGIN, password)
-
 
     def click_new_user(self) -> None:
         """

@@ -28,18 +28,24 @@ def test_add_new_record_to_table(web_tables_page: WebTablesPage):
     """
     new_record_data = {
         "first_name": "John",
-        "last_name": "Doe", 
+        "last_name": "Doe",
         "email": "john.doe@example.com",
         "age": 28,
         "salary": 50000,
-        "department": "Engineering"
+        "department": "Engineering",
     }
 
     with allure.step("Получаем количество записей до добавления"):
         initial_record_count = web_tables_page.get_records_count()
-        web_tables_page.log_step(f"Начальное количество записей: {initial_record_count}")
+        web_tables_page.log_step(
+            f"Начальное количество записей: {initial_record_count}"
+        )
 
-        allure.attach(str(initial_record_count), "initial_records_count", allure.attachment_type.TEXT)
+        allure.attach(
+            str(initial_record_count),
+            "initial_records_count",
+            allure.attachment_type.TEXT,
+        )
 
     with allure.step("Открываем форму добавления новой записи"):
         web_tables_page.log_step("Клик по кнопке 'Add' для открытия формы")
@@ -56,11 +62,11 @@ def test_add_new_record_to_table(web_tables_page: WebTablesPage):
 
         web_tables_page.fill_form(
             new_record_data["first_name"],
-            new_record_data["last_name"], 
+            new_record_data["last_name"],
             new_record_data["email"],
             new_record_data["age"],
             new_record_data["salary"],
-            new_record_data["department"]
+            new_record_data["department"],
         )
 
         # Проверяем что поля заполнены корректно
@@ -82,12 +88,16 @@ def test_add_new_record_to_table(web_tables_page: WebTablesPage):
 
     with allure.step("Проверяем что запись добавилась в таблицу"):
         final_record_count = web_tables_page.get_records_count()
-        web_tables_page.log_step(f"Количество записей после добавления: {final_record_count}")
+        web_tables_page.log_step(
+            f"Количество записей после добавления: {final_record_count}"
+        )
 
         records_added = final_record_count > initial_record_count
         web_tables_page.log_step(f"Запись добавлена: {records_added}")
 
-        assert records_added, f"Количество записей должно увеличиться: было {initial_record_count}, стало {final_record_count}"
+        assert (
+            records_added
+        ), f"Количество записей должно увеличиться: было {initial_record_count}, стало {final_record_count}"
 
     with allure.step("Ищем добавленную запись в таблице"):
         web_tables_page.log_step(f"Поиск записи по email: {new_record_data['email']}")
@@ -95,21 +105,31 @@ def test_add_new_record_to_table(web_tables_page: WebTablesPage):
 
         # Проверяем что запись найдена
         search_results = web_tables_page.get_search_results()
-        web_tables_page.log_step(f"Результаты поиска: {len(search_results)} записей найдено")
+        web_tables_page.log_step(
+            f"Результаты поиска: {len(search_results)} записей найдено"
+        )
 
         record_found = len(search_results) > 0
-        assert record_found, f"Добавленная запись с email {new_record_data['email']} должна быть найдена"
+        assert (
+            record_found
+        ), f"Добавленная запись с email {new_record_data['email']} должна быть найдена"
 
         # Проверяем содержимое найденной записи
         if record_found:
             found_record = search_results[0]
             web_tables_page.log_step(f"Найденная запись: {found_record}")
 
-            allure.attach(str(found_record), "found_record_data", allure.attachment_type.JSON)
+            allure.attach(
+                str(found_record), "found_record_data", allure.attachment_type.JSON
+            )
 
             # Проверяем соответствие данных
-            assert found_record["email"] == new_record_data["email"], "Email должен совпадать"
-            assert found_record["first_name"] == new_record_data["first_name"], "Имя должно совпадать"
+            assert (
+                found_record["email"] == new_record_data["email"]
+            ), "Email должен совпадать"
+            assert (
+                found_record["first_name"] == new_record_data["first_name"]
+            ), "Имя должно совпадать"
 
         web_tables_page.log_step("✅ Запись успешно добавлена и найдена в таблице")
 
@@ -134,11 +154,19 @@ def test_delete_record_from_table(web_tables_page: WebTablesPage):
         # Получаем количество записей до удаления
         records_before_delete = web_tables_page.get_search_results()
         records_count_before = len(records_before_delete)
-        web_tables_page.log_step(f"Найдено записей для удаления: {records_count_before}")
+        web_tables_page.log_step(
+            f"Найдено записей для удаления: {records_count_before}"
+        )
 
-        allure.attach(str(records_before_delete), "records_before_delete", allure.attachment_type.JSON)
+        allure.attach(
+            str(records_before_delete),
+            "records_before_delete",
+            allure.attachment_type.JSON,
+        )
 
-        assert records_count_before > 0, f"Должна быть найдена хотя бы одна запись с '{target_search_term}'"
+        assert (
+            records_count_before > 0
+        ), f"Должна быть найдена хотя бы одна запись с '{target_search_term}'"
 
     with allure.step("Удаляем первую найденную запись"):
         # Получаем данные удаляемой записи для последующей проверки
@@ -147,7 +175,9 @@ def test_delete_record_from_table(web_tables_page: WebTablesPage):
 
         # Выполняем удаление
         web_tables_page.log_step("Клик по кнопке удаления записи")
-        delete_button_clicked = web_tables_page.click_delete_button_for_record(target_search_term)
+        delete_button_clicked = web_tables_page.click_delete_button_for_record(
+            target_search_term
+        )
 
         assert delete_button_clicked, "Кнопка удаления должна быть успешно нажата"
 
@@ -171,19 +201,25 @@ def test_delete_record_from_table(web_tables_page: WebTablesPage):
 
         records_after_delete = web_tables_page.get_search_results()
         records_count_after = len(records_after_delete)
-        web_tables_page.log_step(f"Количество записей после удаления: {records_count_after}")
+        web_tables_page.log_step(
+            f"Количество записей после удаления: {records_count_after}"
+        )
 
         deletion_result = {
             "records_before": records_count_before,
             "records_after": records_count_after,
             "records_deleted": records_count_before - records_count_after,
-            "deletion_successful": records_count_after < records_count_before
+            "deletion_successful": records_count_after < records_count_before,
         }
 
         web_tables_page.log_step(f"Результат удаления: {deletion_result}")
-        allure.attach(str(deletion_result), "deletion_result", allure.attachment_type.JSON)
+        allure.attach(
+            str(deletion_result), "deletion_result", allure.attachment_type.JSON
+        )
 
-        assert deletion_result["deletion_successful"], f"Запись должна быть удалена: было {records_count_before}, стало {records_count_after}"
+        assert deletion_result[
+            "deletion_successful"
+        ], f"Запись должна быть удалена: было {records_count_before}, стало {records_count_after}"
 
         web_tables_page.log_step("✅ Запись успешно удалена из таблицы")
 
@@ -201,9 +237,17 @@ def test_search_functionality(web_tables_page: WebTablesPage):
     """
     search_test_cases = [
         {"term": "Cierra", "expected_min": 1, "description": "Поиск по имени"},
-        {"term": "@example.com", "expected_min": 0, "description": "Поиск по домену email"},
+        {
+            "term": "@example.com",
+            "expected_min": 0,
+            "description": "Поиск по домену email",
+        },
         {"term": "25", "expected_min": 0, "description": "Поиск по возрасту"},
-        {"term": "NonExistentTerm", "expected_min": 0, "description": "Поиск несуществующего термина"}
+        {
+            "term": "NonExistentTerm",
+            "expected_min": 0,
+            "description": "Поиск несуществующего термина",
+        },
     ]
 
     search_results = []
@@ -235,35 +279,53 @@ def test_search_functionality(web_tables_page: WebTablesPage):
                     "found_count": found_count,
                     "expected_min": expected_min,
                     "meets_expectation": found_count >= expected_min,
-                    "found_records": found_records[:2]  # Первые 2 записи для примера
+                    "found_records": found_records[:2],  # Первые 2 записи для примера
                 }
 
                 search_results.append(search_result)
-                web_tables_page.log_step(f"Результат поиска '{search_term}': найдено {found_count} записей")
+                web_tables_page.log_step(
+                    f"Результат поиска '{search_term}': найдено {found_count} записей"
+                )
 
                 # Проверяем соответствие ожиданиям
                 if expected_min > 0:
-                    assert found_count >= expected_min, f"Для '{search_term}' ожидалось минимум {expected_min} записей, найдено {found_count}"
+                    assert (
+                        found_count >= expected_min
+                    ), f"Для '{search_term}' ожидалось минимум {expected_min} записей, найдено {found_count}"
                 elif search_term == "NonExistentTerm":
-                    assert found_count == 0, f"Для несуществующего термина должно быть найдено 0 записей, найдено {found_count}"
+                    assert (
+                        found_count == 0
+                    ), f"Для несуществующего термина должно быть найдено 0 записей, найдено {found_count}"
 
     with allure.step("Анализируем общую эффективность поиска"):
-        allure.attach(str(search_results), "all_search_results", allure.attachment_type.JSON)
+        allure.attach(
+            str(search_results), "all_search_results", allure.attachment_type.JSON
+        )
 
-        successful_searches = sum(1 for result in search_results if result["meets_expectation"])
+        successful_searches = sum(
+            1 for result in search_results if result["meets_expectation"]
+        )
         total_searches = len(search_results)
 
         search_effectiveness = {
             "total_searches": total_searches,
             "successful_searches": successful_searches,
-            "success_rate": successful_searches / total_searches if total_searches > 0 else 0,
-            "search_functionality_works": successful_searches >= total_searches * 0.75
+            "success_rate": (
+                successful_searches / total_searches if total_searches > 0 else 0
+            ),
+            "search_functionality_works": successful_searches >= total_searches * 0.75,
         }
 
         web_tables_page.log_step(f"Эффективность поиска: {search_effectiveness}")
-        allure.attach(str(search_effectiveness), "search_effectiveness", allure.attachment_type.JSON)
+        allure.attach(
+            str(search_effectiveness),
+            "search_effectiveness",
+            allure.attachment_type.JSON,
+        )
 
-        assert search_effectiveness["search_functionality_works"], f"Функциональность поиска должна работать корректно: {successful_searches}/{total_searches} успешных"
+        assert search_effectiveness[
+            "search_functionality_works"
+        ], f"Функциональность поиска должна работать корректно: {successful_searches}/{total_searches} успешных"
 
         web_tables_page.log_step("✅ Функциональность поиска работает корректно")
 
@@ -272,7 +334,7 @@ def test_search_functionality(web_tables_page: WebTablesPage):
 @allure.feature("Web Tables")
 @allure.story("Edit Record")
 @pytest.mark.elements
-@pytest.mark.regression  
+@pytest.mark.regression
 def test_edit_existing_record(web_tables_page: WebTablesPage):
     """
     Тест редактирования существующей записи.
@@ -282,27 +344,35 @@ def test_edit_existing_record(web_tables_page: WebTablesPage):
     target_search_term = "Alden"
     updated_data = {
         "first_name": "AldenUpdated",
-        "last_name": "CantrellUpdated", 
-        "salary": 75000
+        "last_name": "CantrellUpdated",
+        "salary": 75000,
     }
 
     with allure.step("Находим запись для редактирования"):
-        web_tables_page.log_step(f"Поиск записи для редактирования: {target_search_term}")
+        web_tables_page.log_step(
+            f"Поиск записи для редактирования: {target_search_term}"
+        )
         web_tables_page.search(target_search_term)
 
         original_records = web_tables_page.get_search_results()
         web_tables_page.log_step(f"Найдено записей: {len(original_records)}")
 
-        assert len(original_records) > 0, f"Должна быть найдена запись с '{target_search_term}'"
+        assert (
+            len(original_records) > 0
+        ), f"Должна быть найдена запись с '{target_search_term}'"
 
         original_record = original_records[0]
         web_tables_page.log_step(f"Оригинальная запись: {original_record}")
 
-        allure.attach(str(original_record), "original_record_data", allure.attachment_type.JSON)
+        allure.attach(
+            str(original_record), "original_record_data", allure.attachment_type.JSON
+        )
 
     with allure.step("Открываем форму редактирования"):
         web_tables_page.log_step("Клик по кнопке редактирования записи")
-        edit_button_clicked = web_tables_page.click_edit_button_for_record(target_search_term)
+        edit_button_clicked = web_tables_page.click_edit_button_for_record(
+            target_search_term
+        )
 
         assert edit_button_clicked, "Кнопка редактирования должна быть успешно нажата"
 
@@ -316,7 +386,9 @@ def test_edit_existing_record(web_tables_page: WebTablesPage):
         current_form_data = web_tables_page.get_form_data()
         web_tables_page.log_step(f"Текущие данные в форме: {current_form_data}")
 
-        allure.attach(str(current_form_data), "current_form_data", allure.attachment_type.JSON)
+        allure.attach(
+            str(current_form_data), "current_form_data", allure.attachment_type.JSON
+        )
 
     with allure.step("Обновляем данные в форме"):
         web_tables_page.log_step(f"Обновление данных: {updated_data}")
@@ -357,7 +429,9 @@ def test_edit_existing_record(web_tables_page: WebTablesPage):
             updated_record = updated_records[0]
             web_tables_page.log_step(f"Обновленная запись: {updated_record}")
 
-            allure.attach(str(updated_record), "updated_record_data", allure.attachment_type.JSON)
+            allure.attach(
+                str(updated_record), "updated_record_data", allure.attachment_type.JSON
+            )
 
             # Проверяем что изменения применились
             changes_applied = True
@@ -366,13 +440,15 @@ def test_edit_existing_record(web_tables_page: WebTablesPage):
                     actual_value = updated_record[field]
                     if str(actual_value) != str(expected_value):
                         changes_applied = False
-                        web_tables_page.log_step(f"Поле {field}: ожидалось {expected_value}, получено {actual_value}")
+                        web_tables_page.log_step(
+                            f"Поле {field}: ожидалось {expected_value}, получено {actual_value}"
+                        )
 
             edit_result = {
                 "original_record": original_record,
                 "updated_record": updated_record,
                 "changes_applied": changes_applied,
-                "updated_fields": updated_data
+                "updated_fields": updated_data,
             }
 
             web_tables_page.log_step(f"Результат редактирования: {edit_result}")
@@ -399,17 +475,23 @@ def test_table_pagination(web_tables_page: WebTablesPage):
         pagination_info = web_tables_page.get_pagination_info()
         web_tables_page.log_step(f"Информация о пагинации: {pagination_info}")
 
-        allure.attach(str(pagination_info), "pagination_info", allure.attachment_type.JSON)
+        allure.attach(
+            str(pagination_info), "pagination_info", allure.attachment_type.JSON
+        )
 
         has_pagination = pagination_info.get("has_pagination", False)
 
         if not has_pagination:
-            web_tables_page.log_step("ℹ️ Пагинация отсутствует или все записи помещаются на одной странице")
+            web_tables_page.log_step(
+                "ℹ️ Пагинация отсутствует или все записи помещаются на одной странице"
+            )
             return
 
     with allure.step("Тестируем переключение страниц"):
         pages_to_test = pagination_info.get("available_pages", [])
-        web_tables_page.log_step(f"Доступные страницы для тестирования: {pages_to_test}")
+        web_tables_page.log_step(
+            f"Доступные страницы для тестирования: {pages_to_test}"
+        )
 
         pagination_tests = []
 
@@ -433,28 +515,37 @@ def test_table_pagination(web_tables_page: WebTablesPage):
                     "active_page": active_page,
                     "records_on_page": records_count,
                     "page_switch_correct": active_page == page_num,
-                    "has_records": records_count > 0
+                    "has_records": records_count > 0,
                 }
 
                 pagination_tests.append(page_test)
-                web_tables_page.log_step(f"Результат перехода на страницу {page_num}: {page_test}")
+                web_tables_page.log_step(
+                    f"Результат перехода на страницу {page_num}: {page_test}"
+                )
 
     with allure.step("Анализируем результаты пагинации"):
-        allure.attach(str(pagination_tests), "pagination_tests", allure.attachment_type.JSON)
+        allure.attach(
+            str(pagination_tests), "pagination_tests", allure.attachment_type.JSON
+        )
 
-        successful_switches = sum(1 for test in pagination_tests if test["page_switch_correct"])
+        successful_switches = sum(
+            1 for test in pagination_tests if test["page_switch_correct"]
+        )
         pages_with_records = sum(1 for test in pagination_tests if test["has_records"])
 
         pagination_summary = {
             "total_pages_tested": len(pagination_tests),
             "successful_switches": successful_switches,
             "pages_with_records": pages_with_records,
-            "pagination_functionality_works": successful_switches >= len(pagination_tests) * 0.8,
-            "all_pages_have_records": pages_with_records == len(pagination_tests)
+            "pagination_functionality_works": successful_switches
+            >= len(pagination_tests) * 0.8,
+            "all_pages_have_records": pages_with_records == len(pagination_tests),
         }
 
         web_tables_page.log_step(f"Итоги пагинации: {pagination_summary}")
-        allure.attach(str(pagination_summary), "pagination_summary", allure.attachment_type.JSON)
+        allure.attach(
+            str(pagination_summary), "pagination_summary", allure.attachment_type.JSON
+        )
 
         if pagination_summary["pagination_functionality_works"]:
             web_tables_page.log_step("✅ Пагинация работает корректно")

@@ -229,3 +229,55 @@ class DatePickerPage(WidgetBasePage):
         input_field.type(date_string)
         # Нажимаем Enter для подтверждения
         input_field.press("Enter")
+
+    # === Методы для совместимости с тестами ===
+
+    def is_date_input_present(self) -> bool:
+        """
+        Проверяет наличие поля выбора даты.
+
+        Returns:
+            bool: True если поле присутствует
+        """
+        return self.page.locator(DatePickerLocators.DATE_INPUT).is_visible()
+
+    def clear_date_input(self) -> None:
+        """
+        Очищает поле простой даты (алиас для clear_date).
+        """
+        self.clear_date()
+
+    def is_datetime_input_present(self) -> bool:
+        """
+        Проверяет наличие поля выбора даты и времени.
+
+        Returns:
+            bool: True если поле присутствует
+        """
+        return self.page.locator(DatePickerLocators.DATE_TIME_INPUT).is_visible()
+
+    def is_date_range_picker_available(self) -> bool:
+        """
+        Проверяет доступность date range picker.
+
+        Returns:
+            bool: True если date range picker доступен
+        """
+        # Проверяем наличие дополнительных полей для диапазона дат
+        return (
+            self.page.locator(DatePickerLocators.DATE_INPUT).is_visible() and
+            self.page.locator(DatePickerLocators.DATE_TIME_INPUT).is_visible()
+        )
+
+    def open_date_calendar(self) -> bool:
+        """
+        Открывает календарь для выбора даты.
+
+        Returns:
+            bool: True если календарь успешно открыт
+        """
+        try:
+            self.open_date_picker()
+            return self.is_calendar_visible()
+        except:
+            return False

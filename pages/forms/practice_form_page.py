@@ -78,6 +78,13 @@ class AutomationPracticeFormPage(BasePage):
         self.log_step(f"Заполняем номер телефона: {mobile}")
         self.safe_fill(AutomationPracticeFormLocators.MOBILE_INPUT, mobile)
 
+    # Алиас, ожидаемый тестами
+    def fill_mobile(self, mobile: str) -> None:
+        """
+        Алиас для совместимости с тестами: заполняет поле 'Mobile Number'.
+        """
+        self.fill_mobile_number(mobile)
+
     def set_date_of_birth(self, day: str, month: str, year: str) -> None:
         """
         Устанавливает дату рождения через date picker.
@@ -93,16 +100,34 @@ class AutomationPracticeFormPage(BasePage):
         self.safe_click(AutomationPracticeFormLocators.DATE_PICKER)
 
         # Выбираем месяц
-        month_dropdown = self.page.locator(AutomationPracticeFormLocators.DATE_MONTH_SELECT)
+        month_dropdown = self.page.locator(
+            AutomationPracticeFormLocators.DATE_MONTH_SELECT
+        )
         month_dropdown.select_option(month)
 
         # Выбираем год
-        year_dropdown = self.page.locator(AutomationPracticeFormLocators.DATE_YEAR_SELECT)
+        year_dropdown = self.page.locator(
+            AutomationPracticeFormLocators.DATE_YEAR_SELECT
+        )
         year_dropdown.select_option(year)
 
         # Выбираем день
         day_element = self.page.locator(f".react-datepicker__day--0{day.zfill(2)}")
         day_element.click()
+
+    def fill_date_of_birth(self, date_string: str) -> None:
+        """
+        Заполняет дату рождения в формате "DD MMM YYYY" (например, "10 Sep 1990").
+
+        Args:
+            date_string: Дата в формате "DD MMM YYYY"
+        """
+        self.log_step(f"Заполняем дату рождения: {date_string}")
+        try:
+            day, month, year = date_string.split()
+            self.set_date_of_birth(day, month, year)
+        except ValueError:
+            self.log_step(f"Неверный формат даты: {date_string}. Ожидается формат 'DD MMM YYYY'")
 
     def fill_subjects(self, subjects: list[str]) -> None:
         """
@@ -112,7 +137,9 @@ class AutomationPracticeFormPage(BasePage):
             subjects: Список предметов для добавления
         """
         self.log_step(f"Заполняем предметы: {subjects}")
-        subjects_input = self.page.locator(AutomationPracticeFormLocators.SUBJECTS_INPUT)
+        subjects_input = self.page.locator(
+            AutomationPracticeFormLocators.SUBJECTS_INPUT
+        )
 
         for subject in subjects:
             subjects_input.click()
@@ -147,7 +174,9 @@ class AutomationPracticeFormPage(BasePage):
             file_path: Путь к файлу изображения
         """
         self.log_step(f"Загружаем изображение: {file_path}")
-        self.page.set_input_files(AutomationPracticeFormLocators.PICTURE_UPLOAD_INPUT, file_path)
+        self.page.set_input_files(
+            AutomationPracticeFormLocators.PICTURE_UPLOAD_INPUT, file_path
+        )
 
     def fill_current_address(self, address: str) -> None:
         """
@@ -168,7 +197,9 @@ class AutomationPracticeFormPage(BasePage):
         """
         self.log_step(f"Выбираем штат: {state}")
         # Кликаем по dropdown для его открытия
-        state_dropdown = self.page.locator(AutomationPracticeFormLocators.STATE_DROPDOWN)
+        state_dropdown = self.page.locator(
+            AutomationPracticeFormLocators.STATE_DROPDOWN
+        )
         state_dropdown.click()
 
         # Выбираем опцию
@@ -206,7 +237,9 @@ class AutomationPracticeFormPage(BasePage):
         Returns:
             bool: True если модальное окно с результатами видимо
         """
-        return self.page.locator(AutomationPracticeFormLocators.MODAL_DIALOG).is_visible()
+        return self.page.locator(
+            AutomationPracticeFormLocators.MODAL_DIALOG
+        ).is_visible()
 
     def get_modal_title(self) -> str:
         """
@@ -233,7 +266,9 @@ class AutomationPracticeFormPage(BasePage):
             dict: Словарь с парами ключ-значение из таблицы результатов
         """
         results = {}
-        table_rows = self.page.locator(f"{AutomationPracticeFormLocators.MODAL_TABLE} tbody tr")
+        table_rows = self.page.locator(
+            f"{AutomationPracticeFormLocators.MODAL_TABLE} tbody tr"
+        )
 
         for i in range(table_rows.count()):
             row = table_rows.nth(i)

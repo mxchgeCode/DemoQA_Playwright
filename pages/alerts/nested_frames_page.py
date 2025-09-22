@@ -68,7 +68,9 @@ class NestedFramesPage(BasePage):
         # Подсчитываем вложенные фреймы в родительском фрейме
         try:
             parent_frame = self.page.frame_locator(NestedFramesLocators.PARENT_FRAME)
-            nested_frames = parent_frame.locator(NestedFramesLocators.CHILD_FRAME_ALT).count()
+            nested_frames = parent_frame.locator(
+                NestedFramesLocators.CHILD_FRAME_ALT
+            ).count()
             return main_frames + nested_frames
         except:
             return main_frames

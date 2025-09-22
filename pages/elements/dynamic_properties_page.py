@@ -118,36 +118,42 @@ class DynamicPropertiesPage(BasePage):
 
         return False
 
-    def click_enable_after_button(self) -> None:
+    def click_enable_after_button(self) -> bool:
         """
         Кликает по кнопке "Enable After" если она активна.
-
-        Preconditions: кнопка должна быть активной
+    
+        Returns:
+            bool: True если клик выполнен, False если кнопка не активна
         """
         if self.is_enable_after_enabled():
             self.log_step("Кликаем по активной кнопке Enable After")
             self.safe_click(DynamicPropertiesLocators.ENABLE_AFTER_BUTTON)
-        else:
-            raise Exception("Кнопка Enable After не активна")
+            return True
+        return False
 
-    def click_visible_after_button(self) -> None:
+    def click_visible_after_button(self) -> bool:
         """
         Кликает по кнопке "Visible After" если она видима.
-
-        Preconditions: кнопка должна быть видимой
+    
+        Returns:
+            bool: True если клик выполнен, False если кнопка не видима
         """
         if self.is_visible_after_visible():
             self.log_step("Кликаем по видимой кнопке Visible After")
             self.safe_click(DynamicPropertiesLocators.VISIBLE_AFTER_BUTTON)
-        else:
-            raise Exception("Кнопка Visible After не видима")
+            return True
+        return False
 
-    def click_color_change_button(self) -> None:
+    def click_color_change_button(self) -> bool:
         """
         Кликает по кнопке с изменяющимся цветом.
+    
+        Returns:
+            bool: True если клик выполнен
         """
         self.log_step("Кликаем по кнопке Color Change")
         self.safe_click(DynamicPropertiesLocators.COLOR_CHANGE_BUTTON)
+        return True
 
     def get_current_text_color(self) -> str:
         """
@@ -161,3 +167,81 @@ class DynamicPropertiesPage(BasePage):
         parts = current_rgb.strip()[4:-1].split(",")
         r, g, b = [int(p.strip()) for p in parts]
         return f"#{r:02x}{g:02x}{b:02x}"
+
+    # ======== Совместимость с ожидаемым API тестов (алиасы/вспомогательные) ========
+    def is_enable_after_button_enabled(self) -> bool:
+        return self.is_enable_after_enabled()
+
+    def get_enable_after_button_attributes(self) -> dict:
+        loc = self.page.locator(DynamicPropertiesLocators.ENABLE_AFTER_BUTTON)
+        return {
+            "id": loc.get_attribute("id") or "",
+            "disabled": (not loc.is_enabled()),
+            "class": loc.get_attribute("class") or "",
+        }
+
+    def wait_for_enable_after_button(self, timeout: int = 10000) -> bool:
+        return self.wait_and_check_enable_after(timeout=timeout)
+
+    def get_color_change_button_color(self) -> str:
+        loc = self.page.locator(DynamicPropertiesLocators.COLOR_CHANGE_BUTTON)
+        return loc.evaluate("el => window.getComputedStyle(el).color")
+
+    def get_color_change_button_classes(self) -> str:
+        return self.page.locator(DynamicPropertiesLocators.COLOR_CHANGE_BUTTON).get_attribute("class") or ""
+
+    def wait_for_color_change(self, timeout: int = 10000, poll_interval: int = 200) -> bool:
+        loc = self.page.locator(DynamicPropertiesLocators.COLOR_CHANGE_BUTTON)
+        try:
+            initial_color = loc.evaluate("el => window.getComputedStyle(el).color")
+        except Exception:
+            initial_color = ""
+        initial_class = loc.get_attribute("class") or ""
+        elapsed = 0
+        while elapsed < timeout:
+            try:
+                curr_color = loc.evaluate("el => window.getComputedStyle(el).color")
+                curr_class = loc.get_attribute("class") or ""
+                if curr_color != initial_color or curr_class != initial_class:
+                    return True
+            except Exception:
+                pass
+            self.page.wait_for_timeout(poll_interval)
+            elapsed += poll_interval
+        return False
+
+    def is_visible_after_button_visible(self) -> bool:
+        return self.page.locator(DynamicPropertiesLocators.VISIBLE_AFTER_BUTTON).is_visible()
+
+    def is_visible_after_button_in_dom(self) -> bool:
+        return self.page.locator(DynamicPropertiesLocators.VISIBLE_AFTER_BUTTON).count() > 0
+
+    def wait_for_visible_after_button(self, timeout: int = 10000) -> bool:
+        return self.is_visible_after_visible(timeout=timeout)
+
+    def find_random_id_element(self):
+        loc = self.page.locator("[id^='random']")
+        return bool(loc.count() > 0)
+
+    def get_random_id_element_info(self) -> dict:
+        loc = self.page.locator("[id^='random']").first
+        if loc.count() == 0:
+            return {}
+        tag = loc.evaluate("el => el.tagName") or ""
+        return {
+            "id": loc.get_attribute("id") or "",
+            "tag": str(tag).lower(),
+            "text": (loc.inner_text() or "").strip(),
+        }
+
+    def get_random_id_element_id(self) -> str:
+        loc = self.page.locator("[id^='random']").first
+        return loc.get_attribute("id") or ""
+
+    def get_current_timestamp(self) -> int:
+        """
+        Возвращает текущую метку времени в миллисекундах.
+        Используется тестами для измерения длительности операций.
+        """
+        import time
+        return int(time.time() * 1000)

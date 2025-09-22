@@ -130,3 +130,43 @@ class SliderPage(BasePage):
             return int(min_val or "0"), int(max_val or "100")
         except ValueError:
             return 0, 100
+
+    # === Методы для совместимости с тестами ===
+
+    def is_single_slider_present(self) -> bool:
+        """
+        Проверяет наличие одиночного слайдера.
+
+        Returns:
+            bool: True если одиночный слайдер присутствует
+        """
+        return self.page.locator(SliderLocators.SLIDER).is_visible()
+
+    def is_range_slider_present(self) -> bool:
+        """
+        Проверяет наличие диапазонного слайдера.
+
+        Returns:
+            bool: True если диапазонный слайдер присутствует
+        """
+        # Для простоты считаем, что если есть обычный слайдер, то это одиночный
+        # В реальности может быть два слайдера для диапазона
+        return self.page.locator(SliderLocators.SLIDER).count() > 1
+
+    def get_slider_step_properties(self) -> dict:
+        """
+        Получает свойства шага слайдера.
+
+        Returns:
+            dict: Словарь со свойствами шага
+        """
+        slider = self.page.locator(SliderLocators.SLIDER)
+        step = slider.get_attribute("step")
+        min_val, max_val = self.get_slider_range()
+
+        return {
+            "step": int(step) if step and step.isdigit() else 1,
+            "min": min_val,
+            "max": max_val,
+            "range": max_val - min_val
+        }

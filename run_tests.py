@@ -25,10 +25,7 @@ class TestRunner:
         try:
             if capture_output:
                 result = subprocess.run(
-                    command,
-                    shell=True,
-                    capture_output=True,
-                    text=True
+                    command, shell=True, capture_output=True, text=True
                 )
                 return result.returncode, result.stdout
             else:
@@ -38,13 +35,15 @@ class TestRunner:
             print(f"❌ Ошибка выполнения команды: {e}")
             return 1, str(e)
 
-    def run_tests(self, marker: str = None, parallel: bool = False,
-                  verbose: bool = True, html_report: bool = False):
+    def run_tests(
+        self,
+        marker: str = None,
+        parallel: bool = False,
+        verbose: bool = True,
+        html_report: bool = False,
+    ):
         """Запускает тесты с указанными параметрами."""
-        base_command = [
-            "python", "-m", "pytest",
-            "--alluredir=allure-results"
-        ]
+        base_command = ["python", "-m", "pytest", "--alluredir=allure-results"]
 
         if verbose:
             base_command.append("-v")
@@ -80,13 +79,14 @@ class TestRunner:
             ".pytest_cache",
             "htmlcov",
             "pytest-report.html",
-            ".coverage"
+            ".coverage",
         ]
 
         for path_str in paths_to_clean:
             path = Path(path_str)
             if path.is_dir():
                 import shutil
+
                 shutil.rmtree(path, ignore_errors=True)
                 print(f"  ✓ Удалена директория: {path}")
             elif path.is_file():
@@ -98,6 +98,7 @@ class TestRunner:
             for dir_name in dirs[:]:
                 if dir_name == "__pycache__":
                     import shutil
+
                     cache_path = Path(root) / dir_name
                     shutil.rmtree(cache_path, ignore_errors=True)
                     dirs.remove(dir_name)
@@ -119,29 +120,35 @@ def main():
     parser.add_argument(
         "action",
         choices=[
-            "test", "smoke", "regression",
-            "elements", "alerts", "widgets", "forms", "interactions",
-            "parallel", "clean", "allure-serve", "allure-generate",
-            "install", "coverage", "lint"
+            "test",
+            "smoke",
+            "regression",
+            "elements",
+            "alerts",
+            "widgets",
+            "forms",
+            "interactions",
+            "parallel",
+            "clean",
+            "allure-serve",
+            "allure-generate",
+            "install",
+            "coverage",
+            "lint",
         ],
-        help="Действие для выполнения"
+        help="Действие для выполнения",
     )
 
-    parser.add_argument(
-        "--path",
-        help="Путь к конкретным тестам для запуска"
-    )
+    parser.add_argument("--path", help="Путь к конкретным тестам для запуска")
 
     parser.add_argument(
-        "--no-verbose",
-        action="store_true",
-        help="Отключить подробный вывод"
+        "--no-verbose", action="store_true", help="Отключить подробный вывод"
     )
 
     parser.add_argument(
         "--html-report",
         action="store_true",
-        help="Дополнительно создать HTML отчет pytest"
+        help="Дополнительно создать HTML отчет pytest",
     )
 
     args = parser.parse_args()
@@ -154,10 +161,7 @@ def main():
         sys.exit(runner.clean_all())
 
     elif args.action == "install":
-        commands = [
-            "pip install -r requirements.txt",
-            "playwright install"
-        ]
+        commands = ["pip install -r requirements.txt", "playwright install"]
         for cmd in commands:
             result, _ = runner.run_command(cmd)
             if result != 0:
@@ -177,7 +181,9 @@ def main():
         if not runner.allure_results.exists():
             print("❌ Результаты тестов не найдены. Запустите тесты сначала.")
             sys.exit(1)
-        command = f"allure generate {runner.allure_results} -o {runner.allure_report} --clean"
+        command = (
+            f"allure generate {runner.allure_results} -o {runner.allure_report} --clean"
+        )
         result, _ = runner.run_command(command)
         if result == 0:
             print(f"✅ HTML отчет создан: {runner.allure_report}")
@@ -192,7 +198,7 @@ def main():
     elif args.action == "lint":
         commands = [
             "flake8 pages tests locators --max-line-length=120",
-            "mypy pages --ignore-missing-imports"
+            "mypy pages --ignore-missing-imports",
         ]
         for cmd in commands:
             result, _ = runner.run_command(cmd)
@@ -221,7 +227,7 @@ def main():
                 marker=marker,
                 parallel=parallel,
                 verbose=verbose,
-                html_report=args.html_report
+                html_report=args.html_report,
             )
         else:
             print(f"❌ Неизвестное действие: {args.action}")

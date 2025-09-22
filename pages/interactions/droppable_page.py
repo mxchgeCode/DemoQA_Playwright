@@ -145,3 +145,41 @@ class DroppablePage(BasePage):
         self.log_step("Переключаемся на вкладку Revert Draggable")
         self.safe_click(DroppableLocators.TAB_REVERT_DRAGGABLE)
         time.sleep(1)
+
+    # === Методы для совместимости с тестами ===
+
+    def get_simple_drag_element_position(self) -> tuple[int, int]:
+        """
+        Получает позицию простого drag элемента.
+
+        Returns:
+            tuple: (x, y) координаты элемента
+        """
+        drag_element = self.page.locator(DroppableLocators.DRAG_ME_BOX)
+        box = drag_element.bounding_box()
+        return int(box["x"]), int(box["y"])
+
+    def switch_to_accept_tab(self) -> None:
+        """
+        Переключается на вкладку Accept.
+        """
+        self.accept_tab()
+
+    def switch_to_prevent_propagation_tab(self) -> None:
+        """
+        Переключается на вкладку Prevent Propagation.
+        """
+        self.prevent_propogation_tab()
+
+    def switch_to_revert_draggable_tab(self) -> None:
+        """
+        Переключается на вкладку Revert Draggable.
+        """
+        self.revert_draggable_tab()
+
+    def switch_to_simple_tab(self) -> None:
+        """
+        Переключается на простую вкладку (Simple).
+        """
+        # Для простой вкладки не нужно переключение, она активна по умолчанию
+        pass

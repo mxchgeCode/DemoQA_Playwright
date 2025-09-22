@@ -122,8 +122,8 @@ def test_valid_login(login_page):
         login_page.login(p.username, p.password)
 
     with allure.step("Ожидание и проверка успешной авторизации"):
-        expect(login_page.get_logged_in_username().to_have_text(p.username))
-
+        # Исправлено: корректное использование expect с локатором
+        expect(login_page.page.locator(LoginLocators.USER_DISPLAY)).to_have_text(p.username)
 
 
 @pytest.mark.dependency(depends=["test_valid_login"])

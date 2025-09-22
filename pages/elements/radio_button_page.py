@@ -45,14 +45,11 @@ class RadioButtonPage(BasePage):
 
         Note:
             Радиокнопка No отключена и не может быть выбрана.
-            Метод оставлен для тестирования поведения отключенных элементов.
+            В случае попытки клика ожидается исключение Playwright.
         """
         self.log_step("Пытаемся выбрать радиокнопку No (отключена)")
-        try:
-            self.page.click(RadioButtonLocators.NO_RADIO, timeout=500)
-        except:
-            # Ожидаемое поведение - элемент отключен
-            pass
+        # Не подавляем исключение — тест ожидает playwright Error
+        self.page.click(RadioButtonLocators.NO_RADIO, timeout=500)
 
     def get_result_text(self) -> str:
         """

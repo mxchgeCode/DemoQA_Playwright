@@ -234,3 +234,26 @@ class SortablePage(BasePage):
             return self.page.locator(SortableLocators.GRID_ITEMS).count()
         else:
             return self.page.locator(SortableLocators.LIST_ITEMS).count()
+
+    # === Методы для совместимости с тестами ===
+
+    def get_list_items_order(self) -> list[str]:
+        """
+        Получает текущий порядок элементов в списке (алиас для get_list_order).
+
+        Returns:
+            list: Список текстов элементов в их текущем порядке
+        """
+        return self.get_list_order()
+
+    def switch_to_grid_tab(self) -> None:
+        """
+        Переключается на вкладку Grid для сортировки элементов в виде сетки.
+        """
+        self.grid_tab()
+
+    def switch_to_list_tab(self) -> None:
+        """
+        Переключается на вкладку List для сортировки элементов в виде списка.
+        """
+        self.list_tab()

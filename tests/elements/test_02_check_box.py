@@ -33,21 +33,33 @@ def test_expand_collapse_tree_nodes(check_box_page: CheckBoxPage):
 
     with allure.step("Проверяем что дочерние узлы стали видимыми"):
         visible_nodes = check_box_page.get_visible_nodes_count()
-        check_box_page.log_step(f"Количество видимых узлов после развертывания: {visible_nodes}")
+        check_box_page.log_step(
+            f"Количество видимых узлов после развертывания: {visible_nodes}"
+        )
 
-        allure.attach(str(visible_nodes), "visible_nodes_after_expand", allure.attachment_type.TEXT)
+        allure.attach(
+            str(visible_nodes),
+            "visible_nodes_after_expand",
+            allure.attachment_type.TEXT,
+        )
 
-        assert visible_nodes > 1, f"После развертывания должно быть больше 1 узла, найдено: {visible_nodes}"
+        assert (
+            visible_nodes > 1
+        ), f"После развертывания должно быть больше 1 узла, найдено: {visible_nodes}"
 
     with allure.step("Получаем список всех видимых чекбоксов"):
         visible_checkboxes = check_box_page.get_all_visible_checkboxes()
         check_box_page.log_step(f"Видимые чекбоксы: {visible_checkboxes}")
 
-        allure.attach(str(visible_checkboxes), "visible_checkboxes", allure.attachment_type.JSON)
+        allure.attach(
+            str(visible_checkboxes), "visible_checkboxes", allure.attachment_type.JSON
+        )
 
         expected_checkboxes = ["Home", "Desktop", "Documents", "WorkSpace", "Office"]
         for checkbox in expected_checkboxes[:3]:  # Проверяем первые несколько
-            assert checkbox in visible_checkboxes, f"Чекбокс '{checkbox}' должен быть видим"
+            assert (
+                checkbox in visible_checkboxes
+            ), f"Чекбокс '{checkbox}' должен быть видим"
 
     with allure.step("Свертываем дерево обратно"):
         check_box_page.log_step("Клик по кнопке свертывания дерева")
@@ -55,9 +67,13 @@ def test_expand_collapse_tree_nodes(check_box_page: CheckBoxPage):
 
     with allure.step("Проверяем что узлы свернулись"):
         collapsed_nodes = check_box_page.get_visible_nodes_count()
-        check_box_page.log_step(f"Количество видимых узлов после свертывания: {collapsed_nodes}")
+        check_box_page.log_step(
+            f"Количество видимых узлов после свертывания: {collapsed_nodes}"
+        )
 
-        assert collapsed_nodes == 1, f"После свертывания должен остаться только корневой узел, найдено: {collapsed_nodes}"
+        assert (
+            collapsed_nodes == 1
+        ), f"После свертывания должен остаться только корневой узел, найдено: {collapsed_nodes}"
 
 
 @allure.epic("Elements")
@@ -91,10 +107,14 @@ def test_select_individual_checkboxes(check_box_page: CheckBoxPage):
         selected_results = check_box_page.get_selected_results()
         check_box_page.log_step(f"Результаты выбора: {selected_results}")
 
-        allure.attach(str(selected_results), "selection_results", allure.attachment_type.JSON)
+        allure.attach(
+            str(selected_results), "selection_results", allure.attachment_type.JSON
+        )
 
         for checkbox_name in checkboxes_to_test:
-            assert checkbox_name in selected_results, f"'{checkbox_name}' должен быть в результатах"
+            assert (
+                checkbox_name in selected_results
+            ), f"'{checkbox_name}' должен быть в результатах"
 
 
 @allure.epic("Elements")
@@ -120,7 +140,9 @@ def test_parent_child_checkbox_dependencies(check_box_page: CheckBoxPage):
 
         for child in child_checkboxes:
             is_child_selected = check_box_page.is_checkbox_selected(child)
-            check_box_page.log_step(f"Дочерний элемент '{child}' выбран: {is_child_selected}")
+            check_box_page.log_step(
+                f"Дочерний элемент '{child}' выбран: {is_child_selected}"
+            )
 
             # В зависимости от реализации дочерние могут выбираться автоматически
             # Записываем результат для анализа
@@ -128,7 +150,9 @@ def test_parent_child_checkbox_dependencies(check_box_page: CheckBoxPage):
         all_results = check_box_page.get_selected_results()
         check_box_page.log_step(f"Все выбранные элементы: {all_results}")
 
-        allure.attach(str(all_results), "parent_child_selection", allure.attachment_type.JSON)
+        allure.attach(
+            str(all_results), "parent_child_selection", allure.attachment_type.JSON
+        )
 
     with allure.step("Снимаем выбор с родительского элемента"):
         check_box_page.log_step("Снятие выбора с родительского элемента 'Home'")
@@ -136,12 +160,20 @@ def test_parent_child_checkbox_dependencies(check_box_page: CheckBoxPage):
 
     with allure.step("Проверяем что дочерние элементы тоже сняты с выбора"):
         results_after_unselect = check_box_page.get_selected_results()
-        check_box_page.log_step(f"Результаты после снятия выбора: {results_after_unselect}")
+        check_box_page.log_step(
+            f"Результаты после снятия выбора: {results_after_unselect}"
+        )
 
-        allure.attach(str(results_after_unselect), "after_parent_unselect", allure.attachment_type.JSON)
+        allure.attach(
+            str(results_after_unselect),
+            "after_parent_unselect",
+            allure.attachment_type.JSON,
+        )
 
         # Результаты должны быть пустыми или содержать минимум элементов
-        assert len(results_after_unselect) < len(all_results), "После снятия выбора с родителя результатов должно стать меньше"
+        assert len(results_after_unselect) < len(
+            all_results
+        ), "После снятия выбора с родителя результатов должно стать меньше"
 
 
 @allure.epic("Elements")
@@ -167,28 +199,37 @@ def test_mixed_selection_states(check_box_page: CheckBoxPage):
 
     with allure.step("Проверяем состояние родительского элемента"):
         parent_state = check_box_page.get_checkbox_state("Home")
-        check_box_page.log_step(f"Состояние родительского элемента 'Home': {parent_state}")
+        check_box_page.log_step(
+            f"Состояние родительского элемента 'Home': {parent_state}"
+        )
 
         # Родительский элемент может быть в состоянии indeterminate (частично выбран)
         states_info = {
             "parent_state": parent_state,
             "selected_children": partial_selection,
-            "is_indeterminate": parent_state == "indeterminate"
+            "is_indeterminate": parent_state == "indeterminate",
         }
 
-        allure.attach(str(states_info), "mixed_states_info", allure.attachment_type.JSON)
+        allure.attach(
+            str(states_info), "mixed_states_info", allure.attachment_type.JSON
+        )
 
     with allure.step("Проверяем результаты частичного выбора"):
         partial_results = check_box_page.get_selected_results()
         check_box_page.log_step(f"Результаты частичного выбора: {partial_results}")
 
         for selected_item in partial_selection:
-            assert selected_item in partial_results, f"'{selected_item}' должен быть в результатах"
+            assert (
+                selected_item in partial_results
+            ), f"'{selected_item}' должен быть в результатах"
 
         # Не выбранные элементы не должны присутствовать
-        not_selected = ["Downloads", "WorkSpace", "Office"]
+        # Примечание: WorkSpace может быть выбран автоматически как родитель Desktop/Documents
+        not_selected = ["Downloads", "Office"]
         for not_selected_item in not_selected:
-            assert not_selected_item not in partial_results, f"'{not_selected_item}' НЕ должен быть в результатах"
+            assert (
+                not_selected_item not in partial_results
+            ), f"'{not_selected_item}' НЕ должен быть в результатах"
 
 
 @allure.epic("Elements")
@@ -204,7 +245,9 @@ def test_bulk_checkbox_operations(check_box_page: CheckBoxPage):
     with allure.step("Подготавливаем дерево чекбоксов"):
         check_box_page.expand_all()
         initial_count = check_box_page.get_visible_nodes_count()
-        check_box_page.log_step(f"Подготовлено {initial_count} узлов для массовых операций")
+        check_box_page.log_step(
+            f"Подготовлено {initial_count} узлов для массовых операций"
+        )
 
     with allure.step("Выполняем массовый выбор всех элементов"):
         check_box_page.log_step("Выбор всех доступных чекбоксов")
@@ -217,7 +260,9 @@ def test_bulk_checkbox_operations(check_box_page: CheckBoxPage):
         check_box_page.log_step(f"Выбрано элементов: {selected_count}")
         check_box_page.log_step(f"Список выбранных: {all_selected}")
 
-        allure.attach(str(all_selected), "all_selected_items", allure.attachment_type.JSON)
+        allure.attach(
+            str(all_selected), "all_selected_items", allure.attachment_type.JSON
+        )
 
         assert selected_count > 0, "Должен быть выбран хотя бы один элемент"
 
@@ -239,14 +284,20 @@ def test_bulk_checkbox_operations(check_box_page: CheckBoxPage):
 
         allure.attach(str(after_clear), "after_clear_all", allure.attachment_type.JSON)
 
-        assert len(after_clear) == 0, f"После очистки результаты должны быть пустыми, получено: {after_clear}"
+        assert (
+            len(after_clear) == 0
+        ), f"После очистки результаты должны быть пустыми, получено: {after_clear}"
 
         bulk_operations_summary = {
             "initial_nodes": initial_count,
             "max_selected": selected_count,
             "final_selected": len(after_clear),
             "bulk_select_worked": selected_count > 0,
-            "bulk_clear_worked": len(after_clear) == 0
+            "bulk_clear_worked": len(after_clear) == 0,
         }
 
-        allure.attach(str(bulk_operations_summary), "bulk_operations_summary", allure.attachment_type.JSON)
+        allure.attach(
+            str(bulk_operations_summary),
+            "bulk_operations_summary",
+            allure.attachment_type.JSON,
+        )

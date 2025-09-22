@@ -9,7 +9,7 @@
 
 import pytest
 import allure
-from pages.alerts.modal_page import ModalDialogsPage
+from pages.alerts.modal_page import ModalPage
 
 
 @allure.epic("Alerts, Frame & Windows")
@@ -17,7 +17,7 @@ from pages.alerts.modal_page import ModalDialogsPage
 @allure.story("Small Modal Dialog")
 @pytest.mark.alerts
 @pytest.mark.smoke
-def test_small_modal_functionality(modal_page: ModalDialogsPage):
+def test_small_modal_functionality(modal_page: ModalPage):
     """
     Тест функциональности малого модального окна.
 
@@ -37,7 +37,9 @@ def test_small_modal_functionality(modal_page: ModalDialogsPage):
         modal_title = modal_page.get_modal_title()
         modal_page.log_step(f"Заголовок модального окна: '{modal_title}'")
 
-        assert modal_title == "Small Modal", f"Заголовок должен быть 'Small Modal', получен: '{modal_title}'"
+        assert (
+            modal_title == "Small Modal"
+        ), f"Заголовок должен быть 'Small Modal', получен: '{modal_title}'"
 
     with allure.step("Проверяем содержимое малого модального окна"):
         modal_body = modal_page.get_modal_body()
@@ -57,10 +59,16 @@ def test_small_modal_functionality(modal_page: ModalDialogsPage):
         modal_page.log_step(f"Размеры малого модального окна: {modal_size}")
 
         # Проверяем что размеры разумные для малого окна
-        assert modal_size["width"] > 0 and modal_size["height"] > 0, "Модальное окно должно иметь положительные размеры"
-        assert modal_size["width"] < 800, "Малое модальное окно должно быть относительно небольшим по ширине"
+        assert (
+            modal_size["width"] > 0 and modal_size["height"] > 0
+        ), "Модальное окно должно иметь положительные размеры"
+        assert (
+            modal_size["width"] < 800
+        ), "Малое модальное окно должно быть относительно небольшим по ширине"
 
-        allure.attach(str(modal_size), "small_modal_dimensions", allure.attachment_type.JSON)
+        allure.attach(
+            str(modal_size), "small_modal_dimensions", allure.attachment_type.JSON
+        )
 
     with allure.step("Закрываем малое модальное окно"):
         modal_page.log_step("Клик по кнопке закрытия малого модального окна")
@@ -71,7 +79,9 @@ def test_small_modal_functionality(modal_page: ModalDialogsPage):
         modal_closed = not modal_page.is_small_modal_visible()
         modal_page.log_step(f"Малое модальное окно закрыто: {modal_closed}")
 
-        assert modal_closed, "Малое модальное окно должно быть закрыто после клика по кнопке закрытия"
+        assert (
+            modal_closed
+        ), "Малое модальное окно должно быть закрыто после клика по кнопке закрытия"
 
 
 @allure.epic("Alerts, Frame & Windows")
@@ -79,7 +89,7 @@ def test_small_modal_functionality(modal_page: ModalDialogsPage):
 @allure.story("Large Modal Dialog")
 @pytest.mark.alerts
 @pytest.mark.smoke
-def test_large_modal_functionality(modal_page: ModalDialogsPage):
+def test_large_modal_functionality(modal_page: ModalPage):
     """
     Тест функциональности большого модального окна.
 
@@ -93,20 +103,28 @@ def test_large_modal_functionality(modal_page: ModalDialogsPage):
         modal_visible = modal_page.is_large_modal_visible()
         modal_page.log_step(f"Большое модальное окно видимо: {modal_visible}")
 
-        assert modal_visible, "Большое модальное окно должно быть видимым после открытия"
+        assert (
+            modal_visible
+        ), "Большое модальное окно должно быть видимым после открытия"
 
     with allure.step("Проверяем заголовок большого модального окна"):
         modal_title = modal_page.get_modal_title()
         modal_page.log_step(f"Заголовок модального окна: '{modal_title}'")
 
-        assert modal_title == "Large Modal", f"Заголовок должен быть 'Large Modal', получен: '{modal_title}'"
+        assert (
+            modal_title == "Large Modal"
+        ), f"Заголовок должен быть 'Large Modal', получен: '{modal_title}'"
 
     with allure.step("Проверяем содержимое большого модального окна"):
         modal_body = modal_page.get_modal_body()
-        modal_page.log_step(f"Длина содержимого модального окна: {len(modal_body)} символов")
+        modal_page.log_step(
+            f"Длина содержимого модального окна: {len(modal_body)} символов"
+        )
 
         # Проверяем что содержимое достаточно объемное для большого окна
-        assert len(modal_body) > 20, f"Содержимое большого модального окна должно быть объемным, получено: {len(modal_body)} символов"
+        assert (
+            len(modal_body) > 20
+        ), f"Содержимое большого модального окна должно быть объемным, получено: {len(modal_body)} символов"
 
         # Проверяем наличие ключевых элементов
         has_close_button = modal_page.has_large_modal_close_button()
@@ -115,17 +133,25 @@ def test_large_modal_functionality(modal_page: ModalDialogsPage):
         assert has_close_button, "Модальное окно должно содержать кнопку закрытия"
 
         # Сохраняем содержимое для анализа
-        allure.attach(modal_body[:500], "large_modal_content_preview", allure.attachment_type.TEXT)
+        allure.attach(
+            modal_body[:500], "large_modal_content_preview", allure.attachment_type.TEXT
+        )
 
     with allure.step("Получаем размеры большого модального окна"):
         modal_size = modal_page.get_large_modal_size()
         modal_page.log_step(f"Размеры большого модального окна: {modal_size}")
 
         # Проверяем что размеры подходят для большого окна
-        assert modal_size["width"] > 0 and modal_size["height"] > 0, "Модальное окно должно иметь положительные размеры"
-        assert modal_size["width"] >= 600, "Большое модальное окно должно быть достаточно широким"
+        assert (
+            modal_size["width"] > 0 and modal_size["height"] > 0
+        ), "Модальное окно должно иметь положительные размеры"
+        assert (
+            modal_size["width"] >= 600
+        ), "Большое модальное окно должно быть достаточно широким"
 
-        allure.attach(str(modal_size), "large_modal_dimensions", allure.attachment_type.JSON)
+        allure.attach(
+            str(modal_size), "large_modal_dimensions", allure.attachment_type.JSON
+        )
 
     with allure.step("Закрываем большое модальное окно"):
         modal_page.log_step("Клик по кнопке закрытия большого модального окна")
@@ -136,7 +162,9 @@ def test_large_modal_functionality(modal_page: ModalDialogsPage):
         modal_closed = not modal_page.is_large_modal_visible()
         modal_page.log_step(f"Большое модальное окно закрыто: {modal_closed}")
 
-        assert modal_closed, "Большое модальное окно должно быть закрыто после клика по кнопке закрытия"
+        assert (
+            modal_closed
+        ), "Большое модальное окно должно быть закрыто после клика по кнопке закрытия"
 
 
 @allure.epic("Alerts, Frame & Windows")
@@ -144,7 +172,7 @@ def test_large_modal_functionality(modal_page: ModalDialogsPage):
 @allure.story("Modal Dialogs Comparison")
 @pytest.mark.alerts
 @pytest.mark.regression
-def test_modal_sizes_comparison(modal_page: ModalDialogsPage):
+def test_modal_sizes_comparison(modal_page: ModalPage):
     """
     Тест сравнения размеров модальных окон.
 
@@ -162,7 +190,7 @@ def test_modal_sizes_comparison(modal_page: ModalDialogsPage):
             "visible": modal_page.is_small_modal_visible(),
             "size": modal_page.get_small_modal_size(),
             "title": modal_page.get_modal_title(),
-            "body_length": len(modal_page.get_modal_body())
+            "body_length": len(modal_page.get_modal_body()),
         }
 
         modal_page.log_step(f"Параметры малого окна: {small_modal_info}")
@@ -178,7 +206,7 @@ def test_modal_sizes_comparison(modal_page: ModalDialogsPage):
             "visible": modal_page.is_large_modal_visible(),
             "size": modal_page.get_large_modal_size(),
             "title": modal_page.get_modal_title(),
-            "body_length": len(modal_page.get_modal_body())
+            "body_length": len(modal_page.get_modal_body()),
         }
 
         modal_page.log_step(f"Параметры большого окна: {large_modal_info}")
@@ -189,19 +217,30 @@ def test_modal_sizes_comparison(modal_page: ModalDialogsPage):
         comparison = {
             "small_modal": small_modal_info,
             "large_modal": large_modal_info,
-            "width_difference": large_modal_info["size"]["width"] - small_modal_info["size"]["width"],
-            "height_difference": large_modal_info["size"]["height"] - small_modal_info["size"]["height"],
-            "content_difference": large_modal_info["body_length"] - small_modal_info["body_length"],
-            "large_is_wider": large_modal_info["size"]["width"] > small_modal_info["size"]["width"],
-            "large_has_more_content": large_modal_info["body_length"] > small_modal_info["body_length"]
+            "width_difference": large_modal_info["size"]["width"]
+            - small_modal_info["size"]["width"],
+            "height_difference": large_modal_info["size"]["height"]
+            - small_modal_info["size"]["height"],
+            "content_difference": large_modal_info["body_length"]
+            - small_modal_info["body_length"],
+            "large_is_wider": large_modal_info["size"]["width"]
+            > small_modal_info["size"]["width"],
+            "large_has_more_content": large_modal_info["body_length"]
+            > small_modal_info["body_length"],
         }
 
         modal_page.log_step(f"Сравнение модальных окон: {comparison}")
-        allure.attach(str(comparison), "modal_sizes_comparison", allure.attachment_type.JSON)
+        allure.attach(
+            str(comparison), "modal_sizes_comparison", allure.attachment_type.JSON
+        )
 
         # Проверяем логичность размеров
-        assert comparison["large_is_wider"], "Большое модальное окно должно быть шире малого"
-        assert comparison["large_has_more_content"], "Большое модальное окно должно содержать больше контента"
+        assert comparison[
+            "large_is_wider"
+        ], "Большое модальное окно должно быть шире малого"
+        assert comparison[
+            "large_has_more_content"
+        ], "Большое модальное окно должно содержать больше контента"
 
         modal_page.log_step("✅ Размеры модальных окон соответствуют ожиданиям")
 
@@ -210,7 +249,7 @@ def test_modal_sizes_comparison(modal_page: ModalDialogsPage):
 @allure.feature("Modal Dialogs")
 @allure.story("Modal Dialog Overlay")
 @pytest.mark.alerts
-def test_modal_overlay_interaction(modal_page: ModalDialogsPage):
+def test_modal_overlay_interaction(modal_page: ModalPage):
     """
     Тест взаимодействия с overlay модального окна.
 
@@ -221,7 +260,9 @@ def test_modal_overlay_interaction(modal_page: ModalDialogsPage):
         modal_page.open_small_modal()
 
         initial_modal_state = modal_page.is_small_modal_visible()
-        modal_page.log_step(f"Начальное состояние модального окна: {initial_modal_state}")
+        modal_page.log_step(
+            f"Начальное состояние модального окна: {initial_modal_state}"
+        )
 
         assert initial_modal_state, "Модальное окно должно быть открыто"
 
@@ -235,10 +276,12 @@ def test_modal_overlay_interaction(modal_page: ModalDialogsPage):
 
         overlay_info = {
             "has_overlay": has_overlay,
-            "overlay_visible": overlay_visible if has_overlay else False
+            "overlay_visible": overlay_visible if has_overlay else False,
         }
 
-        allure.attach(str(overlay_info), "modal_overlay_info", allure.attachment_type.JSON)
+        allure.attach(
+            str(overlay_info), "modal_overlay_info", allure.attachment_type.JSON
+        )
 
     with allure.step("Тестируем клик по overlay"):
         if has_overlay:
@@ -247,16 +290,26 @@ def test_modal_overlay_interaction(modal_page: ModalDialogsPage):
             modal_page.page.wait_for_timeout(1000)
 
             modal_state_after_overlay_click = modal_page.is_small_modal_visible()
-            modal_page.log_step(f"Состояние модального окна после клика по overlay: {modal_state_after_overlay_click}")
+            modal_page.log_step(
+                f"Состояние модального окна после клика по overlay: {modal_state_after_overlay_click}"
+            )
 
             overlay_test_result = {
                 "overlay_click_attempted": overlay_click_result,
                 "modal_closed_by_overlay": not modal_state_after_overlay_click,
-                "overlay_behavior": "closes_modal" if not modal_state_after_overlay_click else "keeps_modal_open"
+                "overlay_behavior": (
+                    "closes_modal"
+                    if not modal_state_after_overlay_click
+                    else "keeps_modal_open"
+                ),
             }
 
             modal_page.log_step(f"Результат теста overlay: {overlay_test_result}")
-            allure.attach(str(overlay_test_result), "overlay_click_test", allure.attachment_type.JSON)
+            allure.attach(
+                str(overlay_test_result),
+                "overlay_click_test",
+                allure.attachment_type.JSON,
+            )
 
         else:
             modal_page.log_step("Overlay не найден, пропускаем тест клика")
@@ -274,7 +327,7 @@ def test_modal_overlay_interaction(modal_page: ModalDialogsPage):
 @allure.feature("Modal Dialogs")
 @allure.story("Modal Dialog Accessibility")
 @pytest.mark.alerts
-def test_modal_accessibility_features(modal_page: ModalDialogsPage):
+def test_modal_accessibility_features(modal_page: ModalPage):
     """
     Тест функций доступности модальных окон.
 
@@ -300,11 +353,15 @@ def test_modal_accessibility_features(modal_page: ModalDialogsPage):
             "has_aria_modal": has_aria_modal,
             "has_role_dialog": has_role_dialog,
             "has_aria_labelledby": has_aria_labelledby,
-            "accessibility_compliant": has_aria_modal or has_role_dialog
+            "accessibility_compliant": has_aria_modal or has_role_dialog,
         }
 
         modal_page.log_step(f"Проверки доступности: {accessibility_checks}")
-        allure.attach(str(accessibility_checks), "modal_accessibility_checks", allure.attachment_type.JSON)
+        allure.attach(
+            str(accessibility_checks),
+            "modal_accessibility_checks",
+            allure.attachment_type.JSON,
+        )
 
     with allure.step("Проверяем управление фокусом"):
         # Проверяем куда устанавливается фокус при открытии модального окна
@@ -321,24 +378,28 @@ def test_modal_accessibility_features(modal_page: ModalDialogsPage):
             modal_page.page.wait_for_timeout(500)
 
             modal_closed_by_escape = not modal_page.is_small_modal_visible()
-            modal_page.log_step(f"Модальное окно закрыто по Escape: {modal_closed_by_escape}")
+            modal_page.log_step(
+                f"Модальное окно закрыто по Escape: {modal_closed_by_escape}"
+            )
 
             focus_management = {
                 "focused_element": focused_element,
                 "escape_close_available": escape_close_available,
                 "escape_close_successful": modal_closed_by_escape,
-                "focus_management_good": focused_element is not None
+                "focus_management_good": focused_element is not None,
             }
 
         else:
             focus_management = {
                 "focused_element": focused_element,
                 "escape_close_available": False,
-                "focus_management_good": focused_element is not None
+                "focus_management_good": focused_element is not None,
             }
 
             # Закрываем модальное окно обычным способом
             modal_page.close_small_modal()
 
         modal_page.log_step(f"Управление фокусом: {focus_management}")
-        allure.attach(str(focus_management), "modal_focus_management", allure.attachment_type.JSON)
+        allure.attach(
+            str(focus_management), "modal_focus_management", allure.attachment_type.JSON
+        )

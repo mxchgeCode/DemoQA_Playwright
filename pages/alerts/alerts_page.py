@@ -91,6 +91,7 @@ class AlertsPage(BasePage):
         Returns:
             str: Текст результата или пустая строка
         """
+
         def handle_dialog(dialog):
             dialog.accept()
 
@@ -115,6 +116,7 @@ class AlertsPage(BasePage):
         Returns:
             str: Текст результата или пустая строка
         """
+
         def handle_dialog(dialog):
             dialog.dismiss()
 
@@ -142,6 +144,7 @@ class AlertsPage(BasePage):
         Returns:
             str: Результат prompt диалога или пустая строка
         """
+
         def handle_dialog(dialog):
             dialog.accept(text)
 
@@ -166,6 +169,7 @@ class AlertsPage(BasePage):
         Returns:
             str: Результат prompt диалога или пустая строка
         """
+
         def handle_dialog(dialog):
             dialog.dismiss()
 
@@ -193,7 +197,7 @@ class AlertsPage(BasePage):
             AlertsLocators.ALERT_BUTTON,
             AlertsLocators.TIMER_ALERT_BUTTON,
             AlertsLocators.CONFIRM_BUTTON,
-            AlertsLocators.PROMPT_BUTTON
+            AlertsLocators.PROMPT_BUTTON,
         ]
 
         try:

@@ -204,3 +204,39 @@ class DragabblePage(BasePage):
         self.page.mouse.down()
         self.page.mouse.move(start_x + x_offset, start_y + y_offset, steps=10)
         self.page.mouse.up()
+
+    # === Методы для совместимости с тестами ===
+
+    def get_simple_drag_element_position(self) -> tuple[float, float]:
+        """
+        Получает позицию простого drag элемента (алиас для get_drag_box_position).
+
+        Returns:
+            tuple: Координаты (x, y) левого верхнего угла элемента
+        """
+        return self.get_drag_box_position()
+
+    def switch_to_axis_restricted_tab(self) -> None:
+        """
+        Переключается на вкладку с ограничениями по осям.
+        """
+        self.axis_restricted_tab()
+
+    def switch_to_container_restricted_tab(self) -> None:
+        """
+        Переключается на вкладку с контейнерными ограничениями.
+        """
+        self.container_restricted_tab()
+
+    def switch_to_cursor_style_tab(self) -> None:
+        """
+        Переключается на вкладку с различными стилями курсора.
+        """
+        self.cursor_style_tab()
+
+    def switch_to_simple_tab(self) -> None:
+        """
+        Переключается на простую вкладку (Simple).
+        """
+        # Для простой вкладки не нужно переключение, она активна по умолчанию
+        pass

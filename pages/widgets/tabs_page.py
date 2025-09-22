@@ -280,3 +280,62 @@ class TabsPage(WidgetBasePage):
             contents.append(self.get_more_content())
 
         return contents
+
+    # === Методы для совместимости с тестами ===
+
+    def get_all_tabs_info(self) -> dict:
+        """
+        Получает информацию о всех вкладках.
+
+        Returns:
+            dict: Словарь с информацией о вкладках
+        """
+        tabs_info = {
+            "what": {
+                "active": self.is_what_tab_active(),
+                "enabled": True,
+                "content": self.get_what_content()
+            },
+            "origin": {
+                "active": self.is_origin_tab_active(),
+                "enabled": True,
+                "content": self.get_origin_content()
+            },
+            "use": {
+                "active": self.is_use_tab_active(),
+                "enabled": True,
+                "content": self.get_use_content()
+            },
+            "more": {
+                "active": self.is_more_tab_active(),
+                "enabled": self.is_more_tab_enabled(),
+                "content": self.get_more_content()
+            }
+        }
+        return tabs_info
+
+    def are_tabs_keyboard_accessible(self) -> bool:
+        """
+        Проверяет доступность вкладок для клавиатурной навигации.
+
+        Returns:
+            bool: True если вкладки доступны для клавиатуры
+        """
+        # Проверяем наличие tabindex атрибутов у вкладок
+        try:
+            what_tab = self.page.locator(TabsLocators.WHAT_TAB)
+            origin_tab = self.page.locator(TabsLocators.ORIGIN_TAB)
+            use_tab = self.page.locator(TabsLocators.USE_TAB)
+
+            what_tabindex = what_tab.get_attribute("tabindex")
+            origin_tabindex = origin_tab.get_attribute("tabindex")
+            use_tabindex = use_tab.get_attribute("tabindex")
+
+            # Если хотя бы одна вкладка имеет tabindex, считаем доступными
+            return (
+                what_tabindex is not None or
+                origin_tabindex is not None or
+                use_tabindex is not None
+            )
+        except:
+            return False

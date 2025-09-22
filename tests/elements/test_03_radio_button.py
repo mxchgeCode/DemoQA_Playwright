@@ -51,7 +51,9 @@ def test_select_impressive_radio(radio_button_page):
     with allure.step("Проверяем результат выбора"):
         result = radio_button_page.get_result_text()
 
-        assert result == "Impressive", f"Ожидался результат 'Impressive', получен '{result}'"
+        assert (
+            result == "Impressive"
+        ), f"Ожидался результат 'Impressive', получен '{result}'"
         allure.attach(result, "impressive_radio_result")
 
 
@@ -71,7 +73,9 @@ def test_select_no_radio_disabled(radio_button_page):
     """
     with allure.step("Пытаемся кликнуть по отключенной кнопке No"):
         # Проверяем что кнопка действительно отключена
-        no_radio_input = radio_button_page.page.locator(RadioButtonLocators.NO_RADIO_INPUT)
+        no_radio_input = radio_button_page.page.locator(
+            RadioButtonLocators.NO_RADIO_INPUT
+        )
         is_disabled = no_radio_input.is_disabled()
 
         allure.attach(f"No radio disabled: {is_disabled}", "radio_state")
@@ -85,12 +89,16 @@ def test_select_no_radio_disabled(radio_button_page):
             radio_button_page.select_no()
 
     with allure.step("Проверяем что результат не отображается для отключенной кнопки"):
-        result_visible = radio_button_page.page.locator(RadioButtonLocators.RESULT_TEXT).is_visible()
+        result_visible = radio_button_page.page.locator(
+            RadioButtonLocators.RESULT_TEXT
+        ).is_visible()
 
         # Если результат виден, он не должен содержать "No"
         if result_visible:
             result = radio_button_page.get_result_text()
-            assert result != "No", f"Отключенная кнопка не должна давать результат 'No', получен '{result}'"
+            assert (
+                result != "No"
+            ), f"Отключенная кнопка не должна давать результат 'No', получен '{result}'"
 
         allure.attach(f"Result visible: {result_visible}", "disabled_button_result")
 
@@ -120,13 +128,22 @@ def test_radio_button_group_exclusivity(radio_button_page):
 
     with allure.step("Проверяем что только одна кнопка активна"):
         # Проверяем состояние input элементов
-        yes_checked = radio_button_page.page.locator(RadioButtonLocators.YES_RADIO_INPUT).is_checked()
-        impressive_checked = radio_button_page.page.locator(RadioButtonLocators.IMPRESSIVE_RADIO_INPUT).is_checked()
+        yes_checked = radio_button_page.page.locator(
+            RadioButtonLocators.YES_RADIO_INPUT
+        ).is_checked()
+        impressive_checked = radio_button_page.page.locator(
+            RadioButtonLocators.IMPRESSIVE_RADIO_INPUT
+        ).is_checked()
 
-        assert not yes_checked, "Кнопка Yes не должна быть выбрана после выбора Impressive"
+        assert (
+            not yes_checked
+        ), "Кнопка Yes не должна быть выбрана после выбора Impressive"
         assert impressive_checked, "Кнопка Impressive должна быть выбрана"
 
-        allure.attach(f"Yes checked: {yes_checked}, Impressive checked: {impressive_checked}", "radio_states")
+        allure.attach(
+            f"Yes checked: {yes_checked}, Impressive checked: {impressive_checked}",
+            "radio_states",
+        )
 
 
 @allure.epic("Elements")
@@ -141,18 +158,30 @@ def test_radio_button_visual_states(radio_button_page):
     """
     with allure.step("Проверяем начальное состояние всех радио кнопок"):
         # Проверяем видимость всех кнопок
-        yes_visible = radio_button_page.page.locator(RadioButtonLocators.YES_RADIO).is_visible()
-        impressive_visible = radio_button_page.page.locator(RadioButtonLocators.IMPRESSIVE_RADIO).is_visible()
-        no_visible = radio_button_page.page.locator(RadioButtonLocators.NO_RADIO).is_visible()
+        yes_visible = radio_button_page.page.locator(
+            RadioButtonLocators.YES_RADIO
+        ).is_visible()
+        impressive_visible = radio_button_page.page.locator(
+            RadioButtonLocators.IMPRESSIVE_RADIO
+        ).is_visible()
+        no_visible = radio_button_page.page.locator(
+            RadioButtonLocators.NO_RADIO
+        ).is_visible()
 
         assert yes_visible, "Кнопка Yes должна быть видима"
         assert impressive_visible, "Кнопка Impressive должна быть видима"
         assert no_visible, "Кнопка No должна быть видима (даже если отключена)"
 
     with allure.step("Проверяем доступность кнопок"):
-        yes_enabled = not radio_button_page.page.locator(RadioButtonLocators.YES_RADIO_INPUT).is_disabled()
-        impressive_enabled = not radio_button_page.page.locator(RadioButtonLocators.IMPRESSIVE_RADIO_INPUT).is_disabled()
-        no_enabled = not radio_button_page.page.locator(RadioButtonLocators.NO_RADIO_INPUT).is_disabled()
+        yes_enabled = not radio_button_page.page.locator(
+            RadioButtonLocators.YES_RADIO_INPUT
+        ).is_disabled()
+        impressive_enabled = not radio_button_page.page.locator(
+            RadioButtonLocators.IMPRESSIVE_RADIO_INPUT
+        ).is_disabled()
+        no_enabled = not radio_button_page.page.locator(
+            RadioButtonLocators.NO_RADIO_INPUT
+        ).is_disabled()
 
         assert yes_enabled, "Кнопка Yes должна быть доступна"
         assert impressive_enabled, "Кнопка Impressive должна быть доступна"
@@ -161,13 +190,15 @@ def test_radio_button_visual_states(radio_button_page):
         button_states = {
             "yes_enabled": yes_enabled,
             "impressive_enabled": impressive_enabled,
-            "no_enabled": no_enabled
+            "no_enabled": no_enabled,
         }
         allure.attach(str(button_states), "button_accessibility_states")
 
     with allure.step("Проверяем начальное отсутствие выбора"):
         # В начале ни одна кнопка не должна быть выбрана
-        result_visible = radio_button_page.page.locator(RadioButtonLocators.RESULT_TEXT).is_visible()
+        result_visible = radio_button_page.page.locator(
+            RadioButtonLocators.RESULT_TEXT
+        ).is_visible()
 
         if result_visible:
             result = radio_button_page.get_result_text()

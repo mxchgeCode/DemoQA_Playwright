@@ -152,3 +152,23 @@ class AutoCompletePage(BasePage):
         options = self.page.locator(locator)
 
         return [options.nth(i).inner_text() for i in range(options.count())]
+
+    # === Методы для совместимости с тестами ===
+
+    def is_single_auto_complete_input_present(self) -> bool:
+        """
+        Проверяет наличие поля одиночного автодополнения.
+
+        Returns:
+            bool: True если поле присутствует
+        """
+        return self.page.locator(AutoCompleteLocators.SINGLE_INPUT).is_visible()
+
+    def is_multiple_auto_complete_input_present(self) -> bool:
+        """
+        Проверяет наличие поля множественного автодополнения.
+
+        Returns:
+            bool: True если поле присутствует
+        """
+        return self.page.locator(AutoCompleteLocators.MULTIPLE_INPUT).is_visible()

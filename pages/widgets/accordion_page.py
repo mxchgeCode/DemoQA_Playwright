@@ -133,3 +133,53 @@ class AccordionPage(BasePage):
             str: Текст содержимого третьей секции
         """
         return self.get_text_safe(AccordionLocators.THIRD_SECTION_CONTENT)
+
+    # === Методы для совместимости с тестами ===
+
+    def get_all_sections_states(self) -> dict:
+        """
+        Получает состояния всех секций аккордеона.
+
+        Returns:
+            dict: Словарь с состояниями секций (expanded/collapsed)
+        """
+        return {
+            "first_section": self.is_first_section_expanded(),
+            "second_section": self.is_second_section_expanded(),
+            "third_section": self.is_third_section_expanded(),
+        }
+
+    def close_all_sections(self) -> None:
+        """
+        Закрывает все секции аккордеона.
+        """
+        self.log_step("Закрываем все секции аккордеона")
+        # Кликаем по всем секциям, чтобы закрыть их
+        if self.is_first_section_expanded():
+            self.click_first_section()
+        if self.is_second_section_expanded():
+            self.click_second_section()
+        if self.is_third_section_expanded():
+            self.click_third_section()
+
+    def is_accordion_keyboard_accessible(self) -> bool:
+        """
+        Проверяет доступность аккордеона для клавиатурной навигации.
+
+        Returns:
+            bool: True если аккордеон доступен для клавиатуры
+        """
+        # Проверяем наличие tabindex атрибутов у заголовков секций
+        try:
+            first_header_tabindex = self.first_section_header.get_attribute("tabindex")
+            second_header_tabindex = self.second_section_header.get_attribute("tabindex")
+            third_header_tabindex = self.third_section_header.get_attribute("tabindex")
+
+            # Если хотя бы один заголовок имеет tabindex, считаем доступным
+            return (
+                first_header_tabindex is not None or
+                second_header_tabindex is not None or
+                third_header_tabindex is not None
+            )
+        except:
+            return False

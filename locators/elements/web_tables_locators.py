@@ -15,7 +15,7 @@ class WebTablesLocators:
 
     Содержит CSS селекторы для всех элементов веб-таблицы:
     - Поиск и фильтрация записей
-    - Добавление новых записей  
+    - Добавление новых записей
     - Редактирование существующих записей
     - Удаление записей
     - Пагинация и навигация
@@ -46,6 +46,7 @@ class WebTablesLocators:
 
     # Поле поиска
     SEARCH_INPUT: str = "#searchBox"
+    SEARCH_BOX: str = "#searchBox"  # Добавляем отсутствующий локатор
 
     # Кнопка очистки поиска
     SEARCH_CLEAR: str = ".search-clear"
@@ -72,7 +73,7 @@ class WebTablesLocators:
     # Поле имени
     FIRST_NAME_INPUT: str = "#firstName"
 
-    # Поле фамилии  
+    # Поле фамилии
     LAST_NAME_INPUT: str = "#lastName"
 
     # Поле email
@@ -103,7 +104,7 @@ class WebTablesLocators:
     # Кнопки редактирования (иконки карандаша)
     EDIT_BUTTONS: str = "[title='Edit']"
 
-    # Кнопки удаления (иконки корзины)  
+    # Кнопки удаления (иконки корзины)
     DELETE_BUTTONS: str = "[title='Delete']"
 
     # Конкретная кнопка редактирования
@@ -146,7 +147,7 @@ class WebTablesLocators:
     # Индикатор сортировки по возрастанию
     SORT_ASC: str = ".sort-asc"
 
-    # Индикатор сортировки по убыванию  
+    # Индикатор сортировки по убыванию
     SORT_DESC: str = ".sort-desc"
 
     # === ПАГИНАЦИЯ ===
@@ -163,7 +164,7 @@ class WebTablesLocators:
     # Кнопка "Предыдущая страница"
     PREVIOUS_PAGE: str = ".page-item .page-link[aria-label='Previous']"
 
-    # Кнопка "Следующая страница" 
+    # Кнопка "Следующая страница"
     NEXT_PAGE: str = ".page-item .page-link[aria-label='Next']"
 
     # Первая страница

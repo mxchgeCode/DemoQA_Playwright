@@ -32,12 +32,14 @@ def test_basic_menu_navigation(menu_page: MenuPage):
                 "index": i,
                 "text": item.get("text", ""),
                 "has_submenu": item.get("has_submenu", False),
-                "is_enabled": item.get("is_enabled", True)
+                "is_enabled": item.get("is_enabled", True),
             }
             for i, item in enumerate(main_menu_items)
         ]
 
-        allure.attach(str(menu_structure), "main_menu_structure", allure.attachment_type.JSON)
+        allure.attach(
+            str(menu_structure), "main_menu_structure", allure.attachment_type.JSON
+        )
 
         assert len(main_menu_items) > 0, "Должен быть хотя бы один пункт главного меню"
 
@@ -65,7 +67,9 @@ def test_basic_menu_navigation(menu_page: MenuPage):
 
                 # Проверяем результат клика
                 became_active = menu_page.is_menu_item_active(i)
-                submenu_opened = menu_page.is_submenu_visible(i) if has_submenu else False
+                submenu_opened = (
+                    menu_page.is_submenu_visible(i) if has_submenu else False
+                )
 
                 # Если есть подменю, проверяем его содержимое
                 submenu_items = []
@@ -83,15 +87,21 @@ def test_basic_menu_navigation(menu_page: MenuPage):
                     "submenu_opened": submenu_opened,
                     "submenu_items_count": len(submenu_items),
                     "submenu_items": submenu_items[:3],  # Первые 3 для краткости
-                    "navigation_successful": click_result and (became_active or submenu_opened),
-                    "functionality_works": click_result and (became_active or submenu_opened or not has_submenu)
+                    "navigation_successful": click_result
+                    and (became_active or submenu_opened),
+                    "functionality_works": click_result
+                    and (became_active or submenu_opened or not has_submenu),
                 }
 
                 menu_navigation_tests.append(navigation_test)
-                menu_page.log_step(f"Результат навигации '{menu_text}': {navigation_test}")
+                menu_page.log_step(
+                    f"Результат навигации '{menu_text}': {navigation_test}"
+                )
 
                 if navigation_test["functionality_works"]:
-                    menu_page.log_step(f"✅ Пункт меню '{menu_text}' работает корректно")
+                    menu_page.log_step(
+                        f"✅ Пункт меню '{menu_text}' работает корректно"
+                    )
                 else:
                     menu_page.log_step(f"⚠️ Проблема с пунктом меню '{menu_text}'")
 
@@ -101,27 +111,54 @@ def test_basic_menu_navigation(menu_page: MenuPage):
                     menu_page.page.wait_for_timeout(300)
 
     with allure.step("Анализируем результаты навигации по меню"):
-        allure.attach(str(menu_navigation_tests), "menu_navigation_results", allure.attachment_type.JSON)
+        allure.attach(
+            str(menu_navigation_tests),
+            "menu_navigation_results",
+            allure.attachment_type.JSON,
+        )
 
-        functional_items = sum(1 for test in menu_navigation_tests if test["functionality_works"])
-        items_with_submenus = sum(1 for test in menu_navigation_tests if test["has_submenu"])
-        working_submenus = sum(1 for test in menu_navigation_tests if test["submenu_opened"])
+        functional_items = sum(
+            1 for test in menu_navigation_tests if test["functionality_works"]
+        )
+        items_with_submenus = sum(
+            1 for test in menu_navigation_tests if test["has_submenu"]
+        )
+        working_submenus = sum(
+            1 for test in menu_navigation_tests if test["submenu_opened"]
+        )
 
         navigation_summary = {
             "total_menu_items": len(menu_navigation_tests),
             "functional_items": functional_items,
             "items_with_submenus": items_with_submenus,
             "working_submenus": working_submenus,
-            "functionality_rate": functional_items / len(menu_navigation_tests) if menu_navigation_tests else 0,
-            "submenu_success_rate": working_submenus / items_with_submenus if items_with_submenus > 0 else 1,
-            "menu_navigation_works": functional_items >= len(menu_navigation_tests) * 0.8,
-            "submenu_functionality_good": working_submenus >= items_with_submenus * 0.7 if items_with_submenus > 0 else True
+            "functionality_rate": (
+                functional_items / len(menu_navigation_tests)
+                if menu_navigation_tests
+                else 0
+            ),
+            "submenu_success_rate": (
+                working_submenus / items_with_submenus if items_with_submenus > 0 else 1
+            ),
+            "menu_navigation_works": functional_items
+            >= len(menu_navigation_tests) * 0.8,
+            "submenu_functionality_good": (
+                working_submenus >= items_with_submenus * 0.7
+                if items_with_submenus > 0
+                else True
+            ),
         }
 
         menu_page.log_step(f"Итоги навигации по меню: {navigation_summary}")
-        allure.attach(str(navigation_summary), "menu_navigation_summary", allure.attachment_type.JSON)
+        allure.attach(
+            str(navigation_summary),
+            "menu_navigation_summary",
+            allure.attachment_type.JSON,
+        )
 
-        assert navigation_summary["menu_navigation_works"], f"Навигация по меню должна работать: {functional_items}/{len(menu_navigation_tests)}"
+        assert navigation_summary[
+            "menu_navigation_works"
+        ], f"Навигация по меню должна работать: {functional_items}/{len(menu_navigation_tests)}"
 
         if navigation_summary["submenu_functionality_good"]:
             menu_page.log_step("✅ Функциональность подменю работает хорошо")
@@ -144,7 +181,9 @@ def test_submenu_navigation(menu_page: MenuPage):
 
     with allure.step("Находим пункты меню с подменю"):
         main_menu_items = menu_page.get_main_menu_items()
-        items_with_submenus = [item for item in main_menu_items if item.get("has_submenu", False)]
+        items_with_submenus = [
+            item for item in main_menu_items if item.get("has_submenu", False)
+        ]
 
         menu_page.log_step(f"Найдено пунктов с подменю: {len(items_with_submenus)}")
 
@@ -172,17 +211,23 @@ def test_submenu_navigation(menu_page: MenuPage):
                     submenu_item_tests = []
 
                     # Тестируем каждый пункт подменю
-                    for sub_i, submenu_item in enumerate(submenu_items[:4]):  # Максимум 4 пункта
+                    for sub_i, submenu_item in enumerate(
+                        submenu_items[:4]
+                    ):  # Максимум 4 пункта
                         sub_text = submenu_item.get("text", f"sub_{sub_i}")
 
                         menu_page.log_step(f"Клик по пункту подменю: '{sub_text}'")
 
                         # Кликаем по пункту подменю
-                        sub_click_result = menu_page.click_submenu_item(main_index, sub_i)
+                        sub_click_result = menu_page.click_submenu_item(
+                            main_index, sub_i
+                        )
                         menu_page.page.wait_for_timeout(500)
 
                         # Проверяем результат
-                        sub_item_active = menu_page.is_submenu_item_active(main_index, sub_i)
+                        sub_item_active = menu_page.is_submenu_item_active(
+                            main_index, sub_i
+                        )
                         submenu_still_open = menu_page.is_submenu_visible(main_index)
 
                         submenu_item_test = {
@@ -191,11 +236,13 @@ def test_submenu_navigation(menu_page: MenuPage):
                             "click_successful": sub_click_result,
                             "became_active": sub_item_active,
                             "submenu_stays_open": submenu_still_open,
-                            "item_functional": sub_click_result
+                            "item_functional": sub_click_result,
                         }
 
                         submenu_item_tests.append(submenu_item_test)
-                        menu_page.log_step(f"Результат '{sub_text}': {submenu_item_test}")
+                        menu_page.log_step(
+                            f"Результат '{sub_text}': {submenu_item_test}"
+                        )
 
                     # Закрываем подменю
                     menu_page.close_submenu(main_index)
@@ -209,10 +256,13 @@ def test_submenu_navigation(menu_page: MenuPage):
                         "submenu_opened": submenu_opened,
                         "submenu_items_count": len(submenu_items),
                         "submenu_items_tested": len(submenu_item_tests),
-                        "functional_submenu_items": sum(1 for test in submenu_item_tests if test["item_functional"]),
+                        "functional_submenu_items": sum(
+                            1 for test in submenu_item_tests if test["item_functional"]
+                        ),
                         "submenu_closed_properly": submenu_closed,
                         "submenu_item_tests": submenu_item_tests,
-                        "submenu_fully_functional": len(submenu_item_tests) > 0 and all(test["item_functional"] for test in submenu_item_tests)
+                        "submenu_fully_functional": len(submenu_item_tests) > 0
+                        and all(test["item_functional"] for test in submenu_item_tests),
                     }
 
                 else:
@@ -220,19 +270,27 @@ def test_submenu_navigation(menu_page: MenuPage):
                         "main_menu_index": main_index,
                         "main_menu_text": main_text,
                         "submenu_opened": False,
-                        "submenu_fully_functional": False
+                        "submenu_fully_functional": False,
                     }
 
                 submenu_tests.append(submenu_test)
                 menu_page.log_step(f"Итоги подменю '{main_text}': {submenu_test}")
 
     with allure.step("Анализируем функциональность подменю"):
-        allure.attach(str(submenu_tests), "submenu_navigation_tests", allure.attachment_type.JSON)
+        allure.attach(
+            str(submenu_tests), "submenu_navigation_tests", allure.attachment_type.JSON
+        )
 
         opened_submenus = sum(1 for test in submenu_tests if test["submenu_opened"])
-        functional_submenus = sum(1 for test in submenu_tests if test.get("submenu_fully_functional", False))
-        total_submenu_items_tested = sum(test.get("submenu_items_tested", 0) for test in submenu_tests)
-        functional_submenu_items = sum(test.get("functional_submenu_items", 0) for test in submenu_tests)
+        functional_submenus = sum(
+            1 for test in submenu_tests if test.get("submenu_fully_functional", False)
+        )
+        total_submenu_items_tested = sum(
+            test.get("submenu_items_tested", 0) for test in submenu_tests
+        )
+        functional_submenu_items = sum(
+            test.get("functional_submenu_items", 0) for test in submenu_tests
+        )
 
         submenu_summary = {
             "total_submenus_tested": len(submenu_tests),
@@ -240,14 +298,27 @@ def test_submenu_navigation(menu_page: MenuPage):
             "functional_submenus": functional_submenus,
             "total_submenu_items_tested": total_submenu_items_tested,
             "functional_submenu_items": functional_submenu_items,
-            "submenu_opening_rate": opened_submenus / len(submenu_tests) if submenu_tests else 0,
-            "submenu_functionality_rate": functional_submenus / opened_submenus if opened_submenus > 0 else 0,
-            "submenu_items_functionality_rate": functional_submenu_items / total_submenu_items_tested if total_submenu_items_tested > 0 else 0,
-            "submenu_navigation_excellent": functional_submenus == opened_submenus and opened_submenus > 0
+            "submenu_opening_rate": (
+                opened_submenus / len(submenu_tests) if submenu_tests else 0
+            ),
+            "submenu_functionality_rate": (
+                functional_submenus / opened_submenus if opened_submenus > 0 else 0
+            ),
+            "submenu_items_functionality_rate": (
+                functional_submenu_items / total_submenu_items_tested
+                if total_submenu_items_tested > 0
+                else 0
+            ),
+            "submenu_navigation_excellent": functional_submenus == opened_submenus
+            and opened_submenus > 0,
         }
 
         menu_page.log_step(f"Итоги навигации по подменю: {submenu_summary}")
-        allure.attach(str(submenu_summary), "submenu_navigation_summary", allure.attachment_type.JSON)
+        allure.attach(
+            str(submenu_summary),
+            "submenu_navigation_summary",
+            allure.attachment_type.JSON,
+        )
 
         if submenu_summary["submenu_navigation_excellent"]:
             menu_page.log_step("✅ Навигация по подменю работает превосходно")
@@ -296,7 +367,9 @@ def test_menu_states_and_styling(menu_page: MenuPage):
 
                 # Проверяем отключенное состояние если применимо
                 is_disabled = menu_page.is_menu_item_disabled(i)
-                disabled_state = menu_page.get_menu_item_visual_state(i) if is_disabled else None
+                disabled_state = (
+                    menu_page.get_menu_item_visual_state(i) if is_disabled else None
+                )
 
                 state_test = {
                     "menu_index": i,
@@ -309,8 +382,12 @@ def test_menu_states_and_styling(menu_page: MenuPage):
                     "disabled_state": disabled_state,
                     "hover_changes_appearance": hover_state != default_state,
                     "active_changes_appearance": active_state != default_state,
-                    "states_are_distinct": len(set([str(default_state), str(hover_state), str(active_state)])) > 1,
-                    "visual_feedback_works": hover_state != default_state or active_state != default_state
+                    "states_are_distinct": len(
+                        set([str(default_state), str(hover_state), str(active_state)])
+                    )
+                    > 1,
+                    "visual_feedback_works": hover_state != default_state
+                    or active_state != default_state,
                 }
 
                 states_tests.append(state_test)
@@ -339,23 +416,38 @@ def test_menu_states_and_styling(menu_page: MenuPage):
                 "default_classes": default_classes,
                 "hover_classes": hover_classes,
                 "active_classes": active_classes,
-                "css_classes_change": len(set([str(default_classes), str(hover_classes), str(active_classes)])) > 1,
+                "css_classes_change": len(
+                    set([str(default_classes), str(hover_classes), str(active_classes)])
+                )
+                > 1,
                 "has_hover_class": any("hover" in cls for cls in hover_classes),
-                "has_active_class": any("active" in cls for cls in active_classes)
+                "has_active_class": any("active" in cls for cls in active_classes),
             }
 
             css_analysis.append(css_test)
             menu_page.log_step(f"CSS анализ '{menu_text}': {css_test}")
 
     with allure.step("Анализируем качество состояний и стилизации"):
-        allure.attach(str(states_tests), "menu_states_tests", allure.attachment_type.JSON)
-        allure.attach(str(css_analysis), "menu_css_analysis", allure.attachment_type.JSON)
+        allure.attach(
+            str(states_tests), "menu_states_tests", allure.attachment_type.JSON
+        )
+        allure.attach(
+            str(css_analysis), "menu_css_analysis", allure.attachment_type.JSON
+        )
 
-        items_with_visual_feedback = sum(1 for test in states_tests if test["visual_feedback_works"])
-        items_with_hover_changes = sum(1 for test in states_tests if test["hover_changes_appearance"])
-        items_with_distinct_states = sum(1 for test in states_tests if test["states_are_distinct"])
+        items_with_visual_feedback = sum(
+            1 for test in states_tests if test["visual_feedback_works"]
+        )
+        items_with_hover_changes = sum(
+            1 for test in states_tests if test["hover_changes_appearance"]
+        )
+        items_with_distinct_states = sum(
+            1 for test in states_tests if test["states_are_distinct"]
+        )
 
-        css_items_with_changes = sum(1 for test in css_analysis if test["css_classes_change"])
+        css_items_with_changes = sum(
+            1 for test in css_analysis if test["css_classes_change"]
+        )
 
         styling_summary = {
             "total_items_tested": len(states_tests),
@@ -363,14 +455,21 @@ def test_menu_states_and_styling(menu_page: MenuPage):
             "items_with_hover_changes": items_with_hover_changes,
             "items_with_distinct_states": items_with_distinct_states,
             "css_items_with_changes": css_items_with_changes,
-            "visual_feedback_rate": items_with_visual_feedback / len(states_tests) if states_tests else 0,
-            "hover_feedback_rate": items_with_hover_changes / len(states_tests) if states_tests else 0,
-            "styling_quality_good": items_with_visual_feedback >= len(states_tests) * 0.7,
-            "hover_effects_good": items_with_hover_changes >= len(states_tests) * 0.5
+            "visual_feedback_rate": (
+                items_with_visual_feedback / len(states_tests) if states_tests else 0
+            ),
+            "hover_feedback_rate": (
+                items_with_hover_changes / len(states_tests) if states_tests else 0
+            ),
+            "styling_quality_good": items_with_visual_feedback
+            >= len(states_tests) * 0.7,
+            "hover_effects_good": items_with_hover_changes >= len(states_tests) * 0.5,
         }
 
         menu_page.log_step(f"Итоги стилизации меню: {styling_summary}")
-        allure.attach(str(styling_summary), "menu_styling_summary", allure.attachment_type.JSON)
+        allure.attach(
+            str(styling_summary), "menu_styling_summary", allure.attachment_type.JSON
+        )
 
         if styling_summary["styling_quality_good"]:
             menu_page.log_step("✅ Качество стилизации меню отличное")
@@ -394,7 +493,11 @@ def test_menu_keyboard_accessibility(menu_page: MenuPage):
         menu_accessibility_info = menu_page.get_menu_accessibility_info()
         menu_page.log_step(f"Информация о доступности меню: {menu_accessibility_info}")
 
-        allure.attach(str(menu_accessibility_info), "menu_accessibility_info", allure.attachment_type.JSON)
+        allure.attach(
+            str(menu_accessibility_info),
+            "menu_accessibility_info",
+            allure.attachment_type.JSON,
+        )
 
         keyboard_accessible = menu_accessibility_info.get("keyboard_accessible", False)
 
@@ -421,7 +524,11 @@ def test_menu_keyboard_accessibility(menu_page: MenuPage):
                         activated_by_enter = menu_page.is_menu_item_active(i)
 
                         # Если есть подменю, проверяем его открытие
-                        submenu_opened_by_enter = menu_page.is_submenu_visible(i) if menu_item.get("has_submenu") else False
+                        submenu_opened_by_enter = (
+                            menu_page.is_submenu_visible(i)
+                            if menu_item.get("has_submenu")
+                            else False
+                        )
 
                     else:
                         enter_result = False
@@ -436,11 +543,15 @@ def test_menu_keyboard_accessibility(menu_page: MenuPage):
                         "enter_activation": enter_result,
                         "activated_by_enter": activated_by_enter,
                         "submenu_opened_by_enter": submenu_opened_by_enter,
-                        "keyboard_functional": focus_result and is_focused and (activated_by_enter or submenu_opened_by_enter)
+                        "keyboard_functional": focus_result
+                        and is_focused
+                        and (activated_by_enter or submenu_opened_by_enter),
                     }
 
                     keyboard_tests.append(keyboard_test)
-                    menu_page.log_step(f"Клавиатурный тест '{menu_text}': {keyboard_test}")
+                    menu_page.log_step(
+                        f"Клавиатурный тест '{menu_text}': {keyboard_test}"
+                    )
 
         with allure.step("Тестируем навигацию стрелками"):
             if len(main_menu_items) >= 2:
@@ -448,7 +559,9 @@ def test_menu_keyboard_accessibility(menu_page: MenuPage):
                 menu_page.focus_menu_item_with_keyboard(0)
 
                 # Пробуем перейти к следующему пункту стрелкой
-                arrow_navigation_result = menu_page.navigate_menu_with_arrow_keys("down")
+                arrow_navigation_result = menu_page.navigate_menu_with_arrow_keys(
+                    "down"
+                )
                 menu_page.page.wait_for_timeout(300)
 
                 second_item_focused = menu_page.is_menu_item_focused(1)
@@ -456,7 +569,7 @@ def test_menu_keyboard_accessibility(menu_page: MenuPage):
                 arrow_test = {
                     "arrow_navigation_attempted": arrow_navigation_result,
                     "second_item_focused": second_item_focused,
-                    "arrow_navigation_works": second_item_focused
+                    "arrow_navigation_works": second_item_focused,
                 }
 
                 keyboard_tests.append({"test_type": "arrow_navigation", **arrow_test})
@@ -476,25 +589,37 @@ def test_menu_keyboard_accessibility(menu_page: MenuPage):
                 "menu_text": menu_text,
                 "aria_attributes": aria_attributes,
                 "has_role": "role" in aria_attributes,
-                "has_aria_label": "aria-label" in aria_attributes or "aria-labelledby" in aria_attributes,
+                "has_aria_label": "aria-label" in aria_attributes
+                or "aria-labelledby" in aria_attributes,
                 "has_aria_expanded": "aria-expanded" in aria_attributes,
-                "aria_compliance_good": len(aria_attributes) > 0 and ("role" in aria_attributes or "aria-label" in aria_attributes)
+                "aria_compliance_good": len(aria_attributes) > 0
+                and ("role" in aria_attributes or "aria-label" in aria_attributes),
             }
 
             aria_tests.append(aria_test)
             menu_page.log_step(f"ARIA тест '{menu_text}': {aria_test}")
 
     with allure.step("Анализируем доступность меню"):
-        allure.attach(str(keyboard_tests), "menu_keyboard_tests", allure.attachment_type.JSON)
+        allure.attach(
+            str(keyboard_tests), "menu_keyboard_tests", allure.attachment_type.JSON
+        )
         allure.attach(str(aria_tests), "menu_aria_tests", allure.attachment_type.JSON)
 
         menu_tests = [test for test in keyboard_tests if "menu_index" in test]
 
-        keyboard_functional_items = sum(1 for test in menu_tests if test.get("keyboard_functional", False))
+        keyboard_functional_items = sum(
+            1 for test in menu_tests if test.get("keyboard_functional", False)
+        )
         focused_items = sum(1 for test in menu_tests if test.get("is_focused", False))
-        aria_compliant_items = sum(1 for test in aria_tests if test.get("aria_compliance_good", False))
+        aria_compliant_items = sum(
+            1 for test in aria_tests if test.get("aria_compliance_good", False)
+        )
 
-        arrow_navigation_works = any(test.get("arrow_navigation_works", False) for test in keyboard_tests if test.get("test_type") == "arrow_navigation")
+        arrow_navigation_works = any(
+            test.get("arrow_navigation_works", False)
+            for test in keyboard_tests
+            if test.get("test_type") == "arrow_navigation"
+        )
 
         accessibility_summary = {
             "keyboard_support_available": keyboard_accessible,
@@ -503,14 +628,24 @@ def test_menu_keyboard_accessibility(menu_page: MenuPage):
             "focused_items": focused_items,
             "aria_compliant_items": aria_compliant_items,
             "arrow_navigation_works": arrow_navigation_works,
-            "keyboard_functionality_rate": keyboard_functional_items / len(menu_tests) if menu_tests else 0,
-            "aria_compliance_rate": aria_compliant_items / len(aria_tests) if aria_tests else 0,
-            "accessibility_excellent": keyboard_functional_items == len(menu_tests) and aria_compliant_items >= len(aria_tests) * 0.8,
-            "accessibility_good": keyboard_functional_items >= len(menu_tests) * 0.7 or aria_compliant_items >= len(aria_tests) * 0.7
+            "keyboard_functionality_rate": (
+                keyboard_functional_items / len(menu_tests) if menu_tests else 0
+            ),
+            "aria_compliance_rate": (
+                aria_compliant_items / len(aria_tests) if aria_tests else 0
+            ),
+            "accessibility_excellent": keyboard_functional_items == len(menu_tests)
+            and aria_compliant_items >= len(aria_tests) * 0.8,
+            "accessibility_good": keyboard_functional_items >= len(menu_tests) * 0.7
+            or aria_compliant_items >= len(aria_tests) * 0.7,
         }
 
         menu_page.log_step(f"Итоги доступности меню: {accessibility_summary}")
-        allure.attach(str(accessibility_summary), "menu_accessibility_summary", allure.attachment_type.JSON)
+        allure.attach(
+            str(accessibility_summary),
+            "menu_accessibility_summary",
+            allure.attachment_type.JSON,
+        )
 
         if accessibility_summary["accessibility_excellent"]:
             menu_page.log_step("✅ Доступность меню превосходная")
@@ -537,7 +672,9 @@ def test_complete_menu_integration(menu_page: MenuPage):
 
     with allure.step("Выполняем полный цикл работы с меню"):
         main_menu_items = menu_page.get_main_menu_items()
-        menu_page.log_step(f"Интеграционное тестирование {len(main_menu_items)} пунктов меню")
+        menu_page.log_step(
+            f"Интеграционное тестирование {len(main_menu_items)} пунктов меню"
+        )
 
         # 1. Полный обход всех пунктов меню
         full_navigation_results = []
@@ -560,7 +697,7 @@ def test_complete_menu_integration(menu_page: MenuPage):
                     submenu_test_result = {
                         "submenu_opened": True,
                         "submenu_items_count": len(submenu_items),
-                        "submenu_accessible": len(submenu_items) > 0
+                        "submenu_accessible": len(submenu_items) > 0,
                     }
 
                     # Закрываем подменю
@@ -568,15 +705,18 @@ def test_complete_menu_integration(menu_page: MenuPage):
                 else:
                     submenu_test_result = {"submenu_opened": False}
 
-            full_navigation_results.append({
-                "menu_index": i,
-                "menu_text": menu_text,
-                "navigation_time_ms": navigation_time,
-                "click_successful": click_result,
-                "became_active": became_active,
-                "submenu_test": submenu_test_result,
-                "overall_success": click_result and (became_active or submenu_test_result)
-            })
+            full_navigation_results.append(
+                {
+                    "menu_index": i,
+                    "menu_text": menu_text,
+                    "navigation_time_ms": navigation_time,
+                    "click_successful": click_result,
+                    "became_active": became_active,
+                    "submenu_test": submenu_test_result,
+                    "overall_success": click_result
+                    and (became_active or submenu_test_result),
+                }
+            )
 
             menu_page.page.wait_for_timeout(200)
 
@@ -584,10 +724,13 @@ def test_complete_menu_integration(menu_page: MenuPage):
 
         # 2. Тест стабильности меню
         stability_test = {
-            "menu_structure_consistent": len(menu_page.get_main_menu_items()) == len(main_menu_items),
+            "menu_structure_consistent": len(menu_page.get_main_menu_items())
+            == len(main_menu_items),
             "no_javascript_errors": menu_page.check_for_javascript_errors(),
             "page_layout_stable": menu_page.verify_page_layout_stability(),
-            "menu_still_responsive": all(menu_page.is_menu_item_clickable(i) for i in range(len(main_menu_items)))
+            "menu_still_responsive": all(
+                menu_page.is_menu_item_clickable(i) for i in range(len(main_menu_items))
+            ),
         }
 
         integration_results["stability"] = stability_test
@@ -599,28 +742,48 @@ def test_complete_menu_integration(menu_page: MenuPage):
             menu_page.click_menu_item(i)
             response_time = menu_page.get_current_timestamp() - start_time
 
-            performance_metrics.append({
-                "menu_index": i,
-                "response_time_ms": response_time,
-                "fast_response": response_time < 300  # Менее 300мс
-            })
+            performance_metrics.append(
+                {
+                    "menu_index": i,
+                    "response_time_ms": response_time,
+                    "fast_response": response_time < 300,  # Менее 300мс
+                }
+            )
 
         integration_results["performance"] = performance_metrics
 
     with allure.step("Создаем итоговый отчет интеграции меню"):
-        allure.attach(str(integration_results), "menu_integration_results", allure.attachment_type.JSON)
+        allure.attach(
+            str(integration_results),
+            "menu_integration_results",
+            allure.attachment_type.JSON,
+        )
 
         # Анализ навигации
-        successful_navigations = sum(1 for result in integration_results["full_navigation"] if result["overall_success"])
-        working_submenus = sum(1 for result in integration_results["full_navigation"] if result.get("submenu_test", {}).get("submenu_opened", False))
+        successful_navigations = sum(
+            1
+            for result in integration_results["full_navigation"]
+            if result["overall_success"]
+        )
+        working_submenus = sum(
+            1
+            for result in integration_results["full_navigation"]
+            if result.get("submenu_test", {}).get("submenu_opened", False)
+        )
 
         # Анализ стабильности
         stability = integration_results["stability"]
         stable_system = all(stability.values())
 
         # Анализ производительности
-        fast_responses = sum(1 for metric in integration_results["performance"] if metric["fast_response"])
-        avg_response_time = sum(metric["response_time_ms"] for metric in integration_results["performance"]) / len(integration_results["performance"])
+        fast_responses = sum(
+            1
+            for metric in integration_results["performance"]
+            if metric["fast_response"]
+        )
+        avg_response_time = sum(
+            metric["response_time_ms"] for metric in integration_results["performance"]
+        ) / len(integration_results["performance"])
 
         integration_summary = {
             "total_menu_items": len(main_menu_items),
@@ -629,23 +792,31 @@ def test_complete_menu_integration(menu_page: MenuPage):
             "stable_system": stable_system,
             "fast_responses": fast_responses,
             "average_response_time_ms": round(avg_response_time, 2),
-            "navigation_success_rate": successful_navigations / len(main_menu_items) if main_menu_items else 0,
-            "performance_good": fast_responses >= len(integration_results["performance"]) * 0.8,
+            "navigation_success_rate": (
+                successful_navigations / len(main_menu_items) if main_menu_items else 0
+            ),
+            "performance_good": fast_responses
+            >= len(integration_results["performance"]) * 0.8,
             "integration_excellent": (
-                successful_navigations >= len(main_menu_items) * 0.9 and
-                stable_system and
-                fast_responses >= len(integration_results["performance"]) * 0.8
+                successful_navigations >= len(main_menu_items) * 0.9
+                and stable_system
+                and fast_responses >= len(integration_results["performance"]) * 0.8
             ),
             "integration_successful": (
-                successful_navigations >= len(main_menu_items) * 0.7 and
-                stable_system
-            )
+                successful_navigations >= len(main_menu_items) * 0.7 and stable_system
+            ),
         }
 
         menu_page.log_step(f"Итоги интеграции меню: {integration_summary}")
-        allure.attach(str(integration_summary), "menu_integration_summary", allure.attachment_type.JSON)
+        allure.attach(
+            str(integration_summary),
+            "menu_integration_summary",
+            allure.attachment_type.JSON,
+        )
 
-        assert integration_summary["integration_successful"], f"Интеграция меню должна быть успешной: навигация {successful_navigations}/{len(main_menu_items)}, стабильность {stable_system}"
+        assert integration_summary[
+            "integration_successful"
+        ], f"Интеграция меню должна быть успешной: навигация {successful_navigations}/{len(main_menu_items)}, стабильность {stable_system}"
 
         if integration_summary["integration_excellent"]:
             menu_page.log_step("🎉 Интеграция меню превосходная!")

@@ -93,3 +93,32 @@ class UploadDownloadPage(BasePage):
             str: Текст на кнопке скачивания
         """
         return self.get_text_safe(UploadDownloadLocators.DOWNLOAD_BUTTON)
+
+    # === Методы для совместимости с тестами ===
+
+    def is_file_uploaded(self) -> bool:
+        """
+        Проверяет, успешно ли прошла загрузка файла.
+
+        Returns:
+            bool: True если файл загружен успешно
+        """
+        return self.is_upload_successful()
+
+    def is_download_button_visible(self) -> bool:
+        """
+        Проверяет видимость кнопки скачивания.
+
+        Returns:
+            bool: True если кнопка скачивания видима
+        """
+        return self.page.locator(UploadDownloadLocators.DOWNLOAD_BUTTON).is_visible()
+
+    def set_upload_timeout(self, timeout_ms: int) -> None:
+        """
+        Устанавливает таймаут для загрузки файлов.
+
+        Args:
+            timeout_ms: Таймаут в миллисекундах
+        """
+        self.page.set_default_timeout(timeout_ms)

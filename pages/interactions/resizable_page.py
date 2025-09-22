@@ -95,6 +95,15 @@ class ResizablePage(BasePage):
         bounding_box = box.bounding_box()
         return int(bounding_box["width"]), int(bounding_box["height"])
 
+    def get_free_box_size(self) -> tuple[int, int]:
+        """
+        Получает текущий размер неограниченного resizable box (алиас для get_no_restriction_box_size).
+
+        Returns:
+            tuple: (ширина, высота) в пикселях
+        """
+        return self.get_no_restriction_box_size()
+
     def is_resize_handle_visible(self, restricted: bool = True) -> bool:
         """
         Проверяет видимость resize handle.

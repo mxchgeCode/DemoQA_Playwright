@@ -155,3 +155,55 @@ class ProgressBarPage(BasePage):
         button = self.page.locator(ProgressBarLocators.START_STOP_BUTTON)
         self.wait_for_visible(ProgressBarLocators.START_STOP_BUTTON, 10000)
         return button.inner_text().strip()
+
+    # === Методы для совместимости с тестами ===
+
+    def is_static_progress_bar_present(self) -> bool:
+        """
+        Проверяет наличие статического прогресс-бара.
+
+        Returns:
+            bool: True если статический прогресс-бар присутствует
+        """
+        return self.page.locator(ProgressBarLocators.PROGRESS_BAR).is_visible()
+
+    def is_dynamic_progress_bar_present(self) -> bool:
+        """
+        Проверяет наличие динамического прогресс-бара.
+
+        Returns:
+            bool: True если динамический прогресс-бар присутствует
+        """
+        return self.page.locator(ProgressBarLocators.PROGRESS_BAR).is_visible()
+
+    def get_available_progress_controls(self) -> dict:
+        """
+        Получает доступные элементы управления прогресс-баром.
+
+        Returns:
+            dict: Словарь с информацией о доступных элементах управления
+        """
+        controls = {
+            "start_stop_button": self.page.locator(ProgressBarLocators.START_STOP_BUTTON).is_visible(),
+            "reset_button": self.page.locator(ProgressBarLocators.RESET_BUTTON).is_visible(),
+            "progress_bar": self.page.locator(ProgressBarLocators.PROGRESS_BAR).is_visible(),
+        }
+        return controls
+
+    def count_progress_bars_on_page(self) -> int:
+        """
+        Подсчитывает количество прогресс-баров на странице.
+
+        Returns:
+            int: Количество прогресс-баров
+        """
+        return self.page.locator(ProgressBarLocators.PROGRESS_BAR).count()
+
+    def is_reset_progress_button_available(self) -> bool:
+        """
+        Проверяет доступность кнопки сброса прогресса.
+
+        Returns:
+            bool: True если кнопка сброса доступна
+        """
+        return self.page.locator(ProgressBarLocators.RESET_BUTTON).is_visible()

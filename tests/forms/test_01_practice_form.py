@@ -32,7 +32,9 @@ def test_fill_form_and_submit(practice_form_page):
         practice_form_page.fill_last_name(form_data["last_name"])
         practice_form_page.fill_email(form_data["email"])
 
-        allure.attach(f"Name: {form_data['first_name']} {form_data['last_name']}", "user_name")
+        allure.attach(
+            f"Name: {form_data['first_name']} {form_data['last_name']}", "user_name"
+        )
         allure.attach(form_data["email"], "user_email")
 
     with allure.step("Выбираем пол"):
@@ -68,7 +70,9 @@ def test_fill_form_and_submit(practice_form_page):
 
         try:
             practice_form_page.upload_picture(temp_image_path)
-            allure.attach(f"Uploaded file: {os.path.basename(temp_image_path)}", "uploaded_file")
+            allure.attach(
+                f"Uploaded file: {os.path.basename(temp_image_path)}", "uploaded_file"
+            )
         finally:
             # Очищаем временный файл
             if os.path.exists(temp_image_path):
@@ -88,10 +92,14 @@ def test_fill_form_and_submit(practice_form_page):
         practice_form_page.submit_form()
 
     with allure.step("Проверяем появление модального окна с результатами"):
-        assert practice_form_page.is_modal_visible(), "Модальное окно с результатами должно появиться"
+        assert (
+            practice_form_page.is_modal_visible()
+        ), "Модальное окно с результатами должно появиться"
 
         modal_title = practice_form_page.page.locator(".modal-title").inner_text()
-        assert "Thanks for submitting the form" in modal_title, f"Неожиданный заголовок модального окна: {modal_title}"
+        assert (
+            "Thanks for submitting the form" in modal_title
+        ), f"Неожиданный заголовок модального окна: {modal_title}"
 
         allure.attach(modal_title, "modal_title")
 
@@ -115,9 +123,15 @@ def test_fill_form_and_submit(practice_form_page):
 
         # Проверяем наличие ключевых данных в результатах
         table_text = "\n".join(table_content)
-        assert form_data["first_name"] in table_text, "Имя должно присутствовать в результатах"
-        assert form_data["last_name"] in table_text, "Фамилия должна присутствовать в результатах"
-        assert form_data["email"] in table_text, "Email должен присутствовать в результатах"
+        assert (
+            form_data["first_name"] in table_text
+        ), "Имя должно присутствовать в результатах"
+        assert (
+            form_data["last_name"] in table_text
+        ), "Фамилия должна присутствовать в результатах"
+        assert (
+            form_data["email"] in table_text
+        ), "Email должен присутствовать в результатах"
 
     with allure.step("Закрываем модальное окно"):
         practice_form_page.close_modal()
@@ -163,8 +177,12 @@ def test_submit_form_with_minimum_required_fields(practice_form_page):
 
         else:
             # Если модального окна нет, проверяем есть ли ошибки валидации
-            validation_errors = practice_form_page.page.locator(".invalid-feedback").all()
-            error_messages = [error.inner_text() for error in validation_errors if error.is_visible()]
+            validation_errors = practice_form_page.page.locator(
+                ".invalid-feedback"
+            ).all()
+            error_messages = [
+                error.inner_text() for error in validation_errors if error.is_visible()
+            ]
 
             if error_messages:
                 allure.attach("\n".join(error_messages), "validation_errors")
@@ -177,14 +195,17 @@ def test_submit_form_with_minimum_required_fields(practice_form_page):
 @allure.feature("Practice Form")
 @allure.story("Field Validation")
 @pytest.mark.forms
-@pytest.mark.parametrize("email,should_be_valid", [
-    ("test@example.com", True),
-    ("invalid-email", False),
-    ("user.name+tag@domain.co.uk", True),
-    ("@domain.com", False),
-    ("test@", False),
-    ("", True)  # Пустое поле может быть валидным если не обязательно
-])
+@pytest.mark.parametrize(
+    "email,should_be_valid",
+    [
+        ("test@example.com", True),
+        ("invalid-email", False),
+        ("user.name+tag@domain.co.uk", True),
+        ("@domain.com", False),
+        ("test@", False),
+        ("", True),  # Пустое поле может быть валидным если не обязательно
+    ],
+)
 def test_email_field_validation(practice_form_page, email, should_be_valid):
     """
     Параметризованный тест валидации email поля.
@@ -218,14 +239,16 @@ def test_email_field_validation(practice_form_page, email, should_be_valid):
             "expected_valid": should_be_valid,
             "modal_appeared": modal_visible,
             "field_invalid": is_invalid,
-            "field_classes": email_classes
+            "field_classes": email_classes,
         }
 
         allure.attach(str(validation_result), "email_validation_result")
 
         if should_be_valid and email:
             # Для валидных email не должно быть ошибок валидации
-            assert not is_invalid, f"Email '{email}' должен быть валидным, но поле помечено как невалидное"
+            assert (
+                not is_invalid
+            ), f"Email '{email}' должен быть валидным, но поле помечено как невалидное"
         elif not should_be_valid and email:
             # Для невалидных email может быть ошибка (зависит от реализации)
             pass  # Логируем результат без строгой проверки
@@ -247,13 +270,15 @@ def test_file_upload_functionality(practice_form_page):
     test_files = [
         ("test.txt", b"Simple text file content", ".txt"),
         ("test.jpg", b"fake jpg content", ".jpg"),
-        ("test.png", b"fake png content", ".png")
+        ("test.png", b"fake png content", ".png"),
     ]
 
     for filename, content, extension in test_files:
         with allure.step(f"Тестируем загрузку файла: {filename}"):
             # Создаем временный файл
-            with tempfile.NamedTemporaryFile(suffix=extension, delete=False) as tmp_file:
+            with tempfile.NamedTemporaryFile(
+                suffix=extension, delete=False
+            ) as tmp_file:
                 tmp_file.write(content)
                 temp_path = tmp_file.name
 
@@ -273,10 +298,18 @@ def test_file_upload_functionality(practice_form_page):
 
                 # Проверяем результат
                 if practice_form_page.is_modal_visible():
-                    modal_content = practice_form_page.page.locator(".modal-body").inner_text()
-                    file_mentioned = filename in modal_content or os.path.basename(temp_path) in modal_content
+                    modal_content = practice_form_page.page.locator(
+                        ".modal-body"
+                    ).inner_text()
+                    file_mentioned = (
+                        filename in modal_content
+                        or os.path.basename(temp_path) in modal_content
+                    )
 
-                    allure.attach(f"File upload successful for {filename}: {file_mentioned}", "file_upload_result")
+                    allure.attach(
+                        f"File upload successful for {filename}: {file_mentioned}",
+                        "file_upload_result",
+                    )
                     practice_form_page.close_modal()
 
             finally:

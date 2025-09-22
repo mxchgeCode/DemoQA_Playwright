@@ -27,10 +27,16 @@ def test_simple_drag_element(dragabble_page: DragabblePage):
         initial_position = dragabble_page.get_simple_drag_element_position()
         dragabble_page.log_step(f"Начальная позиция элемента: {initial_position}")
 
-        allure.attach(str(initial_position), "initial_drag_position", allure.attachment_type.JSON)
+        allure.attach(
+            str(initial_position), "initial_drag_position", allure.attachment_type.JSON
+        )
 
-        assert initial_position["x"] >= 0, f"Начальная X координата должна быть неотрицательной: {initial_position['x']}"
-        assert initial_position["y"] >= 0, f"Начальная Y координата должна быть неотрицательной: {initial_position['y']}"
+        assert (
+            initial_position["x"] >= 0
+        ), f"Начальная X координата должна быть неотрицательной: {initial_position['x']}"
+        assert (
+            initial_position["y"] >= 0
+        ), f"Начальная Y координата должна быть неотрицательной: {initial_position['y']}"
 
     with allure.step("Перетаскиваем элемент на 100px вправо и 50px вниз"):
         dragabble_page.log_step("Выполнение простого перетаскивания")
@@ -54,28 +60,36 @@ def test_simple_drag_element(dragabble_page: DragabblePage):
             "y_change": new_position["y"] - initial_position["y"],
             "expected_x_change": drag_offset_x,
             "expected_y_change": drag_offset_y,
-            "position_changed": new_position != initial_position
+            "position_changed": new_position != initial_position,
         }
 
         dragabble_page.log_step(f"Анализ изменения позиции: {position_change}")
-        allure.attach(str(position_change), "position_change_analysis", allure.attachment_type.JSON)
+        allure.attach(
+            str(position_change),
+            "position_change_analysis",
+            allure.attachment_type.JSON,
+        )
 
         # Проверяем что элемент действительно переместился
-        assert position_change["position_changed"], f"Позиция элемента должна измениться: {initial_position} -> {new_position}"
+        assert position_change[
+            "position_changed"
+        ], f"Позиция элемента должна измениться: {initial_position} -> {new_position}"
 
         # Проверяем направление перемещения (с допуском на неточности)
         x_moved_right = position_change["x_change"] > 20  # Хотя бы 20px вправо
-        y_moved_down = position_change["y_change"] > 10   # Хотя бы 10px вниз
+        y_moved_down = position_change["y_change"] > 10  # Хотя бы 10px вниз
 
         movement_validation = {
             "moved_right": x_moved_right,
             "moved_down": y_moved_down,
-            "movement_reasonable": x_moved_right and y_moved_down
+            "movement_reasonable": x_moved_right and y_moved_down,
         }
 
         dragabble_page.log_step(f"Валидация движения: {movement_validation}")
 
-        assert movement_validation["movement_reasonable"], f"Элемент должен переместиться в ожидаемом направлении: X+{position_change['x_change']}, Y+{position_change['y_change']}"
+        assert movement_validation[
+            "movement_reasonable"
+        ], f"Элемент должен переместиться в ожидаемом направлении: X+{position_change['x_change']}, Y+{position_change['y_change']}"
 
     with allure.step("Выполняем дополнительное перетаскивание"):
         dragabble_page.log_step("Второе перетаскивание для проверки стабильности")
@@ -90,11 +104,13 @@ def test_simple_drag_element(dragabble_page: DragabblePage):
             "second_drag_successful": second_drag_result,
             "position_after_second_drag": final_position,
             "total_x_change": final_position["x"] - initial_position["x"],
-            "total_y_change": final_position["y"] - initial_position["y"]
+            "total_y_change": final_position["y"] - initial_position["y"],
         }
 
         dragabble_page.log_step(f"Результат второго перетаскивания: {second_movement}")
-        allure.attach(str(second_movement), "second_drag_result", allure.attachment_type.JSON)
+        allure.attach(
+            str(second_movement), "second_drag_result", allure.attachment_type.JSON
+        )
 
         assert second_drag_result, "Второе перетаскивание также должно быть успешным"
 
@@ -123,14 +139,20 @@ def test_axis_restricted_drag(dragabble_page: DragabblePage):
         if x_only_element_present:
             # Получаем начальную позицию X-only элемента
             x_initial_position = dragabble_page.get_x_axis_element_position()
-            dragabble_page.log_step(f"Начальная позиция X-only элемента: {x_initial_position}")
+            dragabble_page.log_step(
+                f"Начальная позиция X-only элемента: {x_initial_position}"
+            )
 
             # Пытаемся перетащить по диагонали (X и Y)
-            x_drag_result = dragabble_page.drag_x_axis_element(80, 60)  # Пытаемся и по X, и по Y
+            x_drag_result = dragabble_page.drag_x_axis_element(
+                80, 60
+            )  # Пытаемся и по X, и по Y
             dragabble_page.page.wait_for_timeout(1000)
 
             x_new_position = dragabble_page.get_x_axis_element_position()
-            dragabble_page.log_step(f"Позиция X-only элемента после перетаскивания: {x_new_position}")
+            dragabble_page.log_step(
+                f"Позиция X-only элемента после перетаскивания: {x_new_position}"
+            )
 
             x_axis_test = {
                 "drag_performed": x_drag_result,
@@ -140,11 +162,14 @@ def test_axis_restricted_drag(dragabble_page: DragabblePage):
                 "y_changed": x_new_position["y"] != x_initial_position["y"],
                 "x_movement": x_new_position["x"] - x_initial_position["x"],
                 "y_movement": x_new_position["y"] - x_initial_position["y"],
-                "x_restriction_works": x_new_position["x"] != x_initial_position["x"] and abs(x_new_position["y"] - x_initial_position["y"]) < 10
+                "x_restriction_works": x_new_position["x"] != x_initial_position["x"]
+                and abs(x_new_position["y"] - x_initial_position["y"]) < 10,
             }
 
             dragabble_page.log_step(f"Результат X-axis теста: {x_axis_test}")
-            allure.attach(str(x_axis_test), "x_axis_restriction_test", allure.attachment_type.JSON)
+            allure.attach(
+                str(x_axis_test), "x_axis_restriction_test", allure.attachment_type.JSON
+            )
 
             if x_axis_test["x_restriction_works"]:
                 dragabble_page.log_step("✅ Ограничение по X-оси работает корректно")
@@ -160,14 +185,20 @@ def test_axis_restricted_drag(dragabble_page: DragabblePage):
         if y_only_element_present:
             # Получаем начальную позицию Y-only элемента
             y_initial_position = dragabble_page.get_y_axis_element_position()
-            dragabble_page.log_step(f"Начальная позиция Y-only элемента: {y_initial_position}")
+            dragabble_page.log_step(
+                f"Начальная позиция Y-only элемента: {y_initial_position}"
+            )
 
             # Пытаемся перетащить по диагонали (X и Y)
-            y_drag_result = dragabble_page.drag_y_axis_element(60, 80)  # Пытаемся и по X, и по Y
+            y_drag_result = dragabble_page.drag_y_axis_element(
+                60, 80
+            )  # Пытаемся и по X, и по Y
             dragabble_page.page.wait_for_timeout(1000)
 
             y_new_position = dragabble_page.get_y_axis_element_position()
-            dragabble_page.log_step(f"Позиция Y-only элемента после перетаскивания: {y_new_position}")
+            dragabble_page.log_step(
+                f"Позиция Y-only элемента после перетаскивания: {y_new_position}"
+            )
 
             y_axis_test = {
                 "drag_performed": y_drag_result,
@@ -177,11 +208,14 @@ def test_axis_restricted_drag(dragabble_page: DragabblePage):
                 "y_changed": y_new_position["y"] != y_initial_position["y"],
                 "x_movement": y_new_position["x"] - y_initial_position["x"],
                 "y_movement": y_new_position["y"] - y_initial_position["y"],
-                "y_restriction_works": y_new_position["y"] != y_initial_position["y"] and abs(y_new_position["x"] - y_initial_position["x"]) < 10
+                "y_restriction_works": y_new_position["y"] != y_initial_position["y"]
+                and abs(y_new_position["x"] - y_initial_position["x"]) < 10,
             }
 
             dragabble_page.log_step(f"Результат Y-axis теста: {y_axis_test}")
-            allure.attach(str(y_axis_test), "y_axis_restriction_test", allure.attachment_type.JSON)
+            allure.attach(
+                str(y_axis_test), "y_axis_restriction_test", allure.attachment_type.JSON
+            )
 
             if y_axis_test["y_restriction_works"]:
                 dragabble_page.log_step("✅ Ограничение по Y-оси работает корректно")
@@ -195,14 +229,23 @@ def test_axis_restricted_drag(dragabble_page: DragabblePage):
         axis_restrictions_summary = {
             "x_only_element_present": x_only_element_present,
             "y_only_element_present": y_only_element_present,
-            "axis_restrictions_available": x_only_element_present or y_only_element_present,
-            "tab_functional": axis_tab_active
+            "axis_restrictions_available": x_only_element_present
+            or y_only_element_present,
+            "tab_functional": axis_tab_active,
         }
 
-        dragabble_page.log_step(f"Итоги ограничений по осям: {axis_restrictions_summary}")
-        allure.attach(str(axis_restrictions_summary), "axis_restrictions_summary", allure.attachment_type.JSON)
+        dragabble_page.log_step(
+            f"Итоги ограничений по осям: {axis_restrictions_summary}"
+        )
+        allure.attach(
+            str(axis_restrictions_summary),
+            "axis_restrictions_summary",
+            allure.attachment_type.JSON,
+        )
 
-        assert axis_restrictions_summary["tab_functional"], "Вкладка Axis Restricted должна быть функциональной"
+        assert axis_restrictions_summary[
+            "tab_functional"
+        ], "Вкладка Axis Restricted должна быть функциональной"
 
 
 @allure.epic("Interactions")
@@ -226,94 +269,152 @@ def test_container_restricted_drag(dragabble_page: DragabblePage):
     with allure.step("Анализируем структуру контейнеров"):
         container_box_present = dragabble_page.is_container_box_present()
         parent_container_present = dragabble_page.is_parent_container_present()
-        drag_element_in_container = dragabble_page.is_drag_element_in_container_present()
+        drag_element_in_container = (
+            dragabble_page.is_drag_element_in_container_present()
+        )
 
         container_structure = {
             "container_box": container_box_present,
             "parent_container": parent_container_present,
-            "drag_element": drag_element_in_container
+            "drag_element": drag_element_in_container,
         }
 
         dragabble_page.log_step(f"Структура контейнеров: {container_structure}")
-        allure.attach(str(container_structure), "container_structure", allure.attachment_type.JSON)
+        allure.attach(
+            str(container_structure), "container_structure", allure.attachment_type.JSON
+        )
 
     with allure.step("Получаем размеры и границы контейнера"):
         if container_box_present:
             container_bounds = dragabble_page.get_container_bounds()
             dragabble_page.log_step(f"Границы контейнера: {container_bounds}")
 
-            allure.attach(str(container_bounds), "container_bounds", allure.attachment_type.JSON)
+            allure.attach(
+                str(container_bounds), "container_bounds", allure.attachment_type.JSON
+            )
 
-            assert container_bounds["width"] > 0, "Ширина контейнера должна быть положительной"
-            assert container_bounds["height"] > 0, "Высота контейнера должна быть положительной"
+            assert (
+                container_bounds["width"] > 0
+            ), "Ширина контейнера должна быть положительной"
+            assert (
+                container_bounds["height"] > 0
+            ), "Высота контейнера должна быть положительной"
 
     with allure.step("Тестируем перетаскивание в пределах контейнера"):
         if drag_element_in_container:
-            initial_container_position = dragabble_page.get_container_drag_element_position()
-            dragabble_page.log_step(f"Начальная позиция элемента в контейнере: {initial_container_position}")
+            initial_container_position = (
+                dragabble_page.get_container_drag_element_position()
+            )
+            dragabble_page.log_step(
+                f"Начальная позиция элемента в контейнере: {initial_container_position}"
+            )
 
             # Перетаскиваем элемент в пределах контейнера
-            within_bounds_drag = dragabble_page.drag_container_element_within_bounds(30, 40)
+            within_bounds_drag = dragabble_page.drag_container_element_within_bounds(
+                30, 40
+            )
             dragabble_page.page.wait_for_timeout(1000)
 
             position_after_within = dragabble_page.get_container_drag_element_position()
-            dragabble_page.log_step(f"Позиция после перетаскивания в пределах: {position_after_within}")
+            dragabble_page.log_step(
+                f"Позиция после перетаскивания в пределах: {position_after_within}"
+            )
 
             within_bounds_test = {
                 "drag_performed": within_bounds_drag,
                 "initial_position": initial_container_position,
                 "position_after": position_after_within,
                 "element_moved": position_after_within != initial_container_position,
-                "x_movement": position_after_within["x"] - initial_container_position["x"],
-                "y_movement": position_after_within["y"] - initial_container_position["y"]
+                "x_movement": position_after_within["x"]
+                - initial_container_position["x"],
+                "y_movement": position_after_within["y"]
+                - initial_container_position["y"],
             }
 
-            dragabble_page.log_step(f"Результат перетаскивания в пределах: {within_bounds_test}")
-            allure.attach(str(within_bounds_test), "within_bounds_drag_test", allure.attachment_type.JSON)
+            dragabble_page.log_step(
+                f"Результат перетаскивания в пределах: {within_bounds_test}"
+            )
+            allure.attach(
+                str(within_bounds_test),
+                "within_bounds_drag_test",
+                allure.attachment_type.JSON,
+            )
 
-            assert within_bounds_test["element_moved"], "Элемент должен перемещаться в пределах контейнера"
+            assert within_bounds_test[
+                "element_moved"
+            ], "Элемент должен перемещаться в пределах контейнера"
 
     with allure.step("Тестируем попытку перетаскивания за пределы контейнера"):
         if drag_element_in_container and container_box_present:
             # Пытаемся перетащить элемент далеко за границы контейнера
-            beyond_bounds_drag = dragabble_page.drag_container_element_beyond_bounds(200, 200)
+            beyond_bounds_drag = dragabble_page.drag_container_element_beyond_bounds(
+                200, 200
+            )
             dragabble_page.page.wait_for_timeout(1000)
 
             position_after_beyond = dragabble_page.get_container_drag_element_position()
-            dragabble_page.log_step(f"Позиция после попытки перетаскивания за пределы: {position_after_beyond}")
+            dragabble_page.log_step(
+                f"Позиция после попытки перетаскивания за пределы: {position_after_beyond}"
+            )
 
             # Проверяем что элемент остался в границах контейнера
-            element_within_container = dragabble_page.is_element_within_container_bounds(position_after_beyond)
+            element_within_container = (
+                dragabble_page.is_element_within_container_bounds(position_after_beyond)
+            )
 
             beyond_bounds_test = {
                 "drag_attempted": beyond_bounds_drag,
                 "final_position": position_after_beyond,
                 "element_within_bounds": element_within_container,
                 "container_restriction_works": element_within_container,
-                "x_constrained": position_after_beyond["x"] <= container_bounds["x"] + container_bounds["width"],
-                "y_constrained": position_after_beyond["y"] <= container_bounds["y"] + container_bounds["height"]
+                "x_constrained": position_after_beyond["x"]
+                <= container_bounds["x"] + container_bounds["width"],
+                "y_constrained": position_after_beyond["y"]
+                <= container_bounds["y"] + container_bounds["height"],
             }
 
-            dragabble_page.log_step(f"Результат попытки выхода за пределы: {beyond_bounds_test}")
-            allure.attach(str(beyond_bounds_test), "beyond_bounds_drag_test", allure.attachment_type.JSON)
+            dragabble_page.log_step(
+                f"Результат попытки выхода за пределы: {beyond_bounds_test}"
+            )
+            allure.attach(
+                str(beyond_bounds_test),
+                "beyond_bounds_drag_test",
+                allure.attachment_type.JSON,
+            )
 
             if beyond_bounds_test["container_restriction_works"]:
                 dragabble_page.log_step("✅ Ограничения контейнера работают корректно")
             else:
-                dragabble_page.log_step("ℹ️ Элемент вышел за пределы контейнера - возможно ограничения не строгие")
+                dragabble_page.log_step(
+                    "ℹ️ Элемент вышел за пределы контейнера - возможно ограничения не строгие"
+                )
 
     with allure.step("Анализируем функциональность контейнерных ограничений"):
         container_functionality = {
-            "container_structure_present": container_box_present and drag_element_in_container,
-            "drag_within_bounds_works": within_bounds_test.get("element_moved", False) if 'within_bounds_test' in locals() else False,
-            "container_restrictions_tested": container_box_present and drag_element_in_container,
-            "tab_works": container_tab_active
+            "container_structure_present": container_box_present
+            and drag_element_in_container,
+            "drag_within_bounds_works": (
+                within_bounds_test.get("element_moved", False)
+                if "within_bounds_test" in locals()
+                else False
+            ),
+            "container_restrictions_tested": container_box_present
+            and drag_element_in_container,
+            "tab_works": container_tab_active,
         }
 
-        dragabble_page.log_step(f"Итоги контейнерных ограничений: {container_functionality}")
-        allure.attach(str(container_functionality), "container_functionality_summary", allure.attachment_type.JSON)
+        dragabble_page.log_step(
+            f"Итоги контейнерных ограничений: {container_functionality}"
+        )
+        allure.attach(
+            str(container_functionality),
+            "container_functionality_summary",
+            allure.attachment_type.JSON,
+        )
 
-        assert container_functionality["tab_works"], "Вкладка Container Restricted должна работать"
+        assert container_functionality[
+            "tab_works"
+        ], "Вкладка Container Restricted должна работать"
 
 
 @allure.epic("Interactions")
@@ -335,25 +436,37 @@ def test_cursor_style_drag(dragabble_page: DragabblePage):
 
     with allure.step("Анализируем элементы с различными стилями курсора"):
         cursor_elements = dragabble_page.get_cursor_style_elements()
-        dragabble_page.log_step(f"Найдено элементов с cursor styles: {len(cursor_elements)}")
+        dragabble_page.log_step(
+            f"Найдено элементов с cursor styles: {len(cursor_elements)}"
+        )
 
-        allure.attach(str(cursor_elements), "cursor_style_elements", allure.attachment_type.JSON)
+        allure.attach(
+            str(cursor_elements), "cursor_style_elements", allure.attachment_type.JSON
+        )
 
-        assert len(cursor_elements) > 0, "Должен быть хотя бы один элемент с cursor style"
+        assert (
+            len(cursor_elements) > 0
+        ), "Должен быть хотя бы один элемент с cursor style"
 
     cursor_tests = []
 
     with allure.step("Тестируем каждый элемент с cursor style"):
         for i, element_info in enumerate(cursor_elements):
-            with allure.step(f"Тест cursor элемента {i + 1}: {element_info.get('cursor_type', 'unknown')}"):
-                element_cursor_type = element_info.get('cursor_type', f'element_{i}')
-                dragabble_page.log_step(f"Тестирование элемента с cursor: {element_cursor_type}")
+            with allure.step(
+                f"Тест cursor элемента {i + 1}: {element_info.get('cursor_type', 'unknown')}"
+            ):
+                element_cursor_type = element_info.get("cursor_type", f"element_{i}")
+                dragabble_page.log_step(
+                    f"Тестирование элемента с cursor: {element_cursor_type}"
+                )
 
                 # Получаем начальную позицию
                 initial_cursor_position = dragabble_page.get_cursor_element_position(i)
 
                 # Получаем CSS cursor свойство
-                cursor_css_property = dragabble_page.get_cursor_element_css_property(i, 'cursor')
+                cursor_css_property = dragabble_page.get_cursor_element_css_property(
+                    i, "cursor"
+                )
 
                 # Перетаскиваем элемент
                 cursor_drag_result = dragabble_page.drag_cursor_element(i, 50, 30)
@@ -372,18 +485,24 @@ def test_cursor_style_drag(dragabble_page: DragabblePage):
                     "element_moved": final_cursor_position != initial_cursor_position,
                     "movement_delta": {
                         "x": final_cursor_position["x"] - initial_cursor_position["x"],
-                        "y": final_cursor_position["y"] - initial_cursor_position["y"]
-                    }
+                        "y": final_cursor_position["y"] - initial_cursor_position["y"],
+                    },
                 }
 
                 cursor_tests.append(cursor_test)
-                dragabble_page.log_step(f"Результат cursor теста {i + 1}: {cursor_test}")
+                dragabble_page.log_step(
+                    f"Результат cursor теста {i + 1}: {cursor_test}"
+                )
 
                 # Проверяем что элемент перетаскивается независимо от cursor style
-                assert cursor_test["element_moved"], f"Элемент {i + 1} с cursor '{element_cursor_type}' должен перетаскиваться"
+                assert cursor_test[
+                    "element_moved"
+                ], f"Элемент {i + 1} с cursor '{element_cursor_type}' должен перетаскиваться"
 
     with allure.step("Анализируем результаты cursor style тестов"):
-        allure.attach(str(cursor_tests), "all_cursor_tests_results", allure.attachment_type.JSON)
+        allure.attach(
+            str(cursor_tests), "all_cursor_tests_results", allure.attachment_type.JSON
+        )
 
         successful_drags = sum(1 for test in cursor_tests if test["element_moved"])
         different_cursors = len(set(test["cursor_type"] for test in cursor_tests))
@@ -394,13 +513,17 @@ def test_cursor_style_drag(dragabble_page: DragabblePage):
             "different_cursor_types": different_cursors,
             "all_elements_draggable": successful_drags == len(cursor_tests),
             "cursor_variety": different_cursors > 1,
-            "cursor_test_details": cursor_tests
+            "cursor_test_details": cursor_tests,
         }
 
         dragabble_page.log_step(f"Анализ cursor styles: {cursor_analysis}")
-        allure.attach(str(cursor_analysis), "cursor_styles_analysis", allure.attachment_type.JSON)
+        allure.attach(
+            str(cursor_analysis), "cursor_styles_analysis", allure.attachment_type.JSON
+        )
 
-        assert cursor_analysis["all_elements_draggable"], f"Все элементы должны быть перетаскиваемыми: {successful_drags}/{len(cursor_tests)}"
+        assert cursor_analysis[
+            "all_elements_draggable"
+        ], f"Все элементы должны быть перетаскиваемыми: {successful_drags}/{len(cursor_tests)}"
 
         if cursor_analysis["cursor_variety"]:
             dragabble_page.log_step("✅ Найдены элементы с различными cursor styles")
@@ -426,7 +549,7 @@ def test_all_dragabble_modes_integration(dragabble_page: DragabblePage):
         ("Simple", "simple"),
         ("Axis Restricted", "axis_restricted"),
         ("Container Restricted", "container_restricted"),
-        ("Cursor Style", "cursor_style")
+        ("Cursor Style", "cursor_style"),
     ]
 
     with allure.step("Выполняем интеграционное тестирование всех режимов drag"):
@@ -450,7 +573,9 @@ def test_all_dragabble_modes_integration(dragabble_page: DragabblePage):
                 tab_active = dragabble_page.is_tab_active(tab_key)
 
                 # Получаем количество перетаскиваемых элементов на вкладке
-                draggable_elements_count = dragabble_page.count_draggable_elements_in_tab(tab_key)
+                draggable_elements_count = (
+                    dragabble_page.count_draggable_elements_in_tab(tab_key)
+                )
 
                 # Выполняем базовый тест перетаскивания
                 basic_drag_works = False
@@ -458,13 +583,17 @@ def test_all_dragabble_modes_integration(dragabble_page: DragabblePage):
 
                 try:
                     if draggable_elements_count > 0:
-                        basic_drag_works = dragabble_page.perform_basic_drag_test_in_tab(tab_key)
+                        basic_drag_works = (
+                            dragabble_page.perform_basic_drag_test_in_tab(tab_key)
+                        )
                 except Exception as e:
                     drag_test_error = str(e)
                     dragabble_page.log_step(f"Ошибка при тестировании {tab_name}: {e}")
 
                 # Проверяем специфичную функциональность вкладки
-                tab_specific_features = dragabble_page.get_tab_specific_features(tab_key)
+                tab_specific_features = dragabble_page.get_tab_specific_features(
+                    tab_key
+                )
 
                 tab_result = {
                     "tab_name": tab_name,
@@ -474,11 +603,15 @@ def test_all_dragabble_modes_integration(dragabble_page: DragabblePage):
                     "basic_drag_works": basic_drag_works,
                     "drag_test_error": drag_test_error,
                     "tab_specific_features": tab_specific_features,
-                    "tab_functional": tab_active and draggable_elements_count > 0 and basic_drag_works
+                    "tab_functional": tab_active
+                    and draggable_elements_count > 0
+                    and basic_drag_works,
                 }
 
                 integration_results[tab_key] = tab_result
-                dragabble_page.log_step(f"Результат интеграционного теста {tab_name}: {tab_result}")
+                dragabble_page.log_step(
+                    f"Результат интеграционного теста {tab_name}: {tab_result}"
+                )
 
     with allure.step("Тестируем переключение между всеми вкладками"):
         tab_switching_test = {}
@@ -503,18 +636,36 @@ def test_all_dragabble_modes_integration(dragabble_page: DragabblePage):
                 "switch_attempted": True,
                 "switch_method_result": switch_result,
                 "tab_became_active": tab_became_active,
-                "switching_works": tab_became_active
+                "switching_works": tab_became_active,
             }
 
-        dragabble_page.log_step(f"Результаты переключения вкладок: {tab_switching_test}")
+        dragabble_page.log_step(
+            f"Результаты переключения вкладок: {tab_switching_test}"
+        )
 
     with allure.step("Создаем итоговый отчет интеграции"):
-        allure.attach(str(integration_results), "dragabble_integration_results", allure.attachment_type.JSON)
-        allure.attach(str(tab_switching_test), "tab_switching_results", allure.attachment_type.JSON)
+        allure.attach(
+            str(integration_results),
+            "dragabble_integration_results",
+            allure.attachment_type.JSON,
+        )
+        allure.attach(
+            str(tab_switching_test),
+            "tab_switching_results",
+            allure.attachment_type.JSON,
+        )
 
-        functional_tabs = sum(1 for result in integration_results.values() if result["tab_functional"])
-        tabs_with_elements = sum(1 for result in integration_results.values() if result["draggable_elements_count"] > 0)
-        successful_switches = sum(1 for result in tab_switching_test.values() if result["switching_works"])
+        functional_tabs = sum(
+            1 for result in integration_results.values() if result["tab_functional"]
+        )
+        tabs_with_elements = sum(
+            1
+            for result in integration_results.values()
+            if result["draggable_elements_count"] > 0
+        )
+        successful_switches = sum(
+            1 for result in tab_switching_test.values() if result["switching_works"]
+        )
         total_tabs = len(integration_results)
 
         integration_summary = {
@@ -522,25 +673,42 @@ def test_all_dragabble_modes_integration(dragabble_page: DragabblePage):
             "functional_tabs": functional_tabs,
             "tabs_with_draggable_elements": tabs_with_elements,
             "successful_tab_switches": successful_switches,
-            "integration_success_rate": functional_tabs / total_tabs if total_tabs > 0 else 0,
+            "integration_success_rate": (
+                functional_tabs / total_tabs if total_tabs > 0 else 0
+            ),
             "all_tabs_functional": functional_tabs == total_tabs,
             "most_tabs_working": functional_tabs >= total_tabs * 0.75,
             "tab_switching_works": successful_switches >= total_tabs * 0.75,
-            "overall_integration_successful": functional_tabs >= 2 and successful_switches >= 2,
+            "overall_integration_successful": functional_tabs >= 2
+            and successful_switches >= 2,
             "detailed_results": integration_results,
-            "switching_details": tab_switching_test
+            "switching_details": tab_switching_test,
         }
 
-        dragabble_page.log_step(f"Итоговый отчет интеграции Dragabble: {integration_summary}")
-        allure.attach(str(integration_summary), "dragabble_integration_summary", allure.attachment_type.JSON)
+        dragabble_page.log_step(
+            f"Итоговый отчет интеграции Dragabble: {integration_summary}"
+        )
+        allure.attach(
+            str(integration_summary),
+            "dragabble_integration_summary",
+            allure.attachment_type.JSON,
+        )
 
         # Проверяем успешность интеграции
-        assert integration_summary["overall_integration_successful"], f"Интеграция должна быть успешной: функциональных вкладок {functional_tabs}/{total_tabs}, переключений {successful_switches}/{total_tabs}"
-        assert integration_summary["tabs_with_draggable_elements"] > 0, f"Хотя бы одна вкладка должна содержать перетаскиваемые элементы: {tabs_with_elements}/{total_tabs}"
+        assert integration_summary[
+            "overall_integration_successful"
+        ], f"Интеграция должна быть успешной: функциональных вкладок {functional_tabs}/{total_tabs}, переключений {successful_switches}/{total_tabs}"
+        assert (
+            integration_summary["tabs_with_draggable_elements"] > 0
+        ), f"Хотя бы одна вкладка должна содержать перетаскиваемые элементы: {tabs_with_elements}/{total_tabs}"
 
         if integration_summary["all_tabs_functional"]:
             dragabble_page.log_step("🎉 Все режимы Dragabble полностью функциональны!")
         elif integration_summary["most_tabs_working"]:
-            dragabble_page.log_step(f"✅ Большинство режимов Dragabble работают: {functional_tabs}/{total_tabs}")
+            dragabble_page.log_step(
+                f"✅ Большинство режимов Dragabble работают: {functional_tabs}/{total_tabs}"
+            )
         else:
-            dragabble_page.log_step(f"⚠️ Только часть режимов Dragabble функциональна: {functional_tabs}/{total_tabs}")
+            dragabble_page.log_step(
+                f"⚠️ Только часть режимов Dragabble функциональна: {functional_tabs}/{total_tabs}"
+            )

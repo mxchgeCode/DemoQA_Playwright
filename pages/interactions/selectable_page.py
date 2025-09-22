@@ -234,3 +234,35 @@ class SelectablePage(BasePage):
             item_class = grid_items.nth(index).get_attribute("class") or ""
             return "active" in item_class
         return False
+
+    # === Методы для совместимости с тестами ===
+
+    def get_all_list_items(self) -> list[str]:
+        """
+        Получает все элементы списка.
+
+        Returns:
+            list: Список текстов всех элементов списка
+        """
+        list_items = self.page.locator(SelectableLocators.LIST_ITEMS)
+        return [
+            list_items.nth(i).inner_text().strip() for i in range(list_items.count())
+        ]
+
+    def clear_all_selections(self) -> None:
+        """
+        Очищает все выделенные элементы (алиас для clear_selection).
+        """
+        self.clear_selection()
+
+    def switch_to_grid_tab(self) -> None:
+        """
+        Переключается на вкладку Grid для выбора элементов в виде сетки.
+        """
+        self.grid_tab()
+
+    def switch_to_list_tab(self) -> None:
+        """
+        Переключается на вкладку List для выбора элементов в виде списка.
+        """
+        self.list_tab()

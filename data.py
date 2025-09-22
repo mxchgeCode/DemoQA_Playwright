@@ -2,6 +2,29 @@
 Централизованные данные проекта: URL'ы, константы, тестовые данные.
 """
 
+# Гибридные структуры для одновременной поддержки доступа по ключам и по атрибутам
+class _Hybrid:
+    def __init__(self, data: dict):
+        # Преобразуем вложенные словари в _Hybrid рекурсивно
+        for k, v in data.items():
+            if isinstance(v, dict):
+                v = _Hybrid(v)
+            setattr(self, k, v)
+        # Сохраняем оригинальный словарь для []-доступа
+        self._data = {k: getattr(self, k) for k in data.keys()}
+
+    def __getitem__(self, key):
+        return self._data[key]
+
+    def __iter__(self):
+        return iter(self._data)
+
+    def items(self):
+        return self._data.items()
+
+    def get(self, key, default=None):
+        return self._data.get(key, default)
+
 
 class URLs:
     """Константы URL'ов для всех страниц приложения."""
@@ -58,23 +81,26 @@ class URLs:
 class TestData:
     """Тестовые данные для различных форм и полей."""
 
-    # Данные пользователя
-    USERS = {
-        "valid_user": {
-            "first_name": "John",
-            "last_name": "Doe",
-            "email": "john.doe@example.com",
-            "age": "30",
-            "salary": "75000",
-            "department": "Engineering",
-        },
-        "test_user": {
-            "username": "testuser",
-            "password": "TestPassword123!",
-            "first_name": "Test",
-            "last_name": "User",
-        },
-    }
+    # Данные пользователя: гибрид поддерживает и USERS["valid_user"]["first_name"],
+    # и USERS.valid_user.first_name, и USERS.test_user.username
+    USERS = _Hybrid(
+        {
+            "valid_user": {
+                "first_name": "John",
+                "last_name": "Doe",
+                "email": "john.doe@example.com",
+                "age": "30",
+                "salary": "75000",
+                "department": "Engineering",
+            },
+            "test_user": {
+                "username": "testuser",
+                "password": "TestPassword123!",
+                "first_name": "Test",
+                "last_name": "User",
+            },
+        }
+    )
 
     # Данные для форм
     FORM_DATA = {

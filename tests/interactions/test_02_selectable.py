@@ -28,7 +28,9 @@ def test_single_item_selection(selectable_page: SelectablePage):
         selectable_page.log_step(f"Изначально выбранные элементы: {initial_selected}")
 
         # Изначально ничего не должно быть выбрано
-        assert len(initial_selected) == 0, f"Изначально не должно быть выбранных элементов, найдено: {len(initial_selected)}"
+        assert (
+            len(initial_selected) == 0
+        ), f"Изначально не должно быть выбранных элементов, найдено: {len(initial_selected)}"
 
     with allure.step("Получаем список всех доступных элементов"):
         all_items = selectable_page.get_all_list_items()
@@ -36,7 +38,9 @@ def test_single_item_selection(selectable_page: SelectablePage):
 
         allure.attach(str(all_items), "all_list_items", allure.attachment_type.JSON)
 
-        assert len(all_items) >= 4, f"В списке должно быть минимум 4 элемента, найдено: {len(all_items)}"
+        assert (
+            len(all_items) >= 4
+        ), f"В списке должно быть минимум 4 элемента, найдено: {len(all_items)}"
 
     with allure.step("Выбираем первый элемент"):
         first_item = all_items[0]
@@ -47,21 +51,31 @@ def test_single_item_selection(selectable_page: SelectablePage):
 
         # Проверяем что элемент выбрался
         selected_after_first = selectable_page.get_selected_list_items()
-        selectable_page.log_step(f"Выбранные элементы после первого выбора: {selected_after_first}")
+        selectable_page.log_step(
+            f"Выбранные элементы после первого выбора: {selected_after_first}"
+        )
 
-        assert len(selected_after_first) == 1, f"Должен быть выбран 1 элемент, выбрано: {len(selected_after_first)}"
-        assert first_item in selected_after_first, f"Первый элемент '{first_item}' должен быть в выбранных"
+        assert (
+            len(selected_after_first) == 1
+        ), f"Должен быть выбран 1 элемент, выбрано: {len(selected_after_first)}"
+        assert (
+            first_item in selected_after_first
+        ), f"Первый элемент '{first_item}' должен быть в выбранных"
 
     with allure.step("Выбираем третий элемент"):
         third_item = all_items[2] if len(all_items) > 2 else all_items[-1]
         selectable_page.log_step(f"Выбор третьего элемента: {third_item}")
 
-        selection_result_third = selectable_page.select_list_item(2 if len(all_items) > 2 else -1)
+        selection_result_third = selectable_page.select_list_item(
+            2 if len(all_items) > 2 else -1
+        )
         assert selection_result_third, "Выбор третьего элемента должен быть успешным"
 
         # Проверяем состояние после второго выбора
         selected_after_third = selectable_page.get_selected_list_items()
-        selectable_page.log_step(f"Выбранные элементы после второго выбора: {selected_after_third}")
+        selectable_page.log_step(
+            f"Выбранные элементы после второго выбора: {selected_after_third}"
+        )
 
         # В зависимости от реализации может быть один или несколько выбранных элементов
         selection_summary = {
@@ -70,13 +84,19 @@ def test_single_item_selection(selectable_page: SelectablePage):
             "selected_after_first": selected_after_first,
             "selected_after_third": selected_after_third,
             "multiple_selection_supported": len(selected_after_third) > 1,
-            "single_selection_mode": len(selected_after_third) == 1
+            "single_selection_mode": len(selected_after_third) == 1,
         }
 
         selectable_page.log_step(f"Итоги выбора: {selection_summary}")
-        allure.attach(str(selection_summary), "single_selection_results", allure.attachment_type.JSON)
+        allure.attach(
+            str(selection_summary),
+            "single_selection_results",
+            allure.attachment_type.JSON,
+        )
 
-        assert len(selected_after_third) >= 1, "После выбора должен быть выбран хотя бы один элемент"
+        assert (
+            len(selected_after_third) >= 1
+        ), "После выбора должен быть выбран хотя бы один элемент"
 
 
 @allure.epic("Interactions")
@@ -105,10 +125,14 @@ def test_multiple_items_selection(selectable_page: SelectablePage):
             if item_index < len(all_items):
                 with allure.step(f"Выбор элемента {i}: индекс {item_index}"):
                     item_text = all_items[item_index]
-                    selectable_page.log_step(f"Выбираем элемент {item_index}: '{item_text}'")
+                    selectable_page.log_step(
+                        f"Выбираем элемент {item_index}: '{item_text}'"
+                    )
 
                     # Выбираем с зажатым Ctrl для множественного выбора
-                    selection_success = selectable_page.select_list_item_with_ctrl(item_index)
+                    selection_success = selectable_page.select_list_item_with_ctrl(
+                        item_index
+                    )
 
                     # Проверяем текущее состояние
                     current_selected = selectable_page.get_selected_list_items()
@@ -118,10 +142,12 @@ def test_multiple_items_selection(selectable_page: SelectablePage):
                         "item_text": item_text,
                         "selection_success": selection_success,
                         "selected_items": current_selected.copy(),
-                        "total_selected": len(current_selected)
+                        "total_selected": len(current_selected),
                     }
 
-                    selectable_page.log_step(f"Результат выбора {i}: {selection_results[f'step_{i}']}")
+                    selectable_page.log_step(
+                        f"Результат выбора {i}: {selection_results[f'step_{i}']}"
+                    )
 
     with allure.step("Анализируем результаты множественного выбора"):
         final_selected = selectable_page.get_selected_list_items()
@@ -132,14 +158,22 @@ def test_multiple_items_selection(selectable_page: SelectablePage):
             "final_selected_items": final_selected,
             "multiple_selection_works": len(final_selected) > 1,
             "all_attempted_selected": len(final_selected) == len(items_to_select),
-            "selection_steps": selection_results
+            "selection_steps": selection_results,
         }
 
-        selectable_page.log_step(f"Анализ множественного выбора: {multiple_selection_analysis}")
-        allure.attach(str(multiple_selection_analysis), "multiple_selection_analysis", allure.attachment_type.JSON)
+        selectable_page.log_step(
+            f"Анализ множественного выбора: {multiple_selection_analysis}"
+        )
+        allure.attach(
+            str(multiple_selection_analysis),
+            "multiple_selection_analysis",
+            allure.attachment_type.JSON,
+        )
 
         # Проверяем что множественный выбор работает или хотя бы один элемент выбран
-        assert len(final_selected) >= 1, f"Должен быть выбран хотя бы один элемент, выбрано: {len(final_selected)}"
+        assert (
+            len(final_selected) >= 1
+        ), f"Должен быть выбран хотя бы один элемент, выбрано: {len(final_selected)}"
 
         # Если поддерживается множественный выбор, проверяем это
         if multiple_selection_analysis["multiple_selection_works"]:
@@ -172,13 +206,19 @@ def test_grid_items_selection(selectable_page: SelectablePage):
 
         allure.attach(str(grid_items), "grid_items", allure.attachment_type.JSON)
 
-        assert len(grid_items) >= 6, f"В сетке должно быть минимум 6 элементов, найдено: {len(grid_items)}"
+        assert (
+            len(grid_items) >= 6
+        ), f"В сетке должно быть минимум 6 элементов, найдено: {len(grid_items)}"
 
     with allure.step("Проверяем начальное состояние сетки"):
         initial_grid_selected = selectable_page.get_selected_grid_items()
-        selectable_page.log_step(f"Изначально выбранные в сетке: {initial_grid_selected}")
+        selectable_page.log_step(
+            f"Изначально выбранные в сетке: {initial_grid_selected}"
+        )
 
-        assert len(initial_grid_selected) == 0, "Изначально в сетке ничего не должно быть выбрано"
+        assert (
+            len(initial_grid_selected) == 0
+        ), "Изначально в сетке ничего не должно быть выбрано"
 
     with allure.step("Выбираем элементы в сетке"):
         grid_selections = []
@@ -189,17 +229,21 @@ def test_grid_items_selection(selectable_page: SelectablePage):
         for item_index in items_to_select:
             if item_index < len(grid_items):
                 item_name = grid_items[item_index]
-                selectable_page.log_step(f"Выбираем элемент сетки {item_index}: '{item_name}'")
+                selectable_page.log_step(
+                    f"Выбираем элемент сетки {item_index}: '{item_name}'"
+                )
 
                 selection_success = selectable_page.select_grid_item(item_index)
                 current_selected = selectable_page.get_selected_grid_items()
 
-                grid_selections.append({
-                    "item_index": item_index,
-                    "item_name": item_name,
-                    "selection_success": selection_success,
-                    "current_selected": current_selected.copy()
-                })
+                grid_selections.append(
+                    {
+                        "item_index": item_index,
+                        "item_name": item_name,
+                        "selection_success": selection_success,
+                        "current_selected": current_selected.copy(),
+                    }
+                )
 
         selectable_page.log_step(f"Результаты выбора в сетке: {grid_selections}")
 
@@ -212,14 +256,22 @@ def test_grid_items_selection(selectable_page: SelectablePage):
             "final_selected_count": len(final_grid_selected),
             "final_selected_items": final_grid_selected,
             "selection_steps": grid_selections,
-            "grid_selection_works": len(final_grid_selected) > 0
+            "grid_selection_works": len(final_grid_selected) > 0,
         }
 
         selectable_page.log_step(f"Итоги выбора в сетке: {grid_selection_summary}")
-        allure.attach(str(grid_selection_summary), "grid_selection_summary", allure.attachment_type.JSON)
+        allure.attach(
+            str(grid_selection_summary),
+            "grid_selection_summary",
+            allure.attachment_type.JSON,
+        )
 
-        assert grid_selection_summary["grid_selection_works"], "Выбор в сеточном режиме должен работать"
-        assert len(final_grid_selected) >= 1, f"В сетке должен быть выбран хотя бы один элемент: {len(final_grid_selected)}"
+        assert grid_selection_summary[
+            "grid_selection_works"
+        ], "Выбор в сеточном режиме должен работать"
+        assert (
+            len(final_grid_selected) >= 1
+        ), f"В сетке должен быть выбран хотя бы один элемент: {len(final_grid_selected)}"
 
 
 @allure.epic("Interactions")
@@ -257,7 +309,8 @@ def test_selection_state_changes(selectable_page: SelectablePage):
                     "state_after": state_after,
                     "visual_change": state_before != state_after,
                     "is_selected": state_after.get("selected", False),
-                    "css_classes_changed": state_before.get("classes") != state_after.get("classes")
+                    "css_classes_changed": state_before.get("classes")
+                    != state_after.get("classes"),
                 }
 
                 state_changes.append(state_change)
@@ -279,32 +332,45 @@ def test_selection_state_changes(selectable_page: SelectablePage):
             "selected_state": selected_state,
             "deselected_state": deselected_state,
             "deselection_success": deselection_success,
-            "state_reverted": selected_state != deselected_state
+            "state_reverted": selected_state != deselected_state,
         }
 
         selectable_page.log_step(f"Тест снятия выбора: {deselection_test}")
 
     with allure.step("Анализируем изменения состояний"):
-        allure.attach(str(state_changes), "state_changes_detailed", allure.attachment_type.JSON)
+        allure.attach(
+            str(state_changes), "state_changes_detailed", allure.attachment_type.JSON
+        )
 
-        visual_changes_count = sum(1 for change in state_changes if change["visual_change"])
+        visual_changes_count = sum(
+            1 for change in state_changes if change["visual_change"]
+        )
         selected_count = sum(1 for change in state_changes if change["is_selected"])
-        css_changes_count = sum(1 for change in state_changes if change["css_classes_changed"])
+        css_changes_count = sum(
+            1 for change in state_changes if change["css_classes_changed"]
+        )
 
         states_analysis = {
             "total_items_tested": len(state_changes),
             "visual_changes": visual_changes_count,
             "items_became_selected": selected_count,
             "css_classes_changed": css_changes_count,
-            "selection_provides_feedback": visual_changes_count > 0 or css_changes_count > 0,
-            "deselection_test": deselection_test
+            "selection_provides_feedback": visual_changes_count > 0
+            or css_changes_count > 0,
+            "deselection_test": deselection_test,
         }
 
         selectable_page.log_step(f"Анализ состояний: {states_analysis}")
-        allure.attach(str(states_analysis), "selection_states_analysis", allure.attachment_type.JSON)
+        allure.attach(
+            str(states_analysis),
+            "selection_states_analysis",
+            allure.attachment_type.JSON,
+        )
 
         # Проверяем что выбор предоставляет визуальную обратную связь
-        assert states_analysis["selection_provides_feedback"], "Выбор элементов должен предоставлять визуальную обратную связь"
+        assert states_analysis[
+            "selection_provides_feedback"
+        ], "Выбор элементов должен предоставлять визуальную обратную связь"
 
 
 @allure.epic("Interactions")
@@ -326,17 +392,21 @@ def test_selection_across_tabs(selectable_page: SelectablePage):
         list_items = selectable_page.get_all_list_items()
         if len(list_items) >= 2:
             selectable_page.select_list_item(0)
-            selectable_page.select_list_item_with_ctrl(1)  # Пытаемся множественный выбор
+            selectable_page.select_list_item_with_ctrl(
+                1
+            )  # Пытаемся множественный выбор
 
         selected_in_list = selectable_page.get_selected_list_items()
 
         cross_tab_results["list_selection"] = {
             "total_items": len(list_items),
             "selected_items": selected_in_list,
-            "selected_count": len(selected_in_list)
+            "selected_count": len(selected_in_list),
         }
 
-        selectable_page.log_step(f"Выбор в списке: {cross_tab_results['list_selection']}")
+        selectable_page.log_step(
+            f"Выбор в списке: {cross_tab_results['list_selection']}"
+        )
 
     with allure.step("Переключаемся на сетку и делаем выбор"):
         selectable_page.switch_to_grid_tab()
@@ -349,17 +419,21 @@ def test_selection_across_tabs(selectable_page: SelectablePage):
         grid_items = selectable_page.get_all_grid_items()
         if len(grid_items) >= 2:
             selectable_page.select_grid_item(1)
-            selectable_page.select_grid_item_with_ctrl(2)  # Пытаемся множественный выбор
+            selectable_page.select_grid_item_with_ctrl(
+                2
+            )  # Пытаемся множественный выбор
 
         selected_in_grid = selectable_page.get_selected_grid_items()
 
         cross_tab_results["grid_selection"] = {
             "total_items": len(grid_items),
             "selected_items": selected_in_grid,
-            "selected_count": len(selected_in_grid)
+            "selected_count": len(selected_in_grid),
         }
 
-        selectable_page.log_step(f"Выбор в сетке: {cross_tab_results['grid_selection']}")
+        selectable_page.log_step(
+            f"Выбор в сетке: {cross_tab_results['grid_selection']}"
+        )
 
     with allure.step("Возвращаемся к списку и проверяем сохранность"):
         selectable_page.switch_to_list_tab()
@@ -371,12 +445,15 @@ def test_selection_across_tabs(selectable_page: SelectablePage):
             "selected_items": list_selection_after_return,
             "selected_count": len(list_selection_after_return),
             "selection_preserved": (
-                set(list_selection_after_return) == set(cross_tab_results["list_selection"]["selected_items"])
+                set(list_selection_after_return)
+                == set(cross_tab_results["list_selection"]["selected_items"])
             ),
-            "selection_cleared": len(list_selection_after_return) == 0
+            "selection_cleared": len(list_selection_after_return) == 0,
         }
 
-        selectable_page.log_step(f"Список после возврата: {cross_tab_results['list_after_return']}")
+        selectable_page.log_step(
+            f"Список после возврата: {cross_tab_results['list_after_return']}"
+        )
 
     with allure.step("Возвращаемся к сетке и проверяем сохранность"):
         selectable_page.switch_to_grid_tab()
@@ -387,33 +464,56 @@ def test_selection_across_tabs(selectable_page: SelectablePage):
             "selected_items": grid_selection_after_return,
             "selected_count": len(grid_selection_after_return),
             "selection_preserved": (
-                set(grid_selection_after_return) == set(cross_tab_results["grid_selection"]["selected_items"])
+                set(grid_selection_after_return)
+                == set(cross_tab_results["grid_selection"]["selected_items"])
             ),
-            "selection_cleared": len(grid_selection_after_return) == 0
+            "selection_cleared": len(grid_selection_after_return) == 0,
         }
 
-        selectable_page.log_step(f"Сетка после возврата: {cross_tab_results['grid_after_return']}")
+        selectable_page.log_step(
+            f"Сетка после возврата: {cross_tab_results['grid_after_return']}"
+        )
 
     with allure.step("Анализируем поведение выбора между вкладками"):
-        allure.attach(str(cross_tab_results), "cross_tab_selection_results", allure.attachment_type.JSON)
+        allure.attach(
+            str(cross_tab_results),
+            "cross_tab_selection_results",
+            allure.attachment_type.JSON,
+        )
 
         cross_tab_summary = {
-            "list_selection_made": cross_tab_results["list_selection"]["selected_count"] > 0,
-            "grid_selection_made": cross_tab_results["grid_selection"]["selected_count"] > 0,
-            "list_selection_preserved": cross_tab_results["list_after_return"]["selection_preserved"],
-            "grid_selection_preserved": cross_tab_results["grid_after_return"]["selection_preserved"],
+            "list_selection_made": cross_tab_results["list_selection"]["selected_count"]
+            > 0,
+            "grid_selection_made": cross_tab_results["grid_selection"]["selected_count"]
+            > 0,
+            "list_selection_preserved": cross_tab_results["list_after_return"][
+                "selection_preserved"
+            ],
+            "grid_selection_preserved": cross_tab_results["grid_after_return"][
+                "selection_preserved"
+            ],
             "selections_independent": (
-                cross_tab_results["list_selection"]["selected_items"] !=
-                cross_tab_results["grid_selection"]["selected_items"]
-            )
+                cross_tab_results["list_selection"]["selected_items"]
+                != cross_tab_results["grid_selection"]["selected_items"]
+            ),
         }
 
         selectable_page.log_step(f"Анализ межвкладочного выбора: {cross_tab_summary}")
-        allure.attach(str(cross_tab_summary), "cross_tab_summary", allure.attachment_type.JSON)
+        allure.attach(
+            str(cross_tab_summary), "cross_tab_summary", allure.attachment_type.JSON
+        )
 
         # Базовые проверки
-        assert cross_tab_summary["list_selection_made"] or cross_tab_summary["grid_selection_made"], "Должен быть сделан выбор хотя бы в одном режиме"
+        assert (
+            cross_tab_summary["list_selection_made"]
+            or cross_tab_summary["grid_selection_made"]
+        ), "Должен быть сделан выбор хотя бы в одном режиме"
 
         # Проверяем что переключения между вкладками работают корректно
-        tabs_work_correctly = selectable_page.is_list_tab_active() == False and selectable_page.is_grid_tab_active() == True
-        assert tabs_work_correctly, "После переключения должна быть активна вкладка Grid"
+        tabs_work_correctly = (
+            selectable_page.is_list_tab_active() == False
+            and selectable_page.is_grid_tab_active() == True
+        )
+        assert (
+            tabs_work_correctly
+        ), "После переключения должна быть активна вкладка Grid"

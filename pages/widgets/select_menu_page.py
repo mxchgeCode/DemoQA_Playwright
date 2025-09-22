@@ -312,3 +312,60 @@ class SelectMenuPage(WidgetBasePage):
             ).first
             if first_option.is_visible():
                 first_option.click()
+
+    # === Методы для совместимости с тестами ===
+
+    def get_select_one_display_text(self) -> str:
+        """
+        Получает отображаемый текст в Select One dropdown.
+
+        Returns:
+            str: Текст выбранной опции или placeholder
+        """
+        return self.get_selected_one()
+
+    @property
+    def simple_select(self):
+        """
+        Возвращает элемент стандартного select для совместимости с тестами.
+        """
+        return self.page.locator(SelectMenuLocators.OLD_STYLE_SELECT_MENU)
+
+    def multiselect_get_placeholder(self) -> str:
+        """
+        Получает placeholder текст multiselect поля.
+
+        Returns:
+            str: Текст placeholder
+        """
+        placeholder = self.page.locator(f"{SelectMenuLocators.MULTISELECT} .css-1wa3eu0-placeholder")
+        return placeholder.inner_text() if placeholder.is_visible() else ""
+
+    def select_standard_multiselect_options(self, values: list[str]) -> None:
+        """
+        Выбирает множественные значения в стандартном HTML multiselect (алиас для select_standard_multiselect).
+        """
+        self.select_standard_multiselect(values)
+
+    def multiselect_open(self) -> None:
+        """
+        Открывает multiselect dropdown.
+        """
+        self.safe_click(SelectMenuLocators.MULTISELECT)
+
+    @property
+    def select_one_control(self):
+        """
+        Возвращает элемент Select One для совместимости с тестами.
+        """
+        return self.page.locator(SelectMenuLocators.SELECT_ONE)
+
+    def select_simple_option_by_index(self, index: int) -> None:
+        """
+        Выбирает опцию в стандартном select по индексу.
+
+        Args:
+            index: Индекс опции для выбора
+        """
+        select_element = self.page.locator(SelectMenuLocators.OLD_STYLE_SELECT_MENU)
+        select_element.select_option(index=index)

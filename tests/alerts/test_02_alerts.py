@@ -7,6 +7,7 @@ import pytest
 import allure
 from locators.alerts.alerts_locators import AlertsLocators
 
+
 @allure.epic("Alerts, Frame & Windows")
 @allure.feature("Alerts")
 @allure.story("Simple Alert")
@@ -22,14 +23,18 @@ def test_simple_alert(alerts_page):
     3. Принимаем alert
     """
     with allure.step("Проверяем видимость кнопок alerts"):
-        assert alerts_page.check_all_buttons_visible(), "Не все кнопки alert видны на странице"
+        assert (
+            alerts_page.check_all_buttons_visible()
+        ), "Не все кнопки alert видны на странице"
 
     with allure.step("Обрабатываем простой alert и проверяем текст"):
         alert_text = alerts_page.handle_simple_alert()
         allure.attach(alert_text, "Alert text", allure.attachment_type.TEXT)
 
         expected_text = "You clicked a button"
-        assert alert_text == expected_text, f"Ожидался текст '{expected_text}', получен '{alert_text}'"
+        assert (
+            alert_text == expected_text
+        ), f"Ожидался текст '{expected_text}', получен '{alert_text}'"
         print(alert_text)
 
 
@@ -53,7 +58,9 @@ def test_timer_alert(alerts_page):
 
     with allure.step("Проверяем текст timer alert"):
         expected_text = "This alert appeared after 5 seconds"
-        assert alert_text == expected_text, f"Ожидался текст '{expected_text}', получен '{alert_text}'"
+        assert (
+            alert_text == expected_text
+        ), f"Ожидался текст '{expected_text}', получен '{alert_text}'"
         assert alert_text != "", "Timer alert не появился или не был обработан"
 
 
@@ -80,7 +87,9 @@ def test_confirm_alert_accept(alerts_page):
         assert result != "", "Результат confirm диалога не получен"
 
         expected_text = "Ok"  # Может быть просто "Ok" вместо полной фразы
-        assert expected_text in result, f"Ожидался результат содержащий '{expected_text}', получен '{result}'"
+        assert (
+            expected_text in result
+        ), f"Ожидался результат содержащий '{expected_text}', получен '{result}'"
 
 
 @allure.epic("Alerts, Frame & Windows")
@@ -106,7 +115,9 @@ def test_confirm_alert_dismiss(alerts_page):
         assert result != "", "Результат dismiss confirm диалога не получен"
 
         expected_text = "Cancel"  # Может быть просто "Cancel"
-        assert expected_text in result, f"Ожидался результат содержащий '{expected_text}', получен '{result}'"
+        assert (
+            expected_text in result
+        ), f"Ожидался результат содержащий '{expected_text}', получен '{result}'"
 
 
 @allure.epic("Alerts, Frame & Windows")
@@ -135,13 +146,19 @@ def test_prompt_alert_with_text(alerts_page):
         # Если результат пустой, возможно элемент не существует на странице
         if result == "":
             # Проверяем, что элемент результата вообще существует
-            prompt_element_exists = alerts_page.check_element_exists(alerts_page.AlertsLocators.PROMPT_RESULT)
+            prompt_element_exists = alerts_page.check_element_exists(
+                alerts_page.AlertsLocators.PROMPT_RESULT
+            )
             if not prompt_element_exists:
-                pytest.skip("Элемент результата prompt не найден на странице - возможно отличается структура DOM")
+                pytest.skip(
+                    "Элемент результата prompt не найден на странице - возможно отличается структура DOM"
+                )
 
         # Если результат получен, проверяем содержимое
         assert result != "", "Результат prompt диалога не получен"
-        assert test_text in result, f"Введенный текст '{test_text}' должен присутствовать в результате '{result}'"
+        assert (
+            test_text in result
+        ), f"Введенный текст '{test_text}' должен присутствовать в результате '{result}'"
 
 
 @allure.epic("Alerts, Frame & Windows")
@@ -164,16 +181,19 @@ def test_prompt_alert_dismiss(alerts_page):
 
     with allure.step("Проверяем результат отклонения prompt"):
         # Если результат/элемент отсутствует — допустимо на демо-сайте
-        prompt_element_exists = alerts_page.check_element_exists(AlertsLocators.PROMPT_RESULT)
+        prompt_element_exists = alerts_page.check_element_exists(
+            AlertsLocators.PROMPT_RESULT
+        )
         if not prompt_element_exists:
             # Это ожидаемо для некоторых конфигураций/site-версий, считаем тест успешным
-            allure.attach("Элемент результата prompt не найден — вариант нормы для демо-стенда", "PromptResult", allure.attachment_type.TEXT)
+            allure.attach(
+                "Элемент результата prompt не найден — вариант нормы для демо-стенда",
+                "PromptResult",
+                allure.attachment_type.TEXT,
+            )
             return
 
         # Если элемент есть, проверяем текст результата
-        assert result == "" or "null" in result or "Cancel" in result, (
-            f"При отклонении prompt ожидается пустой результат, 'null' или 'Cancel', получен '{result}'"
-        )
-
-
-
+        assert (
+            result == "" or "null" in result or "Cancel" in result
+        ), f"При отклонении prompt ожидается пустой результат, 'null' или 'Cancel', получен '{result}'"

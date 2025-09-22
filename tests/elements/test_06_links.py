@@ -37,7 +37,9 @@ def test_simple_link_navigation(links_page: LinksPage):
         final_tabs = links_page.get_tabs_count()
         links_page.log_step(f"Количество вкладок после клика: {final_tabs}")
 
-        assert final_tabs > initial_tabs, f"Должна открыться новая вкладка: было {initial_tabs}, стало {final_tabs}"
+        assert (
+            final_tabs > initial_tabs
+        ), f"Должна открыться новая вкладка: было {initial_tabs}, стало {final_tabs}"
 
     with allure.step("Проверяем содержимое новой вкладки"):
         # Переключаемся на новую вкладку
@@ -53,7 +55,9 @@ def test_simple_link_navigation(links_page: LinksPage):
         allure.attach(new_tab_title, "new_tab_title", allure.attachment_type.TEXT)
 
         # Проверяем что попали на правильную страницу
-        assert "demoqa" in new_tab_url.lower(), f"URL должен содержать 'demoqa': {new_tab_url}"
+        assert (
+            "demoqa" in new_tab_url.lower()
+        ), f"URL должен содержать 'demoqa': {new_tab_url}"
 
     with allure.step("Возвращаемся на исходную вкладку"):
         links_page.switch_to_original_tab()
@@ -125,13 +129,15 @@ def test_api_links_status_codes(links_page: LinksPage):
         ("bad-request", "400", "Bad Request"),
         ("unauthorized", "401", "Unauthorized"),
         ("forbidden", "403", "Forbidden"),
-        ("not-found", "404", "Not Found")
+        ("not-found", "404", "Not Found"),
     ]
 
     api_results = {}
 
     for link_name, expected_status, status_description in api_links_to_test:
-        with allure.step(f"Тестируем API ссылку: {link_name} (ожидаем {expected_status})"):
+        with allure.step(
+            f"Тестируем API ссылку: {link_name} (ожидаем {expected_status})"
+        ):
             links_page.log_step(f"Клик по API ссылке: {link_name}")
 
             # Кликаем по API ссылке
@@ -146,13 +152,19 @@ def test_api_links_status_codes(links_page: LinksPage):
                     "expected_status": expected_status,
                     "description": status_description,
                     "response": api_response,
-                    "status_in_response": expected_status in api_response
+                    "status_in_response": expected_status in api_response,
                 }
 
-                allure.attach(api_response, f"api_response_{link_name}", allure.attachment_type.TEXT)
+                allure.attach(
+                    api_response,
+                    f"api_response_{link_name}",
+                    allure.attachment_type.TEXT,
+                )
 
                 # Проверяем что статус код присутствует в ответе
-                assert expected_status in api_response, f"Ответ должен содержать статус {expected_status}: {api_response}"
+                assert (
+                    expected_status in api_response
+                ), f"Ответ должен содержать статус {expected_status}: {api_response}"
 
             else:
                 links_page.log_step(f"⚠️ Ответ от API ссылки {link_name} не получен")
@@ -160,29 +172,39 @@ def test_api_links_status_codes(links_page: LinksPage):
                     "expected_status": expected_status,
                     "description": status_description,
                     "response": "No response",
-                    "status_in_response": False
+                    "status_in_response": False,
                 }
 
             # Небольшая пауза между запросами
             links_page.page.wait_for_timeout(500)
 
     with allure.step("Анализируем результаты тестирования API ссылок"):
-        allure.attach(str(api_results), "api_links_results", allure.attachment_type.JSON)
+        allure.attach(
+            str(api_results), "api_links_results", allure.attachment_type.JSON
+        )
 
-        successful_api_calls = sum(1 for result in api_results.values() if result["status_in_response"])
+        successful_api_calls = sum(
+            1 for result in api_results.values() if result["status_in_response"]
+        )
         total_api_calls = len(api_results)
 
         api_summary = {
             "total_api_links": total_api_calls,
             "successful_responses": successful_api_calls,
-            "success_rate": successful_api_calls / total_api_calls if total_api_calls > 0 else 0
+            "success_rate": (
+                successful_api_calls / total_api_calls if total_api_calls > 0 else 0
+            ),
         }
 
         links_page.log_step(f"Итоги API тестирования: {api_summary}")
-        allure.attach(str(api_summary), "api_testing_summary", allure.attachment_type.JSON)
+        allure.attach(
+            str(api_summary), "api_testing_summary", allure.attachment_type.JSON
+        )
 
         # Проверяем что хотя бы некоторые API ссылки работают
-        assert successful_api_calls > 0, f"Хотя бы одна API ссылка должна работать, успешных: {successful_api_calls}/{total_api_calls}"
+        assert (
+            successful_api_calls > 0
+        ), f"Хотя бы одна API ссылка должна работать, успешных: {successful_api_calls}/{total_api_calls}"
 
 
 @allure.epic("Elements")
@@ -201,16 +223,22 @@ def test_link_attributes_and_properties(links_page: LinksPage):
             "text": links_page.get_simple_link_text(),
             "target": links_page.get_simple_link_target(),
             "visible": links_page.is_simple_link_visible(),
-            "enabled": links_page.is_simple_link_enabled()
+            "enabled": links_page.is_simple_link_enabled(),
         }
 
         links_page.log_step(f"Атрибуты простой ссылки: {simple_link_attrs}")
-        allure.attach(str(simple_link_attrs), "simple_link_attributes", allure.attachment_type.JSON)
+        allure.attach(
+            str(simple_link_attrs),
+            "simple_link_attributes",
+            allure.attachment_type.JSON,
+        )
 
         # Проверяем основные атрибуты
         assert simple_link_attrs["visible"], "Простая ссылка должна быть видима"
         assert simple_link_attrs["enabled"], "Простая ссылка должна быть активна"
-        assert len(simple_link_attrs["text"]) > 0, "Простая ссылка должна содержать текст"
+        assert (
+            len(simple_link_attrs["text"]) > 0
+        ), "Простая ссылка должна содержать текст"
 
     with allure.step("Анализируем атрибуты динамической ссылки"):
         dynamic_link_attrs = {
@@ -218,11 +246,15 @@ def test_link_attributes_and_properties(links_page: LinksPage):
             "text": links_page.get_dynamic_link_text(),
             "target": links_page.get_dynamic_link_target(),
             "visible": links_page.is_dynamic_link_visible(),
-            "enabled": links_page.is_dynamic_link_enabled()
+            "enabled": links_page.is_dynamic_link_enabled(),
         }
 
         links_page.log_step(f"Атрибуты динамической ссылки: {dynamic_link_attrs}")
-        allure.attach(str(dynamic_link_attrs), "dynamic_link_attributes", allure.attachment_type.JSON)
+        allure.attach(
+            str(dynamic_link_attrs),
+            "dynamic_link_attributes",
+            allure.attachment_type.JSON,
+        )
 
         # Проверяем основные атрибуты
         assert dynamic_link_attrs["visible"], "Динамическая ссылка должна быть видима"
@@ -232,11 +264,13 @@ def test_link_attributes_and_properties(links_page: LinksPage):
         links_comparison = {
             "same_href": simple_link_attrs["href"] == dynamic_link_attrs["href"],
             "same_target": simple_link_attrs["target"] == dynamic_link_attrs["target"],
-            "different_text": simple_link_attrs["text"] != dynamic_link_attrs["text"]
+            "different_text": simple_link_attrs["text"] != dynamic_link_attrs["text"],
         }
 
         links_page.log_step(f"Сравнение ссылок: {links_comparison}")
-        allure.attach(str(links_comparison), "links_comparison", allure.attachment_type.JSON)
+        allure.attach(
+            str(links_comparison), "links_comparison", allure.attachment_type.JSON
+        )
 
     with allure.step("Проверяем количество всех ссылок на странице"):
         all_links_count = links_page.get_all_links_count()
@@ -245,10 +279,14 @@ def test_link_attributes_and_properties(links_page: LinksPage):
         links_statistics = {
             "total_links": all_links_count,
             "api_links": api_links_count,
-            "navigation_links": all_links_count - api_links_count
+            "navigation_links": all_links_count - api_links_count,
         }
 
         links_page.log_step(f"Статистика ссылок: {links_statistics}")
-        allure.attach(str(links_statistics), "links_statistics", allure.attachment_type.JSON)
+        allure.attach(
+            str(links_statistics), "links_statistics", allure.attachment_type.JSON
+        )
 
-        assert all_links_count > 5, f"На странице должно быть больше 5 ссылок, найдено: {all_links_count}"
+        assert (
+            all_links_count > 5
+        ), f"На странице должно быть больше 5 ссылок, найдено: {all_links_count}"

@@ -32,7 +32,9 @@ def test_select_option_via_persistent_control(select_menu_page: SelectMenuPage):
         assert dropdown_control.is_visible(), "Dropdown control должен быть видим"
 
     with allure.step("Получаем начальное состояние"):
-        selected_text_locator = container.locator(SelectMenuLocators.SELECT_ONE_DISPLAY_TEXT)
+        selected_text_locator = container.locator(
+            SelectMenuLocators.SELECT_ONE_DISPLAY_TEXT
+        )
         initial_text = selected_text_locator.text_content().strip()
 
         assert initial_text, "Текст выбранного значения должен присутствовать"
@@ -50,7 +52,9 @@ def test_select_option_via_persistent_control(select_menu_page: SelectMenuPage):
         selected_text = selected_text_locator.text_content().strip()
         expected_text = "Group 1, option 1"
 
-        assert selected_text == expected_text, f"Ожидаем '{expected_text}', получено '{selected_text}'"
+        assert (
+            selected_text == expected_text
+        ), f"Ожидаем '{expected_text}', получено '{selected_text}'"
 
         allure.attach(selected_text, "final_selection")
         time.sleep(1)  # Пауза для наблюдения
@@ -70,7 +74,9 @@ def test_select_title_option(select_menu_page: SelectMenuPage):
         initial_text = select_menu_page.get_select_one_display_text()
         expected_initial = "Select Title"
 
-        assert initial_text == expected_initial, f"Начальный текст должен быть '{expected_initial}', получено '{initial_text}'"
+        assert (
+            initial_text == expected_initial
+        ), f"Начальный текст должен быть '{expected_initial}', получено '{initial_text}'"
         allure.attach(initial_text, "initial_state")
 
     with allure.step("Выбираем опцию Mrs."):
@@ -82,7 +88,9 @@ def test_select_title_option(select_menu_page: SelectMenuPage):
         selected_text = select_menu_page.get_select_one_display_text()
         expected_selection = "Mrs."
 
-        assert selected_text == expected_selection, f"Ожидается '{expected_selection}', получено '{selected_text}'"
+        assert (
+            selected_text == expected_selection
+        ), f"Ожидается '{expected_selection}', получено '{selected_text}'"
 
         allure.attach(selected_text, "selected_title")
         time.sleep(1)
@@ -102,7 +110,9 @@ def test_old_style_select_menu_functionality(select_menu_page: SelectMenuPage):
         simple_select = select_menu_page.simple_select
         select_id = simple_select.get_attribute("id")
 
-        assert select_id == "oldSelectMenu", f"Локатор должен быть #oldSelectMenu, получен #{select_id}"
+        assert (
+            select_id == "oldSelectMenu"
+        ), f"Локатор должен быть #oldSelectMenu, получен #{select_id}"
         allure.attach(select_id, "select_element_id")
 
     with allure.step("Получаем количество доступных опций"):
@@ -120,12 +130,14 @@ def test_old_style_select_menu_functionality(select_menu_page: SelectMenuPage):
             selected_value = select_menu_page.get_simple_select_selected_value()
 
             assert len(selected_value) > 0, "Должно быть выбрано значение"
-            assert selected_value != initial_value, "Выбранное значение должно отличаться от начального"
+            assert (
+                selected_value != initial_value
+            ), "Выбранное значение должно отличаться от начального"
 
             selection_result = {
                 "initial_value": initial_value,
                 "selected_value": selected_value,
-                "selection_changed": selected_value != initial_value
+                "selection_changed": selected_value != initial_value,
             }
             allure.attach(str(selection_result), "selection_change_result")
 
@@ -146,7 +158,9 @@ def test_multiselect_placeholder(select_menu_page: SelectMenuPage):
         placeholder = select_menu_page.multiselect_get_placeholder()
         expected_placeholder = "Select..."
 
-        assert placeholder == expected_placeholder, f"Ожидаемый placeholder '{expected_placeholder}', получено '{placeholder}'"
+        assert (
+            placeholder == expected_placeholder
+        ), f"Ожидаемый placeholder '{expected_placeholder}', получено '{placeholder}'"
 
         allure.attach(placeholder, "multiselect_placeholder")
 
@@ -170,7 +184,9 @@ def test_select_multiple_options(select_menu_page: SelectMenuPage):
     with allure.step("Проверяем что все опции выбраны"):
         selected = select_menu_page.get_selected_standard_multiselect_options()
 
-        assert set(selected) == set(options_to_select), f"Ожидались: {options_to_select}, выбраны: {selected}"
+        assert set(selected) == set(
+            options_to_select
+        ), f"Ожидались: {options_to_select}, выбраны: {selected}"
 
         allure.attach(str(selected), "selected_multiple_options")
         time.sleep(1)
@@ -202,9 +218,13 @@ def test_deselect_all_options(select_menu_page: SelectMenuPage):
         select_menu_page.clear_standard_multiselect_selection()
 
     with allure.step("Проверяем что все опции сняты с выбора"):
-        selected_after_clear = select_menu_page.get_selected_standard_multiselect_options()
+        selected_after_clear = (
+            select_menu_page.get_selected_standard_multiselect_options()
+        )
 
-        assert selected_after_clear == [], f"После очистки ожидался пустой список, получили: {selected_after_clear}"
+        assert (
+            selected_after_clear == []
+        ), f"После очистки ожидался пустой список, получили: {selected_after_clear}"
 
         allure.attach(str(selected_after_clear), "options_after_clearing")
         time.sleep(1)
@@ -246,7 +266,9 @@ def test_multiselect_select_and_remove_options(select_menu_page: SelectMenuPage)
         selected = select_menu_page.multiselect_get_selected_options()
 
         for option in options:
-            assert option in selected, f"Опция '{option}' должна быть выбрана, выбранные: {selected}"
+            assert (
+                option in selected
+            ), f"Опция '{option}' должна быть выбрана, выбранные: {selected}"
 
         allure.attach(str(selected), "all_selected_options")
 
@@ -257,12 +279,17 @@ def test_multiselect_select_and_remove_options(select_menu_page: SelectMenuPage)
 
                 # Проверяем промежуточное состояние
                 current_selected = select_menu_page.multiselect_get_selected_options()
-                allure.attach(f"After removing {option}: {current_selected}", f"after_removing_{option}")
+                allure.attach(
+                    f"After removing {option}: {current_selected}",
+                    f"after_removing_{option}",
+                )
 
     with allure.step("Проверяем что все опции удалены"):
         selected_after_removal = select_menu_page.multiselect_get_selected_options()
 
-        assert not selected_after_removal, f"После удаления всех опций список не пустой: {selected_after_removal}"
+        assert (
+            not selected_after_removal
+        ), f"После удаления всех опций список не пустой: {selected_after_removal}"
 
         allure.attach("All options successfully removed", "final_removal_result")
 
@@ -271,12 +298,17 @@ def test_multiselect_select_and_remove_options(select_menu_page: SelectMenuPage)
 @allure.feature("Select Menu")
 @allure.story("Dropdown Interaction")
 @pytest.mark.widgets
-@pytest.mark.parametrize("dropdown_type,test_value", [
-    ("select_one", "Dr."),
-    ("select_value", "Group 2, option 1"),
-    ("old_style", "2"),
-])
-def test_different_dropdown_types(select_menu_page: SelectMenuPage, dropdown_type, test_value):
+@pytest.mark.parametrize(
+    "dropdown_type,test_value",
+    [
+        ("select_one", "Dr."),
+        ("select_value", "Group 2, option 1"),
+        ("old_style", "2"),
+    ],
+)
+def test_different_dropdown_types(
+    select_menu_page: SelectMenuPage, dropdown_type, test_value
+):
     """
     Параметризованный тест различных типов dropdown меню.
 
@@ -288,7 +320,9 @@ def test_different_dropdown_types(select_menu_page: SelectMenuPage, dropdown_typ
             select_menu_page.select_option_in_dropdown(test_value)
 
             result = select_menu_page.get_select_one_display_text()
-            assert test_value in result, f"Выбранное значение должно содержать '{test_value}'"
+            assert (
+                test_value in result
+            ), f"Выбранное значение должно содержать '{test_value}'"
 
         elif dropdown_type == "old_style":
             select_menu_page.select_simple_option_by_index(int(test_value))

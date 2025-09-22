@@ -45,9 +45,11 @@ class ButtonsPage(BasePage):
         Postconditions: появляется сообщение об обычном клике.
         """
         self.log_step("Выполняем обычный клик по кнопке Click Me")
-        # Используем nth(2) так как это третья кнопка на странице
-        button = self.page.locator("button.btn.btn-primary").nth(2)
-        button.click()
+        # Предпочитаем стабильный селектор по тексту, с резервом
+        btn = self.page.locator(ButtonsLocators.CLICK_ME_BUTTON_ALT)
+        if btn.count() == 0 or not btn.first.is_visible():
+            btn = self.page.locator(ButtonsLocators.CLICK_ME_BUTTON)
+        btn.first.click()
 
     def get_double_click_message(self) -> str:
         """
@@ -75,3 +77,46 @@ class ButtonsPage(BasePage):
             str: Текст сообщения об обычном клике
         """
         return self.get_text_safe(ButtonsLocators.CLICK_ME_MESSAGE)
+
+    # ===== Доп. API, ожидаемое тестами =====
+
+    # Сообщение для обычного клика с именем, ожидаемым тестом
+    def get_click_message(self) -> str:
+        return self.get_click_me_message()
+
+    # Видимость кнопок
+    def is_double_click_button_visible(self) -> bool:
+        return self.page.locator(ButtonsLocators.DOUBLE_CLICK_BUTTON).is_visible()
+
+    def is_right_click_button_visible(self) -> bool:
+        return self.page.locator(ButtonsLocators.RIGHT_CLICK_BUTTON).is_visible()
+
+    def is_click_me_button_visible(self) -> bool:
+        # Считаем видимой, если хотя бы один из селекторов доступен
+        return (
+            self.page.locator(ButtonsLocators.CLICK_ME_BUTTON_ALT).is_visible()
+            or self.page.locator(ButtonsLocators.CLICK_ME_BUTTON).is_visible()
+        )
+
+    # Доступность (enabled) кнопок
+    def is_double_click_button_enabled(self) -> bool:
+        return self.page.locator(ButtonsLocators.DOUBLE_CLICK_BUTTON).is_enabled()
+
+    def is_right_click_button_enabled(self) -> bool:
+        return self.page.locator(ButtonsLocators.RIGHT_CLICK_BUTTON).is_enabled()
+
+    def is_click_me_button_enabled(self) -> bool:
+        return self.page.locator(ButtonsLocators.CLICK_ME_BUTTON).is_enabled()
+
+    # Тексты на кнопках
+    def get_double_click_button_text(self) -> str:
+        return self.page.locator(ButtonsLocators.DOUBLE_CLICK_BUTTON).inner_text()
+
+    def get_right_click_button_text(self) -> str:
+        return self.page.locator(ButtonsLocators.RIGHT_CLICK_BUTTON).inner_text()
+
+    def get_click_me_button_text(self) -> str:
+        locator = self.page.locator(ButtonsLocators.CLICK_ME_BUTTON_ALT)
+        if not locator.is_visible():
+            locator = self.page.locator(ButtonsLocators.CLICK_ME_BUTTON)
+        return locator.inner_text()
