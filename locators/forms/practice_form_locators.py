@@ -62,7 +62,7 @@ class AutomationPracticeFormLocators:
     MODAL_TITLE = ".modal-title"  # Заголовок модального окна
     MODAL_BODY = ".modal-body"  # Тело модального окна
     MODAL_TABLE = ".table"  # Таблица с результатами
-    MODAL_CLOSE_BUTTON = "#closeLargeModal"  # Кнопка закрытия модального окна
+    MODAL_CLOSE_BUTTON = ".btn-close"  # Кнопка закрытия модального окна
 
     # === ВАЛИДАЦИЯ И ОШИБКИ ===
     REQUIRED_FIELD = (

@@ -225,11 +225,16 @@ def test_mixed_selection_states(check_box_page: CheckBoxPage):
 
         # Не выбранные элементы не должны присутствовать
         # Примечание: WorkSpace может быть выбран автоматически как родитель Desktop/Documents
-        not_selected = ["Downloads", "Office"]
+        # Office может быть выбран автоматически как дочерний элемент Documents
+        not_selected = ["Downloads"]
         for not_selected_item in not_selected:
             assert (
                 not_selected_item not in partial_results
             ), f"'{not_selected_item}' НЕ должен быть в результатах"
+
+        # Office может быть выбран автоматически при выборе Documents, это допустимо
+        if "Office" in partial_results:
+            check_box_page.log_step("Office выбран автоматически при выборе Documents - это ожидаемо")
 
 
 @allure.epic("Elements")

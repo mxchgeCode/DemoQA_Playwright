@@ -160,6 +160,7 @@ class LinksPage(BasePage):
 
     def get_api_response_message(self) -> str:
         """Возвращает текст ответа API (универсальный метод под тесты)."""
+        self.page.wait_for_timeout(2000)  # Пауза для получения ответа
         return self.get_response_message()
 
     # ======== Статистика ссылок ========

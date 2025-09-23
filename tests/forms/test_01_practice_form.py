@@ -132,6 +132,35 @@ def test_fill_form_and_submit(practice_form_page):
         assert (
             form_data["email"] in table_text
         ), "Email должен присутствовать в результатах"
+        assert (
+            form_data["gender"] in table_text
+        ), "Пол должен присутствовать в результатах"
+        assert (
+            form_data["mobile"] in table_text
+        ), "Мобильный телефон должен присутствовать в результатах"
+        assert (
+            "September,1990" in table_text
+        ), "Дата рождения должна присутствовать в результатах"
+        for subject in form_data["subjects"]:
+            assert (
+                subject in table_text
+            ), f"Предмет {subject} должен присутствовать в результатах"
+        for hobby in form_data["hobbies"]:
+            assert (
+                hobby in table_text
+            ), f"Хобби {hobby} должен присутствовать в результатах"
+        assert (
+            os.path.basename(temp_image_path) in table_text
+        ), "Имя файла должно присутствовать в результатах"
+        assert (
+            form_data["current_address"] in table_text
+        ), "Адрес должен присутствовать в результатах"
+        assert (
+            form_data["state"] in table_text
+        ), "Штат должен присутствовать в результатах"
+        assert (
+            form_data["city"] in table_text
+        ), "Город должен присутствовать в результатах"
 
     with allure.step("Закрываем модальное окно"):
         practice_form_page.close_modal()

@@ -235,6 +235,7 @@ def create_page_with_wait(
             if attempt == 2:
                 raise Exception(f"Не удалось загрузить страницу {url}: {e}")
             logger.warning(f"Попытка {attempt + 1} загрузки {url} неудачна: {e}")
+            time.sleep(30)  # Пауза перед повторной попыткой для обхода блокировки
             page.reload()
 
 
@@ -362,6 +363,8 @@ def browser_windows_page(page: Page):
 def alerts_page(page: Page):
     try:
         page.goto(URLs.ALERTS_PAGE, wait_until="domcontentloaded", timeout=60000)
+        # Добавляем небольшую паузу для стабилизации страницы
+        page.wait_for_timeout(1000)
         return AlertsPage(page)
     except Exception as e:
         pytest.fail(f"Не удалось загрузить страницу Alerts: {e}")

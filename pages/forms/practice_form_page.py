@@ -50,6 +50,7 @@ class AutomationPracticeFormPage(BasePage):
         Args:
             email: Email адрес для заполнения
         """
+
         self.log_step(f"Заполняем поле Email: {email}")
         self.safe_fill(AutomationPracticeFormLocators.EMAIL_INPUT, email)
 
@@ -96,14 +97,34 @@ class AutomationPracticeFormPage(BasePage):
         """
         self.log_step(f"Устанавливаем дату рождения: {day}/{month}/{year}")
 
+        # Маппинг сокращенных месяцев в полные названия
+        month_mapping = {
+            "Jan": "January",
+            "Feb": "February",
+            "Mar": "March",
+            "Apr": "April",
+            "May": "May",
+            "Jun": "June",
+            "Jul": "July",
+            "Aug": "August",
+            "Sep": "September",
+            "Oct": "October",
+            "Nov": "November",
+            "Dec": "December"
+        }
+        full_month = month_mapping.get(month, month)
+
         # Кликаем по полю даты для открытия календаря
-        self.safe_click(AutomationPracticeFormLocators.DATE_PICKER)
+        self.safe_click(AutomationPracticeFormLocators.DATE_OF_BIRTH_INPUT)
+
+        # Ждем появления календаря
+        self.page.wait_for_timeout(500)
 
         # Выбираем месяц
         month_dropdown = self.page.locator(
             AutomationPracticeFormLocators.DATE_MONTH_SELECT
         )
-        month_dropdown.select_option(month)
+        month_dropdown.select_option(full_month)
 
         # Выбираем год
         year_dropdown = self.page.locator(
@@ -111,9 +132,14 @@ class AutomationPracticeFormPage(BasePage):
         )
         year_dropdown.select_option(year)
 
-        # Выбираем день
-        day_element = self.page.locator(f".react-datepicker__day--0{day.zfill(2)}")
+        # Выбираем день (исключая дни из других месяцев)
+        day_element = self.page.locator(f".react-datepicker__day--0{day.zfill(2)}:not(.react-datepicker__day--outside-month)")
         day_element.click()
+
+        # Закрываем календарь нажатием ESC и кликом на body
+        self.page.keyboard.press("Escape")
+        self.page.click("body")
+        self.page.wait_for_timeout(500)
 
     def fill_date_of_birth(self, date_string: str) -> None:
         """
@@ -126,6 +152,8 @@ class AutomationPracticeFormPage(BasePage):
         try:
             day, month, year = date_string.split()
             self.set_date_of_birth(day, month, year)
+            # Убираем фокус с поля даты, кликая на другое поле
+            self.page.click(AutomationPracticeFormLocators.FIRST_NAME_INPUT)
         except ValueError:
             self.log_step(f"Неверный формат даты: {date_string}. Ожидается формат 'DD MMM YYYY'")
 
@@ -143,13 +171,12 @@ class AutomationPracticeFormPage(BasePage):
 
         for subject in subjects:
             subjects_input.click()
-            subjects_input.type(subject)
-            # Ждем появления опций и выбираем первую
+            subjects_input.type(subject, delay=100)
+            # Ждем появления опций
+            self.page.wait_for_timeout(1000)
+            # Нажимаем Enter для выбора первой опции
+            subjects_input.press("Enter")
             self.page.wait_for_timeout(500)
-            suggestion = self.page.locator(f"text={subject}").first
-            if suggestion.is_visible():
-                suggestion.click()
-
     def select_hobbies(self, hobbies: list[str]) -> None:
         """
         Выбирает хобби из чекбоксов.
@@ -203,7 +230,7 @@ class AutomationPracticeFormPage(BasePage):
         state_dropdown.click()
 
         # Выбираем опцию
-        option = self.page.locator(f"text={state}")
+        option = self.page.locator(f".css-1n7v3ny-option:has-text('{state}')")
         option.click()
 
     def select_city(self, city: str) -> None:
@@ -219,7 +246,7 @@ class AutomationPracticeFormPage(BasePage):
         city_dropdown.click()
 
         # Выбираем опцию
-        option = self.page.locator(f"text={city}")
+        option = self.page.locator(f".css-1n7v3ny-option:has-text('{city}')")
         option.click()
 
     def submit_form(self) -> None:
@@ -256,7 +283,8 @@ class AutomationPracticeFormPage(BasePage):
         Postconditions: модальное окно скрыто.
         """
         self.log_step("Закрываем модальное окно с результатами")
-        self.safe_click(AutomationPracticeFormLocators.MODAL_CLOSE_BUTTON)
+        self.page.keyboard.press("Escape")
+        self.page.wait_for_timeout(500)
 
     def get_form_results(self) -> dict:
         """

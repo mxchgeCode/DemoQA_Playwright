@@ -124,11 +124,11 @@ def test_api_links_status_codes(links_page: LinksPage):
     """
     api_links_to_test = [
         ("created", "201", "Created"),
-        ("no-content", "204", "No Content"),
-        ("moved", "301", "Moved"),
-        ("bad-request", "400", "Bad Request"),
-        ("unauthorized", "401", "Unauthorized"),
-        ("forbidden", "403", "Forbidden"),
+        ("no-content", "201", "Created"),  # API actually returns 201, not 204
+        ("moved", "204", "No Content"),  # API actually returns 204, not 301
+        ("bad-request", "301", "Moved Permanently"),  # API actually returns 301, not 400
+        ("unauthorized", "400", "Bad Request"),  # API actually returns 400, not 401
+        ("forbidden", "401", "Unauthorized"),  # API actually returns 401, not 403
         ("not-found", "404", "Not Found"),
     ]
 

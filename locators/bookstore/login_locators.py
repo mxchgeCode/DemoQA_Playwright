@@ -45,7 +45,10 @@ class LoginLocators:
 
     # === СОСТОЯНИЕ ПОСЛЕ АВТОРИЗАЦИИ ===
     USER_DISPLAY = "#userName-value"  # Отображение имени авторизованного пользователя
+    BOOKS_LABEL = "#userName-label"  # Лейбл "Books :" на странице профиля
     LOGOUT_BUTTON = "#logout"  # Кнопка выхода из системы (если есть)
+    GOTO_STORE_BUTTON = "button#gotoStore"  # Кнопка перехода в магазин
+    DELETE_ACCOUNT_BUTTON = "button:has-text('Delete Account')"  # Кнопка удаления аккаунта
 
     # === ДУБЛИРУЮЩИЕ СЕЛЕКТОРЫ ДЛЯ ЯСНОСТИ ===
     # Форма входа (явное указание контекста)

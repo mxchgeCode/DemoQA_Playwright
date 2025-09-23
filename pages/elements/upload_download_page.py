@@ -4,6 +4,9 @@ Page Object для страницы Upload and Download.
 """
 
 import os
+import time
+import re
+from urllib.parse import urlparse
 from playwright.sync_api import Page
 from locators.elements.download_locators import UploadDownloadLocators
 from pages.base_page import BasePage
@@ -122,3 +125,105 @@ class UploadDownloadPage(BasePage):
             timeout_ms: Таймаут в миллисекундах
         """
         self.page.set_default_timeout(timeout_ms)
+
+    def get_uploaded_file_path(self) -> str:
+        """
+        Получает путь к загруженному файлу.
+
+        Returns:
+            str: Путь к загруженному файлу как отображается на странице
+        """
+        return self.get_uploaded_file_path_text()
+
+    def get_download_button_attributes(self) -> dict:
+        """
+        Получает атрибуты кнопки скачивания.
+
+        Returns:
+            dict: Словарь с атрибутами кнопки скачивания
+        """
+        button_locator = self.page.locator(UploadDownloadLocators.DOWNLOAD_BUTTON)
+        attributes = {}
+
+        # Получаем основные атрибуты
+        common_attrs = ['href', 'target', 'download', 'class', 'id']
+        for attr in common_attrs:
+            value = button_locator.get_attribute(attr)
+            if value is not None:
+                attributes[attr] = value
+
+        return attributes
+
+    def get_current_timestamp(self) -> int:
+        """
+        Получает текущую временную метку в миллисекундах.
+
+        Returns:
+            int: Текущая временная метка в миллисекундах
+        """
+        return int(time.time() * 1000)
+
+    def is_valid_download_url(self, url: str) -> bool:
+        """
+        Проверяет валидность URL для скачивания.
+
+        Args:
+            url: URL для проверки
+
+        Returns:
+            bool: True если URL валидный
+        """
+        try:
+            parsed = urlparse(url)
+            return bool(parsed.scheme and parsed.netloc)
+        except Exception:
+            return False
+
+    def check_download_url_accessibility(self, url: str) -> bool:
+        """
+        Проверяет доступность URL для скачивания.
+
+        Args:
+            url: URL для проверки
+
+        Returns:
+            bool: True если URL доступен
+        """
+        try:
+            # Создаем новый контекст для проверки URL
+            with self.page.context.new_page() as test_page:
+                response = test_page.goto(url, timeout=5000)
+                return response is not None and response.status < 400
+        except Exception:
+            return False
+
+    def get_upload_error_message(self) -> str:
+        """
+        Получает сообщение об ошибке загрузки, если есть.
+
+        Returns:
+            str: Сообщение об ошибке или пустая строка
+        """
+        # Проверяем сообщение об ошибке
+        error_message = self.get_text_safe(UploadDownloadLocators.ERROR_MESSAGE)
+        if error_message:
+            return error_message
+
+        # Проверяем, что файл не был загружен успешно
+        if not self.is_file_uploaded():
+            return "Файл не был загружен"
+
+        return ""
+
+    def click_download_button(self) -> bool:
+        """
+        Кликает по кнопке скачивания.
+
+        Returns:
+            bool: True если клик был успешным
+        """
+        try:
+            self.safe_click(UploadDownloadLocators.DOWNLOAD_BUTTON)
+            return True
+        except Exception:
+            return False

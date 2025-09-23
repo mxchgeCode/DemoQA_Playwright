@@ -24,11 +24,8 @@ class WebTablesLocators:
 
     # === ОСНОВНЫЕ ЭЛЕМЕНТЫ ТАБЛИЦЫ ===
 
-    # Контейнер всей таблицы
-    TABLE_CONTAINER: str = ".rt-table"
 
-    # Заголовки столбцов таблицы
-    TABLE_HEADERS: str = ".rt-thead .rt-th"
+
 
     # Все строки таблицы (включая заголовки)
     TABLE_ROWS: str = ".rt-tr-group"

@@ -67,7 +67,32 @@ class WebTablesPage(BasePage):
         Postconditions: форма отправлена, модальное окно закрыто, запись добавлена/обновлена в таблице.
         """
         self.log_step("Отправляем форму регистрации")
-        self.safe_click(WebTablesLocators.SUBMIT_BUTTON)
+        # Попробуем кликнуть по тексту Submit
+        try:
+            self.page.click("text=Submit")
+        except Exception:
+            self.safe_click(WebTablesLocators.SUBMIT_BUTTON)
+
+        # Ждем закрытия формы
+        try:
+            self.page.locator(WebTablesLocators.REGISTRATION_FORM).wait_for(
+                state="hidden", timeout=5000
+            )
+            self.log_step("Форма успешно закрылась после отправки")
+        except Exception as e:
+            self.log_step(f"Форма не закрылась автоматически: {e}")
+            # Пробуем закрыть форму принудительно
+            try:
+                # Сначала попробуем кликнуть по overlay
+                self.page.click("body", position={"x": 10, "y": 10})
+                self.page.wait_for_timeout(500)
+                if self.page.locator(WebTablesLocators.REGISTRATION_FORM).is_visible():
+                    close_button = self.page.locator(WebTablesLocators.CLOSE_BUTTON)
+                    if close_button.is_visible():
+                        close_button.click()
+                        self.log_step("Форма закрыта принудительно")
+            except Exception:
+                self.log_step("Не удалось закрыть форму")
     
     def search_table(self, search_term: str) -> None:
         """
@@ -223,10 +248,10 @@ class WebTablesPage(BasePage):
     def add_new_person(self, person_data: dict) -> None:
         """
         Добавляет новую запись в таблицу одним методом.
-    
+
         Args:
             person_data: Словарь с данными человека
-    
+
         Example:
             person_data = {
                 'first_name': 'John',
@@ -236,7 +261,7 @@ class WebTablesPage(BasePage):
                 'salary': '50000',
                 'department': 'IT'
             }
-    
+
         Postconditions: новая запись добавлена в таблицу
         """
         self.log_step(
@@ -244,7 +269,7 @@ class WebTablesPage(BasePage):
         )
         self.click_add_button()
         self.wait_for_visible(WebTablesLocators.REGISTRATION_FORM, timeout=5000)
-    
+
         self.fill_registration_form(
             person_data.get("first_name", ""),
             person_data.get("last_name", ""),
@@ -254,6 +279,50 @@ class WebTablesPage(BasePage):
             person_data.get("department", ""),
         )
         self.submit_form()
+
+        # Ждем закрытия формы и обновления таблицы
+        self.page.wait_for_timeout(1000)
+        try:
+            self.page.locator(WebTablesLocators.REGISTRATION_FORM).wait_for(
+                state="hidden", timeout=5000
+            )
+            self.log_step("Форма успешно закрылась после отправки")
+        except Exception as e:
+            self.log_step(f"Форма не закрылась автоматически: {e}")
+
+        # Проверяем что запись появилась в таблице
+        self.page.wait_for_timeout(1000)
+        current_records = self.get_table_data()
+        self.log_step(f"Количество записей после добавления: {len(current_records)}")
+
+        # Отладочная информация о таблице
+        table_info = {
+            "table_rows_count": self.page.locator(WebTablesLocators.TABLE_ROWS).count(),
+            "table_data_rows_count": self.page.locator(WebTablesLocators.TABLE_DATA_ROWS).count(),
+            "current_records": current_records,
+            "person_data": person_data
+        }
+        self.log_step(f"Отладочная информация о таблице: {table_info}")
+
+        # Ищем добавленную запись
+        found = False
+        for record in current_records:
+            if (record.get("first_name") == person_data.get("first_name") and
+                record.get("last_name") == person_data.get("last_name")):
+                found = True
+                self.log_step(f"Запись успешно найдена в таблице: {record}")
+                break
+
+        if not found:
+            self.log_step("⚠️ Добавленная запись не найдена в таблице")
+            # Показываем все записи для отладки
+            self.log_step(f"Все записи в таблице: {current_records}")
+
+            # Проверяем, возможно ли что форма не отправилась корректно
+            if self.is_modal_visible():
+                self.log_step("⚠️ Форма все еще открыта - возможно отправка не удалась")
+            else:
+                self.log_step("✓ Форма закрыта корректно")
     
     # ======== Совместимость с ожидаемым API тестов ========
     # Имена методов-алиасов, возвращающие/делающие то же самое

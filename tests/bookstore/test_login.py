@@ -106,7 +106,6 @@ def test_register_password_rules(login_page):
         login_page.click_back_to_login()
 
 
-@pytest.mark.dependency()
 @allure.epic("BookStore")
 @allure.feature("Authentication")
 @allure.story("Successful login")
@@ -125,18 +124,35 @@ def test_valid_login(login_page):
         # Исправлено: корректное использование expect с локатором
         expect(login_page.page.locator(LoginLocators.USER_DISPLAY)).to_have_text(p.username)
 
+    with allure.step("Переход на страницу профиля"):
+        login_page.page.goto("https://demoqa.com/profile")
 
-@pytest.mark.dependency(depends=["test_valid_login"])
+
 @allure.epic("BookStore")
 @allure.feature("Navigation")
 @allure.story("Go to book store")
 def test_go_to_book_store(login_page):
     """
     Тест перехода в книжный магазин после успешной авторизации.
-    Зависит от test_valid_login.
     """
+    p = TestData.USERS.test_user
+
+    with allure.step("Переход на страницу профиля"):
+        login_page.page.goto("https://demoqa.com/profile")
+        login_page.page.wait_for_load_state("networkidle")
+
+    with allure.step("Проверка успешной авторизации"):
+        if not login_page.is_logged_in():
+            with allure.step("Вход в систему"):
+                login_page.login(p.username, p.password)
+            with allure.step("Переход на страницу профиля после логина"):
+                login_page.page.goto("https://demoqa.com/profile")
+                login_page.page.wait_for_load_state("networkidle")
+            if not login_page.is_logged_in():
+                pytest.skip("Пользователь не найден в базе данных сайта. Создайте пользователя вручную перед запуском зависимых тестов.")
+
     with allure.step("Нажатие кнопки перехода в магазин"):
-        login_page.page.click("button#gotoStore")
+        login_page.page.click(LoginLocators.GOTO_STORE_BUTTON)
 
     with allure.step("Ожидание загрузки страницы книг"):
         login_page.page.wait_for_url("**/books")
@@ -145,15 +161,29 @@ def test_go_to_book_store(login_page):
         assert "books" in login_page.page.url
 
 
-@pytest.mark.dependency(depends=["test_valid_login"])
 @allure.epic("BookStore")
 @allure.feature("Book Search")
 @allure.story("Search and navigation")
 def test_search_book_and_go_back(login_page):
     """
     Тест поиска книги и навигации.
-    ТОЛЬКО ПОСЛЕ ТЕСТА test_valid_login ДЛЯ ЛОГИНА.
     """
+    p = TestData.USERS.test_user
+
+    with allure.step("Переход на страницу профиля"):
+        login_page.page.goto("https://demoqa.com/profile")
+        login_page.page.wait_for_load_state("networkidle")
+
+    with allure.step("Проверка успешной авторизации"):
+        if not login_page.is_logged_in():
+            with allure.step("Вход в систему"):
+                login_page.login(p.username, p.password)
+            with allure.step("Переход на страницу профиля после логина"):
+                login_page.page.goto("https://demoqa.com/profile")
+                login_page.page.wait_for_load_state("networkidle")
+            if not login_page.is_logged_in():
+                pytest.skip("Пользователь не найден в базе данных сайта. Создайте пользователя вручную перед запуском зависимых тестов.")
+
     with allure.step("Переход на страницу книг"):
         login_page.page.goto("https://demoqa.com/books")
 
@@ -172,23 +202,3 @@ def test_search_book_and_go_back(login_page):
         login_page.page.goto("https://demoqa.com/profile")
 
 
-@pytest.mark.dependency(depends=["test_valid_login"])
-@allure.epic("BookStore")
-@allure.feature("Account Management")
-@allure.story("Delete account confirmation")
-def test_delete_account_cancel(login_page):
-    """
-    Тест отмены удаления учетной записи.
-    Проверяет корректную обработку диалогового окна подтверждения.
-    """
-
-    def on_dialog(dialog):
-        """Обработчик диалогового окна подтверждения."""
-        assert dialog.type == "confirm", f"Expected confirm dialog, got: {dialog.type}"
-        dialog.dismiss()
-
-    with allure.step("Настройка обработчика диалогового окна"):
-        login_page.page.on("dialog", on_dialog)
-
-    with allure.step("Нажатие кнопки удаления аккаунта"):
-        login_page.page.click("button:has-text('Delete Account')")

@@ -105,8 +105,26 @@ class ButtonsPage(BasePage):
     def is_right_click_button_enabled(self) -> bool:
         return self.page.locator(ButtonsLocators.RIGHT_CLICK_BUTTON).is_enabled()
 
-    def is_click_me_button_enabled(self) -> bool:
-        return self.page.locator(ButtonsLocators.CLICK_ME_BUTTON).is_enabled()
+    def is_click_me_button_enabled(self, timeout: int = 5000) -> bool:
+        try:
+            # Пробуем альтернативные селекторы
+            selectors = [
+                ButtonsLocators.CLICK_ME_BUTTON_ALT,
+                ButtonsLocators.CLICK_ME_BUTTON,
+                ButtonsLocators.ALL_BUTTONS + ":nth-child(3)"
+            ]
+
+            for selector in selectors:
+                try:
+                    locator = self.page.locator(selector)
+                    if locator.count() > 0:
+                        return locator.is_enabled(timeout=timeout)
+                except:
+                    continue
+
+            return False
+        except Exception:
+            return False
 
     # Тексты на кнопках
     def get_double_click_button_text(self) -> str:

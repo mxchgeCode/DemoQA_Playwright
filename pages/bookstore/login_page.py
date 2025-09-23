@@ -129,16 +129,16 @@ class LoginPage(BasePage):
         except:
             return None
 
-    def get_logged_in_username(self) -> Optional[str]:
-        """
-        Получает отображаемое имя авторизованного пользователя.
-
-        Returns:
-            str или None: Имя пользователя или None если не авторизован
-        """
-        if self.page.is_visible(LoginLocators.USER_DISPLAY):
-            return self.page.text_content(LoginLocators.USER_DISPLAY)
-        return None
+    # def get_logged_in_username(self) -> Optional[str]:
+    #     """
+    #     Получает отображаемое имя авторизованного пользователя.
+    #
+    #     Returns:
+    #         str или None: Имя пользователя или None если не авторизован
+    #     """
+    #     if self.page.is_visible(LoginLocators.USER_DISPLAY):
+    #         return self.page.text_content(LoginLocators.USER_DISPLAY)
+    #     return None
 
     def is_field_invalid(self, field_locator: str) -> bool:
         """
@@ -151,3 +151,17 @@ class LoginPage(BasePage):
             bool: True если поле имеет ошибку валидации
         """
         return self.page.is_visible(field_locator)
+
+    def is_logged_in(self) -> bool:
+        """
+        Проверяет, авторизован ли пользователь на сайте.
+
+        Returns:
+            bool: True если пользователь авторизован
+        """
+        try:
+            # Проверяем наличие лейбла "Books :" на странице профиля
+            books_label = self.page.locator(LoginLocators.BOOKS_LABEL)
+            return books_label.is_visible() and books_label.inner_text().strip() == "Books :"
+        except:
+            return False
