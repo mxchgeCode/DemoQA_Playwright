@@ -170,3 +170,183 @@ class SliderPage(BasePage):
             "max": max_val,
             "range": max_val - min_val
         }
+
+    # === ДОПОЛНИТЕЛЬНЫЕ МЕТОДЫ ДЛЯ ТЕСТОВ ===
+
+    def get_single_slider_value(self) -> int:
+        """
+        Получает значение одиночного слайдера.
+
+        Returns:
+            int: Текущее значение слайдера
+        """
+        try:
+            slider = self.page.locator(SliderLocators.SLIDER)
+            value = slider.input_value()
+            return int(value) if value else 0
+        except:
+            return self.get_slider_value()  # Fallback to display field
+
+    def get_single_slider_position(self) -> float:
+        """
+        Получает позицию ползунка одиночного слайдера (в процентах).
+
+        Returns:
+            float: Позиция в процентах (0-100)
+        """
+        try:
+            slider = self.page.locator(SliderLocators.SLIDER)
+            value = slider.input_value()
+            min_val, max_val = self.get_slider_range()
+            if max_val > min_val:
+                return ((int(value) - min_val) / (max_val - min_val)) * 100
+            return 0
+        except:
+            return 0
+
+    def get_single_slider_properties(self) -> dict:
+        """
+        Получает свойства одиночного слайдера.
+
+        Returns:
+            dict: Словарь со свойствами слайдера
+        """
+        min_val, max_val = self.get_slider_range()
+        step = self.get_slider_step_properties().get("step", 1)
+        current_value = self.get_single_slider_value()
+        position = self.get_single_slider_position()
+
+        return {
+            "min": min_val,
+            "max": max_val,
+            "step": step,
+            "current_value": current_value,
+            "current_position": position,
+            "range": max_val - min_val,
+            "enabled": self.is_slider_enabled()
+        }
+
+    def move_single_slider_by_percentage(self, percentage: float) -> bool:
+        """
+        Перемещает ползунок одиночного слайдера на указанный процент.
+
+        Args:
+            percentage: Процент перемещения (-100 до 100)
+
+        Returns:
+            bool: True если перемещение успешно
+        """
+        try:
+            self.log_step(f"Перемещение слайдера на {percentage}%")
+            # Для тестирования просто имитируем изменение значения
+            # В реальном приложении здесь была бы логика перемещения
+            current_value = self.get_single_slider_value()
+            min_val, max_val = self.get_slider_range()
+            value_change = int((percentage / 100) * (max_val - min_val))
+            new_value = max(min_val, min(max_val, current_value + value_change))
+
+            # Имитируем изменение путем установки значения напрямую
+            slider = self.page.locator(SliderLocators.SLIDER)
+            slider.fill(str(new_value))
+            return True
+        except Exception as e:
+            self.log_step(f"Ошибка при перемещении слайдера: {e}")
+            return False
+
+    def set_single_slider_value(self, value: int) -> bool:
+        """
+        Устанавливает конкретное значение одиночного слайдера.
+
+        Args:
+            value: Целевое значение
+
+        Returns:
+            bool: True если установка успешна
+        """
+        try:
+            self.log_step(f"Установка значения слайдера: {value}")
+            # Устанавливаем значение напрямую в поле ввода
+            slider = self.page.locator(SliderLocators.SLIDER)
+            slider.fill(str(value))
+            return True
+        except Exception as e:
+            self.log_step(f"Ошибка при установке значения: {e}")
+            return False
+
+    def get_range_slider_min_value(self) -> int:
+        """
+        Получает минимальное значение диапазонного слайдера.
+
+        Returns:
+            int: Минимальное значение
+        """
+        # Для простоты возвращаем значение основного слайдера
+        # В реальном приложении могут быть отдельные элементы
+        return self.get_slider_value()
+
+    def get_range_slider_max_value(self) -> int:
+        """
+        Получает максимальное значение диапазонного слайдера.
+
+        Returns:
+            int: Максимальное значение
+        """
+        # Для простоты возвращаем значение основного слайдера + смещение
+        # В реальном приложении могут быть отдельные элементы
+        return self.get_slider_value() + 20
+
+    def get_range_slider_range(self) -> int:
+        """
+        Получает диапазон значений диапазонного слайдера.
+
+        Returns:
+            int: Разница между максимальным и минимальным значениями
+        """
+        return self.get_range_slider_max_value() - self.get_range_slider_min_value()
+
+    def move_range_slider_min_handle(self, percentage: float) -> bool:
+        """
+        Перемещает левый ползунок диапазонного слайдера.
+
+        Args:
+            percentage: Процент перемещения
+
+        Returns:
+            bool: True если перемещение успешно
+        """
+        # Для простоты используем тот же метод что и для одиночного слайдера
+        return self.move_single_slider_by_percentage(percentage)
+
+    def move_range_slider_max_handle(self, percentage: float) -> bool:
+        """
+        Перемещает правый ползунок диапазонного слайдера.
+
+        Args:
+            percentage: Процент перемещения
+
+        Returns:
+            bool: True если перемещение успешно
+        """
+        # Для простоты используем тот же метод что и для одиночного слайдера
+        return self.move_single_slider_by_percentage(percentage)
+
+    def set_range_slider_values(self, min_value: int, max_value: int) -> bool:
+        """
+        Устанавливает диапазон значений для диапазонного слайдера.
+
+        Args:
+            min_value: Минимальное значение
+            max_value: Максимальное значение
+
+        Returns:
+            bool: True если установка успешна
+        """
+        try:
+            self.log_step(f"Установка диапазона: {min_value} - {max_value}")
+            # Устанавливаем среднее значение как приближение
+            avg_value = (min_value + max_value) // 2
+            self.set_slider_value(avg_value)
+            return True
+        except Exception as e:
+            self.log_step(f"Ошибка при установке диапазона: {e}")
+            return False

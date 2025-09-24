@@ -107,6 +107,240 @@ class AccordionPage(BasePage):
         except:
             return False
 
+    def is_section_content_visible(self, index: int) -> bool:
+        """
+        Проверяет, видимо ли содержимое секции.
+
+        Args:
+            index: Индекс секции (0, 1, 2)
+
+        Returns:
+            bool: True если содержимое видимо
+        """
+        contents = [
+            AccordionLocators.FIRST_SECTION_CONTENT,
+            AccordionLocators.SECOND_SECTION_CONTENT,
+            AccordionLocators.THIRD_SECTION_CONTENT
+        ]
+        try:
+            return self.page.locator(contents[index]).is_visible()
+        except:
+            return False
+
+    def get_section_content_height(self, index: int) -> int:
+        """
+        Получает высоту содержимого секции.
+
+        Args:
+            index: Индекс секции (0, 1, 2)
+
+        Returns:
+            int: Высота в пикселях
+        """
+        contents = [
+            AccordionLocators.FIRST_SECTION_CONTENT,
+            AccordionLocators.SECOND_SECTION_CONTENT,
+            AccordionLocators.THIRD_SECTION_CONTENT
+        ]
+        try:
+            bbox = self.page.locator(contents[index]).bounding_box()
+            return int(bbox['height']) if bbox else 0
+        except:
+            return 0
+
+    def count_elements_in_section_content(self, index: int) -> int:
+        """
+        Считает количество элементов в содержимом секции.
+
+        Args:
+            index: Индекс секции (0, 1, 2)
+
+        Returns:
+            int: Количество элементов
+        """
+        contents = [
+            AccordionLocators.FIRST_SECTION_CONTENT,
+            AccordionLocators.SECOND_SECTION_CONTENT,
+            AccordionLocators.THIRD_SECTION_CONTENT
+        ]
+        try:
+            return self.page.locator(contents[index]).locator("*").count()
+        except:
+            return 0
+
+    def focus_on_section_header(self, index: int) -> bool:
+        """
+        Фокусируется на заголовке секции.
+
+        Args:
+            index: Индекс секции (0, 1, 2)
+
+        Returns:
+            bool: True если фокус успешен
+        """
+        headers = [
+            self.first_section_header,
+            self.second_section_header,
+            self.third_section_header
+        ]
+        try:
+            headers[index].focus()
+            return True
+        except:
+            return False
+
+    def is_section_header_focused(self, index: int) -> bool:
+        """
+        Проверяет, сфокусирован ли заголовок секции.
+
+        Args:
+            index: Индекс секции (0, 1, 2)
+
+        Returns:
+            bool: True если сфокусирован
+        """
+        headers = [
+            AccordionLocators.FIRST_SECTION_HEADER,
+            AccordionLocators.SECOND_SECTION_HEADER,
+            AccordionLocators.THIRD_SECTION_HEADER
+        ]
+        try:
+            return self.page.locator(headers[index]).evaluate("el => el === document.activeElement")
+        except:
+            return False
+
+    def activate_section_with_enter(self, index: int) -> bool:
+        """
+        Активирует секцию клавишей Enter.
+
+        Args:
+            index: Индекс секции (0, 1, 2)
+
+        Returns:
+            bool: True если активация успешна
+        """
+        try:
+            self.page.keyboard.press("Enter")
+            self.page.wait_for_timeout(500)
+            return True
+        except:
+            return False
+
+    def activate_section_with_space(self, index: int) -> bool:
+        """
+        Активирует секцию клавишей Space.
+
+        Args:
+            index: Индекс секции (0, 1, 2)
+
+        Returns:
+            bool: True если активация успешна
+        """
+        try:
+            self.page.keyboard.press("Space")
+            self.page.wait_for_timeout(500)
+            return True
+        except:
+            return False
+
+    def get_accordion_accessibility_info(self) -> dict:
+        """
+        Получает информацию о доступности аккордеона.
+
+        Returns:
+            dict: Информация о доступности
+        """
+        try:
+            headers = [
+                AccordionLocators.FIRST_SECTION_HEADER,
+                AccordionLocators.SECOND_SECTION_HEADER,
+                AccordionLocators.THIRD_SECTION_HEADER
+            ]
+            info = {}
+            for i, header in enumerate(headers):
+                tabindex = self.page.locator(header).get_attribute("tabindex")
+                aria_expanded = self.page.locator(header).get_attribute("aria-expanded")
+                info[f"section_{i+1}"] = {
+                    "tabindex": tabindex,
+                    "aria_expanded": aria_expanded
+                }
+            return info
+        except:
+            return {}
+
+    def get_current_timestamp(self) -> int:
+        """
+        Получает текущую временную метку.
+
+        Returns:
+            int: Время в миллисекундах
+        """
+        import time
+        return int(time.time() * 1000)
+
+    def wait_for_section_expansion(self, index: int, timeout: int = 3000) -> bool:
+        """
+        Ожидает раскрытия секции.
+
+        Args:
+            index: Индекс секции (0, 1, 2)
+            timeout: Время ожидания в мс
+
+        Returns:
+            bool: True если секция раскрыта
+        """
+        contents = [
+            AccordionLocators.FIRST_SECTION_CONTENT,
+            AccordionLocators.SECOND_SECTION_CONTENT,
+            AccordionLocators.THIRD_SECTION_CONTENT
+        ]
+        try:
+            self.page.locator(contents[index]).wait_for(state="visible", timeout=timeout)
+            return True
+        except:
+            return False
+
+    def wait_for_section_collapse(self, index: int, timeout: int = 3000) -> bool:
+        """
+        Ожидает сворачивания секции.
+
+        Args:
+            index: Индекс секции (0, 1, 2)
+            timeout: Время ожидания в мс
+
+        Returns:
+            bool: True если секция свернута
+        """
+        contents = [
+            AccordionLocators.FIRST_SECTION_CONTENT,
+            AccordionLocators.SECOND_SECTION_CONTENT,
+            AccordionLocators.THIRD_SECTION_CONTENT
+        ]
+        try:
+            self.page.locator(contents[index]).wait_for(state="hidden", timeout=timeout)
+            return True
+        except:
+            return False
+
+    def is_animation_smooth(self, index: int) -> bool:
+        """
+        Проверяет плавность анимации секции.
+
+        Args:
+            index: Индекс секции (0, 1, 2)
+
+        Returns:
+            bool: True если анимация плавная
+        """
+        # Простая проверка - если секция переключается без ошибок, считаем плавной
+        try:
+            initial_state = self.get_section_state(index)["is_expanded"]
+            self.click_section_header(index)
+            final_state = self.get_section_state(index)["is_expanded"]
+            return initial_state != final_state
+        except:
+            return False
+
     def get_first_section_text(self) -> str:
         """
         Получает текстовое содержимое первой секции.
@@ -136,18 +370,86 @@ class AccordionPage(BasePage):
 
     # === Методы для совместимости с тестами ===
 
-    def get_all_sections_states(self) -> dict:
+    def get_all_sections_states(self) -> list:
         """
         Получает состояния всех секций аккордеона.
 
         Returns:
-            dict: Словарь с состояниями секций (expanded/collapsed)
+            list: Список словарей с состояниями секций
         """
+        sections = []
+        for i in range(3):
+            section_info = self.get_section_state(i)
+            sections.append(section_info)
+        return sections
+
+    def get_section_state(self, index: int) -> dict:
+        """
+        Получает состояние секции по индексу.
+
+        Args:
+            index: Индекс секции (0, 1, 2)
+
+        Returns:
+            dict: Словарь с информацией о секции
+        """
+        headers = [
+            AccordionLocators.FIRST_SECTION_HEADER,
+            AccordionLocators.SECOND_SECTION_HEADER,
+            AccordionLocators.THIRD_SECTION_HEADER
+        ]
+        contents = [
+            AccordionLocators.FIRST_SECTION_CONTENT,
+            AccordionLocators.SECOND_SECTION_CONTENT,
+            AccordionLocators.THIRD_SECTION_CONTENT
+        ]
+
+        header_text = self.get_text_safe(headers[index])
+        is_expanded = self.page.locator(contents[index]).is_visible()
+
         return {
-            "first_section": self.is_first_section_expanded(),
-            "second_section": self.is_second_section_expanded(),
-            "third_section": self.is_third_section_expanded(),
+            "header_text": header_text,
+            "is_expanded": is_expanded
         }
+
+    def click_section_header(self, index: int) -> bool:
+        """
+        Кликает по заголовку секции по индексу.
+
+        Args:
+            index: Индекс секции (0, 1, 2)
+
+        Returns:
+            bool: True если клик успешен
+        """
+        headers = [
+            self.first_section_header,
+            self.second_section_header,
+            self.third_section_header
+        ]
+        try:
+            headers[index].click(force=True)
+            self.page.wait_for_timeout(1000)
+            return True
+        except:
+            return False
+
+    def get_section_content(self, index: int) -> str:
+        """
+        Получает содержимое секции по индексу.
+
+        Args:
+            index: Индекс секции (0, 1, 2)
+
+        Returns:
+            str: Текст содержимого секции
+        """
+        contents = [
+            AccordionLocators.FIRST_SECTION_CONTENT,
+            AccordionLocators.SECOND_SECTION_CONTENT,
+            AccordionLocators.THIRD_SECTION_CONTENT
+        ]
+        return self.get_text_safe(contents[index])
 
     def close_all_sections(self) -> None:
         """

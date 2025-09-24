@@ -8,6 +8,7 @@ class SliderLocators:
     """CSS селекторы для элементов страницы Slider."""
 
     # === ОСНОВНОЙ ПОЛЗУНОК ===
+    SLIDER = "input[type='range']"  # Основной слайдер (input range)
     SLIDER_HANDLE = ".range-slider"  # Основной ползунок (input range)
     SLIDER_INPUT = "input[type='range']"  # Input элемент ползунка
 

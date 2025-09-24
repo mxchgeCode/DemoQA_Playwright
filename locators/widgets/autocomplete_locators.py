@@ -12,44 +12,33 @@ class AutoCompleteLocators:
     """CSS селекторы для элементов страницы Auto Complete."""
 
     # === ПОЛЯ АВТОДОПОЛНЕНИЯ ===
-    SINGLE_INPUT = ".auto-complete__control--is-focused .auto-complete__input input"  # Поле одиночного ввода
+    SINGLE_INPUT = "#autoCompleteSingleInput"  # Поле одиночного ввода
     SINGLE_CONTAINER = "#autoCompleteSingle"  # Контейнер одиночного автодополнения
-    SINGLE_CONTROL = (
-        "#autoCompleteSingle .auto-complete__control"  # Контрол одиночного ввода
-    )
+    SINGLE_CONTROL = "#autoCompleteSingle"  # Контрол одиночного ввода
 
-    MULTIPLE_INPUT = (
-        "#autoCompleteMultiple .auto-complete__input input"  # Поле множественного ввода
-    )
-    MULTIPLE_CONTAINER = (
-        "#autoCompleteMultiple"  # Контейнер множественного автодополнения
-    )
-    MULTIPLE_CONTROL = (
-        "#autoCompleteMultiple .auto-complete__control"  # Контрол множественного ввода
-    )
+    MULTIPLE_INPUT = "#autoCompleteMultipleInput"  # Поле множественного ввода
+    MULTIPLE_CONTAINER = "#autoCompleteMultiple"  # Контейнер множественного автодополнения
+    MULTIPLE_CONTROL = "#autoCompleteMultiple"  # Контрол множественного ввода
 
     # === ВЫПАДАЮЩИЕ МЕНЮ ===
+    SINGLE_OPTIONS = "#autoCompleteSingleContainer .auto-complete__option"  # Опции одиночного поля
+    MULTIPLE_OPTIONS = "#autoCompleteMultipleContainer .auto-complete__option"  # Опции множественного поля
     DROPDOWN_MENU = ".auto-complete__menu"  # Выпадающее меню с предложениями
     DROPDOWN_OPTIONS = ".auto-complete__option"  # Опции в выпадающем меню
-    DROPDOWN_FOCUSED_OPTION = (
-        ".auto-complete__option--is-focused"  # Сфокусированная опция
-    )
+    DROPDOWN_FOCUSED_OPTION = ".auto-complete__option--is-focused"  # Сфокусированная опция
     DROPDOWN_SELECTED_OPTION = ".auto-complete__option--is-selected"  # Выбранная опция
 
     # === КОНТРОЛЫ И ИНДИКАТОРЫ ===
-    DROPDOWN_INDICATOR = (
-        ".auto-complete__dropdown-indicator"  # Индикатор выпадающего списка
-    )
+    DROPDOWN_INDICATOR = ".auto-complete__dropdown-indicator"  # Индикатор выпадающего списка
     CLEAR_INDICATOR = ".auto-complete__clear-indicator"  # Индикатор очистки
     LOADING_INDICATOR = ".auto-complete__loading-indicator"  # Индикатор загрузки
 
     # === ЗНАЧЕНИЯ И ТЕГИ ===
     SINGLE_VALUE = ".auto-complete__single-value"  # Выбранное значение (одиночное)
-    MULTI_VALUE = (
-        ".auto-complete__multi-value"  # Тег выбранного значения (множественное)
-    )
+    MULTIPLE_VALUES = ".auto-complete__multi-value"  # Теги выбранных значений (множественное)
+    MULTI_VALUE = ".auto-complete__multi-value"  # Тег выбранного значения (множественное)
     MULTI_VALUE_LABEL = ".auto-complete__multi-value__label"  # Текст тега
-    MULTI_VALUE_REMOVE = ".auto-complete__multi-value__remove"  # Кнопка удаления тега
+    REMOVE_VALUE = ".auto-complete__multi-value__remove"  # Кнопка удаления тега
 
     # === ПЛЕЙСХОЛДЕРЫ И СООБЩЕНИЯ ===
     PLACEHOLDER = ".auto-complete__placeholder"  # Плейсхолдер поля ввода
@@ -75,6 +64,9 @@ class AutoCompleteLocators:
     VALUE_CONTAINER = ".auto-complete__value-container"  # Контейнер значений
     MENU_LIST = ".auto-complete__menu-list"  # Список в меню
 
+    # === ДОПОЛНИТЕЛЬНЫЕ СЕЛЕКТОРЫ ===
+    SINGLE_CLEAR = "#autoCompleteSingle .auto-complete__clear-indicator"  # Кнопка очистки одиночного поля
+
     # === АТРИБУТЫ И СВОЙСТВА ===
     INPUT_VALUE_ATTRIBUTE = "value"  # Атрибут значения input
     ARIA_EXPANDED = "aria-expanded"  # Атрибут развернутого состояния
@@ -82,6 +74,4 @@ class AutoCompleteLocators:
 
     # === АНИМАЦИЯ И ПЕРЕХОДЫ ===
     MENU_PORTAL = ".auto-complete__menu-portal"  # Портал меню
-    TRANSITION_GROUP = (
-        ".auto-complete__multi-value__transition-group"  # Группа переходов
-    )
+    TRANSITION_GROUP = ".auto-complete__multi-value__transition-group"  # Группа переходов

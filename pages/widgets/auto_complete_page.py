@@ -172,3 +172,213 @@ class AutoCompletePage(BasePage):
             bool: True если поле присутствует
         """
         return self.page.locator(AutoCompleteLocators.MULTIPLE_INPUT).is_visible()
+
+    # === ДОПОЛНИТЕЛЬНЫЕ МЕТОДЫ ДЛЯ ТЕСТОВ ===
+
+    def clear_single_input(self) -> None:
+        """
+        Очищает поле одиночного автодополнения.
+        """
+        self.log_step("Очищаем поле одиночного автодополнения")
+        # Для React Select нужно кликнуть на контейнер, а не на input
+        container = self.page.locator(AutoCompleteLocators.SINGLE_CONTAINER)
+        container.click()
+
+        # Проверяем, есть ли кнопка очистки
+        clear_button = self.page.locator(AutoCompleteLocators.SINGLE_CLEAR)
+        if clear_button.is_visible():
+            clear_button.click()
+        else:
+            # Если нет кнопки очистки, используем клавиатуру
+            self.page.keyboard.press("Backspace")
+            self.page.keyboard.press("Delete")
+
+    def get_single_input_value(self) -> str:
+        """
+        Получает значение поля одиночного автодополнения.
+
+        Returns:
+            str: Текущее значение поля
+        """
+        input_field = self.page.locator(AutoCompleteLocators.SINGLE_INPUT)
+        return input_field.input_value()
+
+    def type_in_single_input(self, text: str) -> None:
+        """
+        Вводит текст в поле одиночного автодополнения.
+
+        Args:
+            text: Текст для ввода
+        """
+        self.log_step(f"Вводим текст в одиночное поле: '{text}'")
+        # Сначала кликаем на контейнер, чтобы активировать поле
+        container = self.page.locator(AutoCompleteLocators.SINGLE_CONTAINER)
+        container.click()
+
+        # Затем вводим текст
+        input_field = self.page.locator(AutoCompleteLocators.SINGLE_INPUT)
+        input_field.fill(text)
+
+    def are_single_suggestions_visible(self) -> bool:
+        """
+        Проверяет видимость предложений для одиночного поля.
+
+        Returns:
+            bool: True если предложения видны
+        """
+        return self.page.locator(AutoCompleteLocators.SINGLE_OPTIONS).count() > 0
+
+    def get_single_suggestions_list(self) -> list[str]:
+        """
+        Получает список предложений для одиночного поля.
+
+        Returns:
+            list: Список текстов предложений
+        """
+        options = self.page.locator(AutoCompleteLocators.SINGLE_OPTIONS)
+        return [options.nth(i).inner_text() for i in range(options.count())]
+
+    def select_first_single_suggestion(self) -> bool:
+        """
+        Выбирает первое предложение для одиночного поля.
+
+        Returns:
+            bool: True если выбор успешен
+        """
+        try:
+            options = self.page.locator(AutoCompleteLocators.SINGLE_OPTIONS)
+            if options.count() > 0:
+                options.first.click()
+                return True
+        except Exception as e:
+            self.log_step(f"Ошибка при выборе предложения: {e}")
+        return False
+
+    def clear_multiple_input(self) -> None:
+        """
+        Очищает все выбранные значения множественного поля.
+        """
+        self.log_step("Очищаем множественное поле автодополнения")
+        # Удаляем все выбранные значения
+        remove_buttons = self.page.locator(AutoCompleteLocators.REMOVE_VALUE)
+        count = remove_buttons.count()
+        for i in range(count):
+            try:
+                remove_buttons.nth(i).click()
+                self.page.wait_for_timeout(100)  # Небольшая пауза между удалениями
+            except:
+                break
+
+    def get_multiple_selected_values(self) -> list[str]:
+        """
+        Получает список выбранных значений множественного поля.
+
+        Returns:
+            list: Список выбранных значений
+        """
+        values = []
+        tags = self.page.locator(AutoCompleteLocators.MULTIPLE_VALUES)
+        for i in range(tags.count()):
+            tag_text = tags.nth(i).inner_text()
+            values.append(tag_text.strip())
+        return values
+
+    def type_in_multiple_input(self, text: str) -> None:
+        """
+        Вводит текст в поле множественного автодополнения.
+
+        Args:
+            text: Текст для ввода
+        """
+        self.log_step(f"Вводим текст в множественное поле: '{text}'")
+        # Кликаем на контейнер множественного поля
+        container = self.page.locator(AutoCompleteLocators.MULTIPLE_CONTAINER)
+        container.click()
+
+        # Затем вводим текст в input поле
+        input_field = self.page.locator(AutoCompleteLocators.MULTIPLE_INPUT)
+        input_field.fill(text)
+
+    def are_multiple_suggestions_visible(self) -> bool:
+        """
+        Проверяет видимость предложений для множественного поля.
+
+        Returns:
+            bool: True если предложения видны
+        """
+        return self.page.locator(AutoCompleteLocators.MULTIPLE_OPTIONS).count() > 0
+
+    def get_multiple_suggestions_list(self) -> list[str]:
+        """
+        Получает список предложений для множественного поля.
+
+        Returns:
+            list: Список текстов предложений
+        """
+        options = self.page.locator(AutoCompleteLocators.MULTIPLE_OPTIONS)
+        return [options.nth(i).inner_text() for i in range(options.count())]
+
+    def select_multiple_suggestion_by_text(self, text: str) -> bool:
+        """
+        Выбирает предложение множественного поля по тексту.
+
+        Args:
+            text: Текст предложения для выбора
+
+        Returns:
+            bool: True если выбор успешен
+        """
+        try:
+            options = self.page.locator(AutoCompleteLocators.MULTIPLE_OPTIONS)
+            for i in range(options.count()):
+                option_text = options.nth(i).inner_text()
+                if text.lower() in option_text.lower():
+                    options.nth(i).click()
+                    return True
+        except Exception as e:
+            self.log_step(f"Ошибка при выборе предложения '{text}': {e}")
+        return False
+
+    def select_first_multiple_suggestion(self) -> bool:
+        """
+        Выбирает первое предложение для множественного поля.
+
+        Returns:
+            bool: True если выбор успешен
+        """
+        try:
+            options = self.page.locator(AutoCompleteLocators.MULTIPLE_OPTIONS)
+            if options.count() > 0:
+                options.first.click()
+                return True
+        except Exception as e:
+            self.log_step(f"Ошибка при выборе первого предложения: {e}")
+        return False
+
+    def clear_multiple_input_text(self) -> None:
+        """
+        Очищает текстовое поле множественного автодополнения (не выбранные значения).
+        """
+        self.log_step("Очищаем текстовое поле множественного автодополнения")
+        input_field = self.page.locator(AutoCompleteLocators.MULTIPLE_INPUT)
+        input_field.click()
+        input_field.clear()
+
+    def remove_multiple_value_by_index(self, index: int) -> bool:
+        """
+        Удаляет выбранное значение множественного поля по индексу.
+
+        Args:
+            index: Индекс значения для удаления
+
+        Returns:
+            bool: True если удаление успешно
+        """
+        try:
+            remove_buttons = self.page.locator(AutoCompleteLocators.REMOVE_VALUE)
+            if remove_buttons.count() > index:
+                remove_buttons.nth(index).click()
+                return True
+        except Exception as e:
+            self.log_step(f"Ошибка при удалении значения с индексом {index}: {e}")
+        return False

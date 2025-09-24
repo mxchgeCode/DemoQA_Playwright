@@ -170,7 +170,6 @@ def test_multiple_auto_complete_functionality(auto_complete_page: AutoCompletePa
     Проверяет возможность выбора нескольких значений с автодополнением.
     """
     test_colors = ["Red", "Blue", "Green", "Yellow"]
-
     with allure.step("Проверяем наличие поля множественного автодополнения"):
         multiple_input_present = (
             auto_complete_page.is_multiple_auto_complete_input_present()
